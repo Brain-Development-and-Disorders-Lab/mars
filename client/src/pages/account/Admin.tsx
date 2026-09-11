@@ -33,7 +33,7 @@ const GET_ADMIN_DATA = gql`
       workspaces
       entities
       projects
-      templates
+      attributes
     }
     adminUsers {
       _id
@@ -62,7 +62,7 @@ const GET_ADMIN_DATA = gql`
       owner
       entities
       projects
-      templates
+      attributes
     }
   }
 `;
@@ -300,13 +300,13 @@ const Admin = () => {
       header: "Projects",
       meta: { fixedWidth: 100 } as ColumnMeta,
     }),
-    workspaceColumnHelper.accessor("templates", {
+    workspaceColumnHelper.accessor("attributes", {
       cell: (info) => (
         <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
           {info.getValue()}
         </Text>
       ),
-      header: "Templates",
+      header: "Attributes",
       meta: { fixedWidth: 100 } as ColumnMeta,
     }),
   ];
@@ -385,10 +385,10 @@ const Admin = () => {
               iconColor={STYLES.project.color.icon}
             />
             <StatCard
-              label={"Templates"}
-              value={data?.adminMetrics?.templates}
-              icon={"template"}
-              iconColor={STYLES.template.color.icon}
+              label={"Attributes"}
+              value={data?.adminMetrics?.attributes}
+              icon={"attribute"}
+              iconColor={STYLES.attribute.color.icon}
             />
           </Flex>
         </Flex>

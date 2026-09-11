@@ -216,7 +216,7 @@ const Activity = () => {
     columnHelper.accessor("target", {
       cell: (info) => {
         const target = info.getValue();
-        if (target.type !== "workspace") {
+        if (target.type !== "workspaces") {
           return (
             <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
               <Linky id={target._id} type={target.type} fallback={target.name} justify={"left"} size={"xs"} />
@@ -335,7 +335,7 @@ const Activity = () => {
             </Flex>
             <Flex direction={"column"} flex={"1"} minW="0">
               <ActivityGraph
-                activities={activityData.filter((activity) => activity.target.type === "workspace")}
+                activities={activityData.filter((activity) => activity.target.type === "workspaces")}
                 title="Workspace Activity"
                 height="200px"
               />
@@ -478,7 +478,7 @@ const Activity = () => {
                             Target Type
                           </Text>
                           <Flex direction={"column"} gap={"2"} ml={"1"}>
-                            {["entities", "projects", "templates"].map((type) => (
+                            {["entities", "projects", "attributes"].map((type) => (
                               <Checkbox.Root
                                 key={type}
                                 size={"xs"}
@@ -502,7 +502,7 @@ const Activity = () => {
                                 <Checkbox.HiddenInput />
                                 <Checkbox.Control />
                                 <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                                  {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Template"}
+                                  {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Attribute"}
                                 </Checkbox.Label>
                               </Checkbox.Root>
                             ))}

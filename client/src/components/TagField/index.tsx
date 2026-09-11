@@ -37,9 +37,9 @@ export const ValueTag = (props: ValueTagProps) => {
 
 // A single Attribute
 export const AttributeTag = (props: AttributeTagProps) => (
-  <Tag.Root colorPalette={"template"} size={props.size}>
+  <Tag.Root colorPalette={"attribute"} size={props.size}>
     <Tag.StartElement>
-      <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+      <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
     </Tag.StartElement>
     <Tag.Label fontSize={"xs"}>{props.attribute.name}</Tag.Label>
   </Tag.Root>

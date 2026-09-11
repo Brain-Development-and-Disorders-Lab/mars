@@ -15,23 +15,16 @@ import DialogViewAttribute from "@components/DialogViewAttribute";
 import { AttributeModel, CreateEntityAttributeNameCellProps, CreateEntityAttributesTableProps } from "@types";
 
 // Utility functions and libraries
+import { getBaseAttributeId } from "@lib/util";
 import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
 
-/** Returns true if `_id` matches, or was generated from, one of the known Templates. */
-const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
-  for (const attribute of templates) {
-    if (_.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id)) return true;
-  }
-  return false;
-};
-
 /** Row cell for the "Name" column, kept as its own component so the dialog's open state uses a real hook. */
 const CreateEntityAttributeNameCell = ({
   attribute,
-  templates,
+  availableAttributes,
   onUpdate,
   onRemove,
 }: CreateEntityAttributeNameCellProps) => {
@@ -41,7 +34,7 @@ const CreateEntityAttributeNameCell = ({
     <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
       <Tooltip content={attribute.name} disabled={attribute.name.length < 16} showArrow>
         <Flex direction={"row"} gap={"1"} ml={"0.5"}>
-          <Icon name={"attribute"} color={STYLES.template.color.icon} size={"xs"} />
+          <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             {_.truncate(attribute.name, { length: 16 })}
           </Text>
@@ -75,7 +68,7 @@ const CreateEntityAttributeNameCell = ({
           setOpen={setViewAttributeDialogOpen}
           attribute={attribute}
           editing={true}
-          isTemplate={isKnownTemplate(attribute._id, templates)}
+          originalAttributeId={getBaseAttributeId(attribute._id, availableAttributes)}
           onAttributeUpdate={onUpdate}
           removeCallback={() => onRemove(attribute._id)}
         />
@@ -88,7 +81,7 @@ const attributeColumnHelper = createColumnHelper<AttributeModel>();
 
 const CreateEntityAttributesTable = ({
   attributes,
-  templates,
+  availableAttributes,
   onUpdate,
   onRemove,
   onAddClick,
@@ -98,13 +91,13 @@ const CreateEntityAttributesTable = ({
       cell: (info) => (
         <CreateEntityAttributeNameCell
           attribute={info.row.original}
-          templates={templates}
+          availableAttributes={availableAttributes}
           onUpdate={onUpdate}
           onRemove={onRemove}
         />
       ),
       header: "Name",
-      meta: { minWidth: 240 },
+      meta: { minWidth: 300 },
     }),
     attributeColumnHelper.accessor("description", {
       cell: (info) => {
@@ -147,7 +140,7 @@ const CreateEntityAttributesTable = ({
     >
       <Flex direction={"row"} justify={"space-between"} align={"center"}>
         <Flex direction={"row"} gap={"0.5"} align={"center"}>
-          <Icon name={"attribute"} size={"xs"} color={STYLES.template.color.icon} />
+          <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Attributes
           </Text>

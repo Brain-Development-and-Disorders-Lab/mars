@@ -23,16 +23,16 @@ import UploadStep from "@components/DialogImport/steps/UploadStep";
 import EntityDetailsStep from "@components/DialogImport/steps/EntityDetailsStep";
 import EntityMappingStep from "@components/DialogImport/steps/EntityMappingStep";
 import EntityReviewStep from "@components/DialogImport/steps/EntityReviewStep";
-import TemplateReviewStep from "@components/DialogImport/steps/TemplateReviewStep";
+import AttributeReviewStep from "@components/DialogImport/steps/AttributeReviewStep";
 import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 
 // Custom and existing types
 import {
   AttributeModel,
+  AttributeImportReview,
   ColumnInfo,
   IGenericItem,
   EntityImportReview,
-  TemplateImportReview,
   DialogImportProps,
   IColumnMapping,
   EntityModel,
@@ -54,8 +54,8 @@ import {
   IMPORT_ENTITY_CSV,
   REVIEW_ENTITY_JSON,
   IMPORT_ENTITY_JSON,
-  REVIEW_TEMPLATE_JSON,
-  IMPORT_TEMPLATE_JSON,
+  REVIEW_ATTRIBUTE_JSON,
+  IMPORT_ATTRIBUTE_JSON,
 } from "@components/DialogImport/queries";
 
 // Utility functions and libraries
@@ -74,7 +74,7 @@ import {
   JSON_MIME_TYPE,
   MAX_DISPLAYED_COLUMNS,
   ACCEPTED_IMPORTS_ENTITIES,
-  ACCEPTED_IMPORTS_TEMPLATES,
+  ACCEPTED_IMPORTS_ATTRIBUTES,
   STYLES,
 } from "@variables";
 
@@ -95,7 +95,7 @@ const DialogImport = (props: DialogImportProps) => {
   const navigate = useNavigate();
 
   // State to differentiate which type of file is being imported
-  const [importType, setImportType] = useState<"entities" | "template">();
+  const [importType, setImportType] = useState<"entities" | "attribute">();
   const [importTypeSelected, setImportTypeSelected] = useState(false);
   const [isTypeSelectDisabled, setIsTypeSelectDisabled] = useState(false);
 
@@ -106,7 +106,7 @@ const DialogImport = (props: DialogImportProps) => {
   const fileUpload = useFileUpload({
     maxFiles: 1,
     maxFileSize: 10 * 1024 * 1024,
-    accept: importType === "entities" ? ACCEPTED_IMPORTS_ENTITIES : ACCEPTED_IMPORTS_TEMPLATES,
+    accept: importType === "entities" ? ACCEPTED_IMPORTS_ENTITIES : ACCEPTED_IMPORTS_ATTRIBUTES,
     // No file contents type selected yet, so the dropzone shouldn't accept anything
     disabled: _.isUndefined(importType),
     onFileChange: (details) => {
@@ -116,8 +116,8 @@ const DialogImport = (props: DialogImportProps) => {
     },
   });
 
-  /** Swaps between the Entity and Template upload contexts, discarding any file picked under the old type. */
-  const selectImportType = (type: "entities" | "template") => {
+  /** Swaps between the Entity and Attribute upload contexts, discarding any file picked under the old type. */
+  const selectImportType = (type: "entities" | "attribute") => {
     if (isTypeSelectDisabled) return;
 
     fileUpload.clearFiles();
@@ -129,21 +129,21 @@ const DialogImport = (props: DialogImportProps) => {
   const [entityInterfacePage, setEntityInterfacePage] = useState(
     "upload" as "upload" | "details" | "mapping" | "review",
   );
-  const [templateInterfacePage, setTemplateInterfacePage] = useState("upload" as "upload" | "review");
+  const [attributeInterfacePage, setAttributeInterfacePage] = useState("upload" as "upload" | "review");
 
   // Used to generated numerical steps and a progress bar
   // Entity steps
   const entitySteps = [
     { title: "Upload File" },
     { title: "Setup Entities" },
-    { title: "Apply Templates" },
+    { title: "Apply Attributes" },
     { title: "Review" },
   ];
   const [entityStep, setEntityStep] = useState(0);
 
-  // Template steps
-  const templateSteps = [{ title: "Upload File" }, { title: "Review" }];
-  const [templateStep, setTemplateStep] = useState(0);
+  // Attribute steps
+  const attributeSteps = [{ title: "Upload File" }, { title: "Review" }];
+  const [attributeStep, setAttributeStep] = useState(0);
 
   // Spreadsheet column state
   const [columns, setColumns] = useState([] as ColumnInfo[]);
@@ -168,8 +168,8 @@ const DialogImport = (props: DialogImportProps) => {
     }),
   );
 
-  // Templates available for attribute creation
-  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+  // Attributes available for Attribute creation
+  const [attributes, setAttributes] = useState<AttributeModel[]>([]);
 
   // Controls the "Add Attribute" dialog on the mapping step
   const [addAttributeOpen, setAddAttributeOpen] = useState(false);
@@ -188,7 +188,7 @@ const DialogImport = (props: DialogImportProps) => {
 
   // Review state
   const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
-  const [reviewTemplates, setReviewTemplates] = useState([] as TemplateImportReview[]);
+  const [reviewAttributes, setReviewAttributes] = useState([] as AttributeImportReview[]);
 
   // Confirmation dialog shown when the user clicks Finish and warnings are present
   const [confirmWarningsOpen, setConfirmWarningsOpen] = useState(false);
@@ -219,7 +219,7 @@ const DialogImport = (props: DialogImportProps) => {
   }>(PREPARE_ENTITY_CSV);
   const [getMappingData, { error: mappingDataError }] = useLazyQuery<{
     projects: IGenericItem[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
   }>(GET_MAPPING_DATA);
   const [reviewEntityCSV, { error: reviewEntityCSVError }] = useMutation<{
     reviewEntityCSV: ResponseData<EntityImportReview[]>;
@@ -237,12 +237,12 @@ const DialogImport = (props: DialogImportProps) => {
   const [importEntityJSON, { error: importEntityJSONError }] = useMutation<{
     importEntityJSON: IResponseMessage;
   }>(IMPORT_ENTITY_JSON);
-  const [reviewTemplateJSON, { error: reviewTemplateJSONError }] = useMutation<{
-    reviewTemplateJSON: ResponseData<TemplateImportReview[]>;
-  }>(REVIEW_TEMPLATE_JSON);
-  const [importTemplateJSON, { error: importTemplateJSONError }] = useMutation<{
-    importTemplateJSON: IResponseMessage;
-  }>(IMPORT_TEMPLATE_JSON);
+  const [reviewAttributeJSON, { error: reviewAttributeJSONError }] = useMutation<{
+    reviewAttributeJSON: ResponseData<AttributeImportReview[]>;
+  }>(REVIEW_ATTRIBUTE_JSON);
+  const [importAttributeJSON, { error: importAttributeJSONError }] = useMutation<{
+    importAttributeJSON: IResponseMessage;
+  }>(IMPORT_ATTRIBUTE_JSON);
 
   // Effect to manipulate 'Continue' button state for 'upload' page, also re-disabling it
   // if the file is removed after being accepted
@@ -402,18 +402,18 @@ const DialogImport = (props: DialogImportProps) => {
     return true;
   };
 
-  /** Fetches projects and templates to populate the mapping step dropdowns. */
+  /** Fetches Projects and Attributes to populate the mapping step dropdowns */
   const setupMapping = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await getMappingData();
     setImportLoading(false);
 
-    if (response.data?.templates) {
-      // Templates containing entity or select values can't be mapped to CSV columns
-      const supportedTemplates = response.data.templates.filter((t: AttributeModel) =>
-        t.values.every((v) => !["entity", "select"].includes(v.type)),
+    if (response.data?.attributes) {
+      // Attributes containing "Entity" or "Select"-type Values can't be mapped to CSV columns
+      const supportedAttributes = response.data.attributes.filter((a: AttributeModel) =>
+        a.values.every((v) => !["entity", "select"].includes(v.type)),
       );
-      setTemplates(supportedTemplates);
+      setAttributes(supportedAttributes);
     }
     if (response.data?.projects) {
       setProjectsCollection(
@@ -539,21 +539,21 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Runs the server-side review for a JSON template import and populates `reviewTemplates`. */
-  const setupReviewTemplateJSON = async () => {
+  /** Runs the server-side review for a JSON Attribute import and populates `reviewAttributes`. */
+  const setupReviewAttributeJSON = async () => {
     setImportLoading(true);
-    const response = await reviewTemplateJSON({
+    const response = await reviewAttributeJSON({
       variables: {
         file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
 
-    if (response.data && response.data.reviewTemplateJSON.data) {
-      setReviewTemplates(response.data.reviewTemplateJSON.data);
+    if (response.data && response.data.reviewAttributeJSON.data) {
+      setReviewAttributes(response.data.reviewAttributeJSON.data);
     }
 
-    if (reviewTemplateJSONError) {
+    if (reviewAttributeJSONError) {
       toaster.create({
         title: "JSON Import Error",
         type: "error",
@@ -622,17 +622,17 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Executes the final JSON template import and resets state on success. */
-  const finishImportTemplateJSON = async () => {
+  /** Executes the final JSON Attribute import and resets state on success. */
+  const finishImportAttributeJSON = async () => {
     setImportLoading(true);
-    await importTemplateJSON({
+    await importAttributeJSON({
       variables: {
         file: fileUpload.acceptedFiles[0],
       },
     });
     setImportLoading(false);
 
-    if (importTemplateJSONError) {
+    if (importAttributeJSONError) {
       toaster.create({
         title: "JSON Import Error",
         type: "error",
@@ -828,30 +828,30 @@ const DialogImport = (props: DialogImportProps) => {
         }
         setImportLoading(false);
       }
-    } else if (_.isEqual(importType, "template")) {
-      if (_.isEqual(templateInterfacePage, "upload")) {
+    } else if (_.isEqual(importType, "attribute")) {
+      if (_.isEqual(attributeInterfacePage, "upload")) {
         // Capture event
         posthog.capture("client.import.continue", {
-          importType: "template",
+          importType: "attribute",
           fromPage: "upload",
           toPage: "review",
         });
 
-        // Run the review setup function for Template JSON files
-        await setupReviewTemplateJSON();
+        // Run the review setup function for Attribute JSON files
+        await setupReviewAttributeJSON();
 
         // Proceed to the next page
-        setTemplateStep(1);
-        setTemplateInterfacePage("review");
-      } else if (_.isEqual(templateInterfacePage, "review")) {
+        setAttributeStep(1);
+        setAttributeInterfacePage("review");
+      } else if (_.isEqual(attributeInterfacePage, "review")) {
         // Capture event
         posthog.capture("client.import.finish", {
-          importType: "template",
+          importType: "attribute",
         });
 
-        // Run the final import function for Template JSON files
+        // Run the final import function for Attribute JSON files
         setImportLoading(true);
-        await finishImportTemplateJSON();
+        await finishImportAttributeJSON();
         setImportLoading(false);
       }
     }
@@ -864,8 +864,8 @@ const DialogImport = (props: DialogImportProps) => {
 
     setEntityStep(0);
     setEntityInterfacePage("upload");
-    setTemplateStep(0);
-    setTemplateInterfacePage("upload");
+    setAttributeStep(0);
+    setAttributeInterfacePage("upload");
 
     setContinueDisabled(true);
     setImportLoading(false);
@@ -900,11 +900,11 @@ const DialogImport = (props: DialogImportProps) => {
         itemToString: (item: IGenericItem) => item.name,
       }),
     );
-    setTemplates([]);
+    setAttributes([]);
     setAddAttributeOpen(false);
     setAttributesField([]);
     setReviewEntities([]);
-    setReviewTemplates([]);
+    setReviewAttributes([]);
     setConfirmWarningsOpen(false);
   };
 
@@ -994,17 +994,17 @@ const DialogImport = (props: DialogImportProps) => {
               </Steps.Root>
             )}
 
-            {(_.isEqual(importType, "template") || _.isUndefined(importType)) && (
+            {(_.isEqual(importType, "attribute") || _.isUndefined(importType)) && (
               <Steps.Root
-                step={templateStep}
+                step={attributeStep}
                 colorPalette={"blue"}
-                onStepChange={(event) => setTemplateStep(event.step)}
-                count={templateSteps.length}
+                onStepChange={(event) => setAttributeStep(event.step)}
+                count={attributeSteps.length}
                 p={"1"}
                 size={"sm"}
               >
                 <Steps.List>
-                  {templateSteps.map((step, index) => (
+                  {attributeSteps.map((step, index) => (
                     <Steps.Item key={index} index={index} title={step.title}>
                       <Steps.Indicator />
                       <Steps.Title fontSize={"xs"} fontWeight={"semibold"}>
@@ -1018,7 +1018,7 @@ const DialogImport = (props: DialogImportProps) => {
             )}
 
             {/* Select import type, and upload a file */}
-            {entityStep === 0 && templateStep === 0 && (
+            {entityStep === 0 && attributeStep === 0 && (
               <UploadStep
                 importType={importType}
                 isTypeSelectDisabled={isTypeSelectDisabled}
@@ -1117,7 +1117,7 @@ const DialogImport = (props: DialogImportProps) => {
                 addAttributeOpen={addAttributeOpen}
                 onAddAttributeOpenChange={setAddAttributeOpen}
                 ownerField={ownerField}
-                templates={templates}
+                attributes={attributes}
                 fileType={fileType}
                 columns={columns}
               />
@@ -1128,10 +1128,10 @@ const DialogImport = (props: DialogImportProps) => {
               <EntityReviewStep reviewEntities={reviewEntities} />
             )}
 
-            {/* Template Steps */}
-            {/* Template Step 1: Review */}
-            {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && (
-              <TemplateReviewStep reviewTemplates={reviewTemplates} />
+            {/* Attribute Steps */}
+            {/* Attribute Step 1: Review */}
+            {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && (
+              <AttributeReviewStep reviewAttributes={reviewAttributes} />
             )}
           </Dialog.Body>
 
@@ -1178,7 +1178,7 @@ const DialogImport = (props: DialogImportProps) => {
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={
-                    _.isEqual(templateInterfacePage, "review") || _.isEqual(entityInterfacePage, "review")
+                    _.isEqual(attributeInterfacePage, "review") || _.isEqual(entityInterfacePage, "review")
                       ? "green"
                       : "blue"
                   }
@@ -1189,15 +1189,15 @@ const DialogImport = (props: DialogImportProps) => {
                   loadingText={"Processing"}
                 >
                   {/* Default button text */}
-                  {entityStep === 0 && templateStep === 0 && "Continue"}
+                  {entityStep === 0 && attributeStep === 0 && "Continue"}
 
                   {/* Entities import type */}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && "Continue"}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && "Continue"}
                   {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
 
-                  {/* Template import type */}
-                  {_.isEqual(importType, "template") && _.isEqual(templateInterfacePage, "review") && "Finish"}
+                  {/* Attribute import type */}
+                  {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && "Finish"}
 
                   {/* Icon */}
                   {_.includes(["upload", "details", "mapping"], entityInterfacePage) ? (

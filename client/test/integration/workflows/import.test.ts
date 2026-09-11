@@ -53,6 +53,8 @@ test.describe("Import", () => {
       await clickButtonWhenEnabled(page, "#importContinueButton"); // Review page
       await clickButtonWhenEnabled(page, "#importContinueButton"); // Finalize
 
+      await page.waitForLoadState("networkidle");
+
       // Verify import success
       await page.click("#navProjectsButtonDesktop");
       await page
@@ -82,7 +84,7 @@ test.describe("Import", () => {
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
-      await page.locator("text=No Attributes added").waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=No Attributes").waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
@@ -91,6 +93,8 @@ test.describe("Import", () => {
       await page.waitForLoadState("networkidle");
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
+
+      await page.waitForLoadState("networkidle");
 
       // Verify import success
       await page.click("#navEntitiesButtonDesktop");

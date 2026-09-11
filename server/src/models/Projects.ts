@@ -446,7 +446,7 @@ export class Projects {
         created: result?.created,
         description: result?.description,
         projects: result?.projects,
-        relationships: result?.relationships,
+        links: result?.links,
         attributes: result?.attributes,
         attachments: result?.attachments,
       };

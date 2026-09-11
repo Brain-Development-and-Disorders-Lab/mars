@@ -80,7 +80,7 @@ const Workspace = () => {
     workspacePermissions.administration.invite ||
     workspacePermissions.entities.archive ||
     workspacePermissions.projects.archive ||
-    workspacePermissions.templates.archive;
+    workspacePermissions.attributes.archive;
 
   // Query to get a Workspace
   const GET_WORKSPACE = gql`
@@ -109,7 +109,7 @@ const Workspace = () => {
               edit
               archive
             }
-            templates {
+            attributes {
               create
               edit
               archive
@@ -139,7 +139,7 @@ const Workspace = () => {
         }
         total
       }
-      templates {
+      attributes {
         _id
         name
         archived
@@ -169,7 +169,7 @@ const Workspace = () => {
       total: number;
     };
     projects: (IGenericItem & { archived: boolean })[];
-    templates: (IGenericItem & { archived: boolean })[];
+    attributes: (IGenericItem & { archived: boolean })[];
     counters: CounterModel[];
     identifierFormats: IdentifierFormatModel[];
   }>(GET_WORKSPACE_DATA, {
@@ -200,17 +200,17 @@ const Workspace = () => {
   const [archiveProjectsQuery, { error: archiveProjectsError, loading: archiveProjectsLoading }] =
     useMutation(ARCHIVE_PROJECTS);
 
-  // Mutation to archive Templates
-  const ARCHIVE_TEMPLATES = gql`
-    mutation ArchiveTemplates($toArchive: [String], $state: Boolean) {
-      archiveTemplates(toArchive: $toArchive, state: $state) {
+  // Mutation to archive Attributes
+  const ARCHIVE_ATTRIBUTES = gql`
+    mutation ArchiveAttributes($toArchive: [String], $state: Boolean) {
+      archiveAttributes(toArchive: $toArchive, state: $state) {
         success
         message
       }
     }
   `;
-  const [archiveTemplatesQuery, { error: archiveTemplatesError, loading: archiveTemplatesLoading }] =
-    useMutation(ARCHIVE_TEMPLATES);
+  const [archiveAttributesQuery, { error: archiveAttributesError, loading: archiveAttributesLoading }] =
+    useMutation(ARCHIVE_ATTRIBUTES);
 
   // Mutation to update Workspace
   const UPDATE_WORKSPACE = gql`
@@ -241,16 +241,16 @@ const Workspace = () => {
   const [created, setCreated] = useState("");
 
   // State for Workspace contents
-  const [activeTab, setActiveTab] = useState<"entities" | "projects" | "templates">("entities");
+  const [activeTab, setActiveTab] = useState<"entities" | "projects" | "attributes">("entities");
   const [entities, setEntities] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [projects, setProjects] = useState([] as (IGenericItem & { archived: boolean })[]);
-  const [templates, setTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
+  const [attributes, setAttributes] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [shownEntities, setShownEntities] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedEntities, setSelectedEntities] = useState({});
   const [shownProjects, setShownProjects] = useState([] as (IGenericItem & { archived: boolean })[]);
   const [selectedProjects, setSelectedProjects] = useState({});
-  const [shownTemplates, setShownTemplates] = useState([] as (IGenericItem & { archived: boolean })[]);
-  const [selectedTemplates, setSelectedTemplates] = useState({});
+  const [shownAttributes, setShownAttributes] = useState([] as (IGenericItem & { archived: boolean })[]);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
 
   // State for current user
   const { data: session } = auth.useSession();
@@ -309,11 +309,11 @@ const Workspace = () => {
       setShownProjects([...workspaceData.data.projects.filter((project) => project.archived === true)]);
       setSelectedProjects({});
     }
-    if (workspaceData.data?.templates) {
-      setTemplates(workspaceData.data.templates);
-      // Filter to only show archived templates
-      setShownTemplates([...workspaceData.data.templates.filter((template) => template.archived === true)]);
-      setSelectedTemplates({});
+    if (workspaceData.data?.attributes) {
+      setAttributes(workspaceData.data.attributes);
+      // Filter to only show archived Attributes
+      setShownAttributes([...workspaceData.data.attributes.filter((attribute) => attribute.archived === true)]);
+      setSelectedAttributes({});
     }
     if (workspaceData.data?.counters) {
       setCounters(workspaceData.data.counters);
@@ -344,9 +344,9 @@ const Workspace = () => {
     setSelectedEntities({});
     setShownProjects([...projects.filter((project) => project.archived === true)]);
     setSelectedProjects({});
-    setShownTemplates([...templates.filter((template) => template.archived === true)]);
-    setSelectedTemplates({});
-  }, [entities, projects, templates]);
+    setShownAttributes([...attributes.filter((attribute) => attribute.archived === true)]);
+    setSelectedAttributes({});
+  }, [entities, projects, attributes]);
 
   /**
    * Handler function for the `Cancel` button, discard any unsaved edits by re-fetching the Workspace
@@ -373,7 +373,7 @@ const Workspace = () => {
       },
     });
 
-    // Update Entity, Project, and Template archive state; each pair of calls is mutually exclusive so all six can run concurrently
+    // Update Entity, Project, and Attribute archive state; each pair of calls is mutually exclusive so all six can run concurrently
     await Promise.all([
       archiveEntitiesQuery({
         variables: {
@@ -399,15 +399,15 @@ const Workspace = () => {
           state: false,
         },
       }),
-      archiveTemplatesQuery({
+      archiveAttributesQuery({
         variables: {
-          toArchive: templates.filter((template) => template.archived === true).map((template) => template._id),
+          toArchive: attributes.filter((attribute) => attribute.archived === true).map((attribute) => attribute._id),
           state: true,
         },
       }),
-      archiveTemplatesQuery({
+      archiveAttributesQuery({
         variables: {
-          toArchive: templates.filter((template) => template.archived === false).map((template) => template._id),
+          toArchive: attributes.filter((attribute) => attribute.archived === false).map((attribute) => attribute._id),
           state: false,
         },
       }),
@@ -437,10 +437,10 @@ const Workspace = () => {
         duration: 2000,
         closable: true,
       });
-    } else if (archiveTemplatesError) {
+    } else if (archiveAttributesError) {
       toaster.create({
         title: "Error",
-        description: "Unable to apply archive state to Templates",
+        description: "Unable to apply archive state to Attributes",
         type: "error",
         duration: 2000,
         closable: true,
@@ -526,25 +526,25 @@ const Workspace = () => {
     setProjects(updated);
   };
 
-  const archiveTemplate = async (_id: string, state: boolean) => {
-    // Clone and update the local collection of Templates
-    const updated = _.cloneDeep(templates);
-    updated.map((template) => {
-      if (_.isEqual(template._id, _id)) {
-        template.archived = state;
+  const archiveAttribute = async (_id: string, state: boolean) => {
+    // Clone and update the local collection of Attributes
+    const updated = _.cloneDeep(attributes);
+    updated.map((attribute) => {
+      if (_.isEqual(attribute._id, _id)) {
+        attribute.archived = state;
       }
     });
-    setTemplates(updated);
+    setAttributes(updated);
   };
 
-  const archiveTemplates = (toArchive: string[], state: boolean) => {
-    const updated = _.cloneDeep(templates);
-    updated.map((template) => {
-      if (_.includes(toArchive, template._id)) {
-        template.archived = state;
+  const archiveAttributes = (toArchive: string[], state: boolean) => {
+    const updated = _.cloneDeep(attributes);
+    updated.map((attribute) => {
+      if (_.includes(toArchive, attribute._id)) {
+        attribute.archived = state;
       }
     });
-    setTemplates(updated);
+    setAttributes(updated);
   };
 
   // Setup `DataTable` components
@@ -682,15 +682,15 @@ const Workspace = () => {
     },
   ];
 
-  const templatesTableColumnHelper = createColumnHelper<IGenericItem>();
-  const templatesTableColumns = [
-    templatesTableColumnHelper.accessor("name", {
+  const attributesTableColumnHelper = createColumnHelper<IGenericItem>();
+  const attributesTableColumns = [
+    attributesTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
               <Flex direction={"row"} gap={"1"}>
-                <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+                <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), {
                     length: truncateTableText ? 12 : 24,
@@ -701,17 +701,17 @@ const Workspace = () => {
             <Flex p={"0.5"} gap={"1"}>
               <Tooltip
                 content={"Insufficient permissions in this Workspace"}
-                disabled={workspacePermissions.templates.archive}
+                disabled={workspacePermissions.attributes.archive}
                 showArrow
               >
                 <Button
                   size={"2xs"}
                   rounded={"md"}
-                  aria-label={"Restore Template"}
+                  aria-label={"Restore Attribute"}
                   colorPalette={"orange"}
                   variant={"subtle"}
-                  disabled={!workspacePermissions.templates.archive || !editing}
-                  onClick={() => archiveTemplate(info.row.original._id, false)}
+                  disabled={!workspacePermissions.attributes.archive || !editing}
+                  onClick={() => archiveAttribute(info.row.original._id, false)}
                 >
                   Restore
                   {<Icon name={"rewind"} size={"xs"} />}
@@ -721,8 +721,8 @@ const Workspace = () => {
                 variant={"subtle"}
                 size={"2xs"}
                 rounded={"md"}
-                aria-label={"View Template"}
-                onClick={() => navigate(`/templates/${info.row.original._id}`)}
+                aria-label={"View Attribute"}
+                onClick={() => navigate(`/attributes/${info.row.original._id}`)}
               >
                 View
                 <Icon name={"a_right"} size={"xs"} />
@@ -734,17 +734,17 @@ const Workspace = () => {
       header: "Name",
     }),
   ];
-  const templatesTableActions: DataTableAction[] = [
+  const attributesTableActions: DataTableAction[] = [
     {
-      label: "Restore Templates",
+      label: "Restore Attributes",
       icon: "rewind",
-      disabled: !workspacePermissions.templates.archive || !editing,
+      disabled: !workspacePermissions.attributes.archive || !editing,
       action(table, rows) {
-        const templatesToRestore: string[] = [];
+        const attributesToRestore: string[] = [];
         for (const rowIndex of Object.keys(rows)) {
-          templatesToRestore.push(table.getRow(rowIndex).original._id);
+          attributesToRestore.push(table.getRow(rowIndex).original._id);
         }
-        archiveTemplates(templatesToRestore, false);
+        archiveAttributes(attributesToRestore, false);
       },
     },
   ];
@@ -950,7 +950,7 @@ const Workspace = () => {
                 colorPalette={"green"}
                 disabled={name === ""}
                 loading={
-                  workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveTemplatesLoading
+                  workspaceUpdateLoading || archiveEntitiesLoading || archiveProjectsLoading || archiveAttributesLoading
                 }
                 onClick={() => handleUpdateClick()}
               >
@@ -1108,7 +1108,7 @@ const Workspace = () => {
               <Tabs.Root
                 w={"100%"}
                 value={activeTab}
-                onValueChange={(details) => setActiveTab(details.value as "entities" | "projects" | "templates")}
+                onValueChange={(details) => setActiveTab(details.value as "entities" | "projects" | "attributes")}
               >
                 <Flex
                   bg={"surface.muted"}
@@ -1155,15 +1155,15 @@ const Workspace = () => {
                     rounded={"sm"}
                     variant={"ghost"}
                     colorPalette={"gray"}
-                    bg={activeTab === "templates" ? "white" : "transparent"}
+                    bg={activeTab === "attributes" ? "white" : "transparent"}
                     color={"text.default"}
-                    fontWeight={activeTab === "templates" ? "semibold" : "medium"}
-                    shadow={activeTab === "templates" ? "xs" : "none"}
-                    _hover={{ bg: activeTab === "templates" ? "white" : "surface.card" }}
-                    onClick={() => setActiveTab("templates")}
+                    fontWeight={activeTab === "attributes" ? "semibold" : "medium"}
+                    shadow={activeTab === "attributes" ? "xs" : "none"}
+                    _hover={{ bg: activeTab === "attributes" ? "white" : "surface.card" }}
+                    onClick={() => setActiveTab("attributes")}
                   >
-                    <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
-                    Archived Templates
+                    <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
+                    Archived Attributes
                   </Button>
                 </Flex>
 
@@ -1231,22 +1231,22 @@ const Workspace = () => {
                   </Flex>
                 </Tabs.Content>
 
-                {/* Archived Templates */}
-                <Tabs.Content value={"templates"} p={"0"} pt={"1"}>
+                {/* Archived Attributes */}
+                <Tabs.Content value={"attributes"} p={"0"} pt={"1"}>
                   <Flex
                     w={"100%"}
                     minW={"0"}
                     justify={"flex-start"}
-                    align={shownTemplates.length > 0 ? "" : "center"}
-                    minH={shownTemplates.length > 0 ? "fit-content" : "200px"}
+                    align={shownAttributes.length > 0 ? "" : "center"}
+                    minH={shownAttributes.length > 0 ? "fit-content" : "200px"}
                   >
-                    {shownTemplates.length > 0 ? (
+                    {shownAttributes.length > 0 ? (
                       <DataTable
-                        data={shownTemplates}
-                        columns={templatesTableColumns}
+                        data={shownAttributes}
+                        columns={attributesTableColumns}
                         visibleColumns={{}}
-                        selectedRows={selectedTemplates}
-                        actions={templatesTableActions}
+                        selectedRows={selectedAttributes}
+                        actions={attributesTableActions}
                         showPagination
                         showSelection
                       />
@@ -1254,9 +1254,9 @@ const Workspace = () => {
                       <EmptyState.Root>
                         <EmptyState.Content>
                           <EmptyState.Indicator>
-                            <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
+                            <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.default} />
                           </EmptyState.Indicator>
-                          <EmptyState.Description>No Archived Templates</EmptyState.Description>
+                          <EmptyState.Description>No Archived Attributes</EmptyState.Description>
                         </EmptyState.Content>
                       </EmptyState.Root>
                     )}

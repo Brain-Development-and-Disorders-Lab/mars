@@ -8,7 +8,7 @@ nav:
       - Overview: creating/Creating.md
       - Creating Entities: creating/Creating-Entities.md
       - Creating Projects: creating/Creating-Projects.md
-      - Creating Templates: creating/Creating-Templates.md
+      - Creating Attributes: creating/Creating-Attributes.md
       - Creating Workspaces: creating/Creating-Workspaces.md
   - Searching Metadata: Searching.md
   - Tracking Entities: Tracking.md

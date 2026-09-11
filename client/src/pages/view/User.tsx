@@ -993,7 +993,7 @@ const User = () => {
                     <Box mt={"0.5"} minW={"sm"}>
                       <SelectSearch
                         resultType={"institution"}
-                        defaultOption={"Affiliation Not Shown"}
+                        defaultOption={"No Affiliation"}
                         value={{ _id: userAffiliation, name: userAffiliation }}
                         onChange={(item) => {
                           setUserAffiliation(item.name);

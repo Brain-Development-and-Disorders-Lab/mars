@@ -31,7 +31,7 @@ const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
 const TYPE_LABEL: Record<LinkyType, string> = {
   entities: "Entity",
   projects: "Project",
-  templates: "Template",
+  attributes: "Attribute",
   workspaces: "Workspace",
 };
 
@@ -49,11 +49,11 @@ const TYPE_STYLE: Record<LinkyType, { icon: IconNames; badgeBg: string; badgeBor
     badgeBorder: STYLES.project.color.border,
     iconColor: STYLES.project.color.icon,
   },
-  templates: {
-    icon: "template",
-    badgeBg: STYLES.template.color.light,
-    badgeBorder: STYLES.template.color.border,
-    iconColor: STYLES.template.color.icon,
+  attributes: {
+    icon: "attribute",
+    badgeBg: STYLES.attribute.color.light,
+    badgeBorder: STYLES.attribute.color.border,
+    iconColor: STYLES.attribute.color.icon,
   },
   workspaces: {
     icon: "workspace",
@@ -67,13 +67,13 @@ const TYPE_STYLE: Record<LinkyType, { icon: IconNames; badgeBg: string; badgeBor
 const NAVIGATOR_LABEL: Record<LinkyType, string> = {
   entities: "Attributes",
   projects: "Entities",
-  templates: "Values",
+  attributes: "Values",
   workspaces: "Values",
 };
 
 // Icon, color, and color palette for navigator preview tags that don't depend on the item itself
 const NAVIGATOR_ITEM_STYLE: Partial<Record<LinkyType, { icon: IconNames; color: string; palette: string }>> = {
-  entities: { icon: "attribute", color: STYLES.template.color.icon, palette: "template" },
+  entities: { icon: "attribute", color: STYLES.attribute.color.icon, palette: "attribute" },
   projects: { icon: "entity", color: STYLES.entity.color.icon, palette: "entity" },
   workspaces: { icon: "workspace", color: "black", palette: "gray" },
 };
@@ -142,9 +142,9 @@ const Linky = (props: LinkyProps) => {
     projectEntities: { _id: string; name: string }[];
   }>(GET_PROJECT);
 
-  const GET_TEMPLATE = gql`
-    query GetTemplate($_id: String) {
-      template(_id: $_id) {
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String) {
+      attribute(_id: $_id) {
         _id
         name
         archived
@@ -157,13 +157,13 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getTemplate, { loading: loadingTemplate }] = useLazyQuery<{
-    template: IGenericItem & {
+  const [getAttribute, { loading: loadingAttribute }] = useLazyQuery<{
+    attribute: IGenericItem & {
       archived: boolean;
       description: string;
       values: { _id: string; name: string; type: IValueType }[];
     };
-  }>(GET_TEMPLATE);
+  }>(GET_ATTRIBUTE);
 
   const GET_WORKSPACE = gql`
     query GetWorkspace($_id: String) {
@@ -203,14 +203,14 @@ const Linky = (props: LinkyProps) => {
         items: data.projectEntities,
       };
     },
-    templates: async () => {
-      const { data, error } = await getTemplate({ variables: { _id: props.id }, context: queryContext });
+    attributes: async () => {
+      const { data, error } = await getAttribute({ variables: { _id: props.id }, context: queryContext });
       if (error || !data) return null;
       return {
-        name: data.template.name,
-        archived: data.template.archived,
-        description: data.template.description,
-        items: data.template.values,
+        name: data.attribute.name,
+        archived: data.attribute.archived,
+        description: data.attribute.description,
+        items: data.attribute.values,
       };
     },
     workspaces: async () => {
@@ -259,7 +259,7 @@ const Linky = (props: LinkyProps) => {
   };
 
   const onClickHandler = () => {
-    if (!showDeleted && !loadingEntity && !loadingProject && !loadingTemplate && !loadingWorkspace) {
+    if (!showDeleted && !loadingEntity && !loadingProject && !loadingAttribute && !loadingWorkspace) {
       if (props.isPublic && props.type !== "workspaces") {
         navigate(`/public/${props.workspace}/${props.type}/${props.id}`);
       } else {
@@ -272,7 +272,7 @@ const Linky = (props: LinkyProps) => {
     getLinkyData();
   }, [props.id]);
 
-  const isLoading = loadingTemplate || loadingEntity || loadingProject;
+  const isLoading = loadingAttribute || loadingEntity || loadingProject;
   const { icon, badgeBg, badgeBorder, iconColor } = TYPE_STYLE[props.type];
   const navigatorLabel = NAVIGATOR_LABEL[props.type];
 

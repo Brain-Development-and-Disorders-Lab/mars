@@ -23,12 +23,12 @@ Optional fields are not required to create an Entity, but it strongly encouraged
 
 **Projects:** Entities can be added to existing Projects.
 
-**Relationships:** Relationships can be created between Entities. Relationships can be directional (e.g. parent-child) or general. Specify the target Entity, then specify the type of relationship between these Entities. When creating parent or child directional relationships, the relationship is read from left-to-right like so:
+**Links:** Links can be created between Entities. Links can be directional (e.g. parent-child) or general. Specify the target Entity, then specify the type of link between these Entities. When creating parent or child directional links, the link is read from left-to-right like so:
 
 ```text
 Created Entity is the parent / child of Target Entity
 ```
 
-**Attributes:** Attributes can be created and assigned to Entities. A Template Attribute can be utilized or a new Attribute can be created for that Entity. Attributes are explained in detail as part of the Metadatify [Terminology](../Terminology) and creating Template Attributes is discussed here: [Creating Templates](../creating/Creating-Templates).
+**Attributes:** Attributes can be created and assigned to Entities. An existing Attribute can be utilized or a new Attribute can be created for that Entity. Attributes are explained in detail as part of the Metadatify [Terminology](../Terminology) and creating reusable Attributes is discussed here: [Creating Attributes](../creating/Creating-Attributes).
 
-If an AI model is configured, Metadatify can suggest a Template when creating a new Entity. After providing a name and description, an AI suggestion button will appear in the Attributes section. Clicking it will select the Template from your workspace library that best matches the entity you are describing.
+If an AI model is configured, Metadatify can suggest an Attribute when creating a new Entity. After providing a name and description, an AI suggestion button will appear in the Attributes section. Clicking it will select the Attribute from your Workspace that best matches the Entity you are describing.

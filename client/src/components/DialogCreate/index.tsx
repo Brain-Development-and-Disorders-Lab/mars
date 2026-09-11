@@ -43,7 +43,7 @@ const CREATE_OPTIONS = [
     event: "client.create.entity_click",
     description: "Create an Entity to store metadata of a physical or digital resource.",
     required: ["Name", "Created"],
-    optional: ["Description", "Projects", "Relationships", "Attributes"],
+    optional: ["Description", "Projects", "Links", "Attributes"],
   },
   {
     type: "project",
@@ -57,13 +57,13 @@ const CREATE_OPTIONS = [
     optional: ["Entities"],
   },
   {
-    type: "template",
+    type: "attribute",
     scope: "workspace",
-    permissionKey: "templates",
-    label: "Template",
-    route: "/create/template",
-    event: "client.create.template_click",
-    description: "Create a Template to reuse metadata structures across Entities.",
+    permissionKey: "attributes",
+    label: "Attribute",
+    route: "/create/attribute",
+    event: "client.create.attribute_click",
+    description: "Create an Attribute to reuse metadata structures across Entities.",
     required: ["Name", "Description", "Values"],
     optional: [],
   },
@@ -118,7 +118,7 @@ const DialogCreate = (props: DialogCreateProps) => {
                 color={STYLES.font.secondaryHeader.color}
                 textAlign={"center"}
               >
-                Create a new Workspace, Entity, Project, or Template.
+                Create a new Workspace, Entity, Project, or Attribute.
               </Text>
 
               <Flex direction={{ base: "column", md: "row" }} gap={"3"} align={"stretch"}>

@@ -581,7 +581,7 @@ const URL_PLATFORM_STYLES: {
 ];
 
 const DEFAULT_URL_STYLE = {
-  iconStyle: "link" as IconNames,
+  iconStyle: "url" as IconNames,
   badgeBg: "blue.50",
   badgeBorder: "blue.100",
   iconColor: STYLES.project.color.icon,

@@ -121,7 +121,7 @@ const TagVisibility = (props: TagVisibilityProps) => {
 
               {!props.isPublic && (
                 <Text fontSize={"xs"} ml={"0.5"}>
-                  You are about to set this Workspace to Public visibility. All Entities, Projects, and Templates in
+                  You are about to set this Workspace to Public visibility. All Entities, Projects, and Attributes in
                   this Workspace will become viewable via a public URL.
                 </Text>
               )}

@@ -15,6 +15,7 @@ import DialogViewAttribute from "@components/DialogViewAttribute";
 import { AttributeModel, EntityAttributeNameCellProps, EntityAttributesTableProps } from "@types";
 
 // Utility functions and libraries
+import { getBaseAttributeId } from "@lib/util";
 import _ from "lodash";
 
 // Hooks
@@ -23,20 +24,12 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 // Variables
 import { STYLES } from "@variables";
 
-/** Returns true if `_id` matches, or was generated from, one of the known Templates. */
-const isKnownTemplate = (_id: string, templates: AttributeModel[]): boolean => {
-  for (const attribute of templates) {
-    if (_.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id)) return true;
-  }
-  return false;
-};
-
-/** Row cell for the "Name" column, kept as its own component so the dialog's open state uses a real hook. */
+/** Row cell for the "Name" column, kept as its own component so the dialog's open state uses a real hook */
 const EntityAttributeNameCell = ({
   attribute,
+  availableAttributes,
   editing,
   entityName,
-  templates,
   onUpdate,
   onRemove,
   workspace,
@@ -82,7 +75,7 @@ const EntityAttributeNameCell = ({
           editing={editing}
           entityName={entityName}
           attribute={attribute}
-          isTemplate={isKnownTemplate(attribute._id, templates)}
+          originalAttributeId={getBaseAttributeId(attribute._id, availableAttributes)}
           onAttributeUpdate={onUpdate}
           removeCallback={onRemove ? () => onRemove(attribute._id) : undefined}
           workspace={workspace}
@@ -97,9 +90,9 @@ const attributeColumnHelper = createColumnHelper<AttributeModel>();
 
 const EntityAttributesTable = ({
   attributes,
+  availableAttributes,
   editing,
   entityName,
-  templates,
   onUpdate,
   onRemove,
   onAddClick,
@@ -123,9 +116,9 @@ const EntityAttributesTable = ({
       cell: (info) => (
         <EntityAttributeNameCell
           attribute={info.row.original}
+          availableAttributes={availableAttributes}
           editing={editing}
           entityName={entityName}
-          templates={templates}
           onUpdate={onUpdate}
           onRemove={onRemove}
           workspace={workspace}
@@ -185,7 +178,7 @@ const EntityAttributesTable = ({
     >
       <Flex direction={"row"} justify={"space-between"} align={"center"}>
         <Flex direction={"row"} gap={"0.5"} align={"center"}>
-          <Icon name={"attribute"} size={"xs"} color={STYLES.template.color.icon} />
+          <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
             Attributes ({attributes.length})
           </Text>
@@ -211,7 +204,7 @@ const EntityAttributesTable = ({
           <EmptyState.Root>
             <EmptyState.Content>
               <EmptyState.Indicator>
-                <Icon name={"attribute"} size={"lg"} color={STYLES.template.color.light} />
+                <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.light} />
               </EmptyState.Indicator>
               <EmptyState.Description>No Attributes</EmptyState.Description>
             </EmptyState.Content>

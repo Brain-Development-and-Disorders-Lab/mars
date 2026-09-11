@@ -49,7 +49,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -60,7 +60,7 @@ describe("Entity model", () => {
     expect(entity).not.toBeNull();
   });
 
-  it("should create a parent-child relationship between two Entities", async () => {
+  it("should create a parent-child link between two Entities", async () => {
     // Create the first Entity
     const parentResult: ResponseData<string> = await Entities.create({
       name: "TestParentEntity",
@@ -69,7 +69,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Parent",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -83,7 +83,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Child",
       projects: [],
-      relationships: [
+      links: [
         {
           source: { name: "TestChildEntity", _id: "no_id" },
           target: { name: "TestParentEntity", _id: parentResult.data },
@@ -104,15 +104,15 @@ describe("Entity model", () => {
     if (_.isNull(childEntity)) throw new Error();
 
     // Check the parent of the child
-    expect(childEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships[0].target._id).toStrictEqual(parentEntity._id);
+    expect(childEntity.links.length).toBe(1);
+    expect(childEntity.links[0].target._id).toStrictEqual(parentEntity._id);
 
     // Check the child of the parent
-    expect(parentEntity.relationships.length).toBe(1);
-    expect(parentEntity.relationships[0].target._id).toStrictEqual(childEntity._id);
+    expect(parentEntity.links.length).toBe(1);
+    expect(parentEntity.links[0].target._id).toStrictEqual(childEntity._id);
   });
 
-  it("should create a child-parent relationship between two Entities", async () => {
+  it("should create a child-parent link between two Entities", async () => {
     // Create the first Entity (child)
     const childResult: ResponseData<string> = await Entities.create({
       name: "TestChildEntity",
@@ -121,7 +121,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Child",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -135,7 +135,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Parent",
       projects: [],
-      relationships: [
+      links: [
         {
           source: { name: "TestParentEntity", _id: "no_id" },
           target: { name: "TestChildEntity", _id: childResult.data },
@@ -154,12 +154,12 @@ describe("Entity model", () => {
     if (_.isNull(parentEntity)) throw new Error();
 
     // Check the child of the parent
-    expect(parentEntity.relationships.length).toBe(1);
-    expect(parentEntity.relationships[0].target._id).toStrictEqual(childEntity._id);
+    expect(parentEntity.links.length).toBe(1);
+    expect(parentEntity.links[0].target._id).toStrictEqual(childEntity._id);
 
     // Check the parent of the child
-    expect(childEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships[0].target._id).toStrictEqual(parentEntity._id);
+    expect(childEntity.links.length).toBe(1);
+    expect(childEntity.links[0].target._id).toStrictEqual(parentEntity._id);
   });
 
   it("should create an Attribute", async () => {
@@ -171,7 +171,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [
         {
           _id: "TestAttribute",
@@ -203,7 +203,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -228,7 +228,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -274,7 +274,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -314,7 +314,7 @@ describe("Entity model", () => {
     expect(updatedProject.entities.length).toBe(0);
   });
 
-  it("should update Entity relationships from the child", async () => {
+  it("should update Entity links from the child", async () => {
     const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
@@ -322,7 +322,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -336,7 +336,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -346,7 +346,7 @@ describe("Entity model", () => {
     if (_.isNull(entity)) throw new Error();
 
     // Add the parent
-    entity.relationships.push({
+    entity.links.push({
       target: {
         _id: parentResult.data,
         name: "ParentEntity",
@@ -367,24 +367,24 @@ describe("Entity model", () => {
     if (_.isNull(childEntity)) throw new Error();
 
     // Validate Entities
-    expect(parentEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships.length).toBe(1);
+    expect(parentEntity.links.length).toBe(1);
+    expect(childEntity.links.length).toBe(1);
 
     // Remove the parent from the child
-    childEntity.relationships = [];
+    childEntity.links = [];
     await Entities.update(childEntity);
 
     // Validate Entities
     parentEntity = await Entities.getOne(parentResult.data);
     if (_.isNull(parentEntity)) throw new Error();
-    expect(parentEntity.relationships.length).toBe(0);
+    expect(parentEntity.links.length).toBe(0);
 
     childEntity = await Entities.getOne(entityResult.data);
     if (_.isNull(childEntity)) throw new Error();
-    expect(childEntity.relationships.length).toBe(0);
+    expect(childEntity.links.length).toBe(0);
   });
 
-  it("should update Entity relationships from the parent", async () => {
+  it("should update Entity links from the parent", async () => {
     const entityResult: ResponseData<string> = await Entities.create({
       name: "TestEntity",
       created: dayjs(Date.now()).toISOString(),
@@ -392,7 +392,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -406,7 +406,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -416,7 +416,7 @@ describe("Entity model", () => {
     if (_.isNull(entity)) throw new Error();
 
     // Add the child
-    entity.relationships.push({
+    entity.links.push({
       target: {
         _id: childResult.data,
         name: "ChildEntity",
@@ -437,21 +437,21 @@ describe("Entity model", () => {
     if (_.isNull(childEntity)) throw new Error();
 
     // Validate Entities
-    expect(updatedEntity.relationships.length).toBe(1);
-    expect(childEntity.relationships.length).toBe(1);
+    expect(updatedEntity.links.length).toBe(1);
+    expect(childEntity.links.length).toBe(1);
 
     // Remove the Product
-    updatedEntity.relationships = [];
+    updatedEntity.links = [];
     await Entities.update(updatedEntity);
 
     // Validate Entities
     updatedEntity = await Entities.getOne(entityResult.data);
     if (_.isNull(updatedEntity)) throw new Error();
-    expect(updatedEntity.relationships.length).toBe(0);
+    expect(updatedEntity.links.length).toBe(0);
 
     childEntity = await Entities.getOne(childResult.data);
     if (_.isNull(childEntity)) throw new Error();
-    expect(childEntity.relationships.length).toBe(0);
+    expect(childEntity.links.length).toBe(0);
   });
 
   it("should add an Attribute", async () => {
@@ -463,7 +463,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -496,7 +496,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [
         {
           _id: "a-test-remove",
@@ -530,7 +530,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [
         {
           _id: "TestAttribute",
@@ -574,7 +574,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Product",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -588,7 +588,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Origin",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -626,7 +626,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -651,7 +651,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -677,7 +677,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],
@@ -700,7 +700,7 @@ describe("Entity model", () => {
       owner: "henry.burgess@wustl.edu",
       description: "Test Entity description",
       projects: [],
-      relationships: [],
+      links: [],
       attributes: [],
       attachments: [],
       history: [],

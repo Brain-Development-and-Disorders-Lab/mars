@@ -5,9 +5,9 @@ import {
   EntityModel,
   IEntity,
   IGenericItem,
-  IRelationship,
+  ILink,
   IResponseMessage,
-  RelationshipType,
+  LinkType,
   ResponseData,
 } from "@types";
 
@@ -88,7 +88,7 @@ export class Entities {
       owners?: string[];
       hasAttachments?: boolean;
       hasAttributes?: boolean;
-      hasRelationships?: boolean;
+      hasLinks?: boolean;
       attributeCountRanges?: string[];
     },
     sort?: { field: string; direction: string },
@@ -126,14 +126,14 @@ export class Entities {
       queryFilter["attachments.0"] = { $exists: true };
     }
 
-    // Add has attributes filter
+    // Add has Attributes filter
     if (filter?.hasAttributes === true) {
       queryFilter["attributes.0"] = { $exists: true };
     }
 
-    // Add has relationships filter
-    if (filter?.hasRelationships === true) {
-      queryFilter["relationships.0"] = { $exists: true };
+    // Add has links filter
+    if (filter?.hasLinks === true) {
+      queryFilter["links.0"] = { $exists: true };
     }
 
     let query = getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(queryFilter);
@@ -239,7 +239,7 @@ export class Entities {
       owners?: string[];
       hasAttachments?: boolean;
       hasAttributes?: boolean;
-      hasRelationships?: boolean;
+      hasLinks?: boolean;
       attributeCountRanges?: string[];
     },
   ): Promise<number> => {
@@ -281,9 +281,9 @@ export class Entities {
       queryFilter["attributes.0"] = { $exists: true };
     }
 
-    // Add has relationships filter
-    if (filter?.hasRelationships === true) {
-      queryFilter["relationships.0"] = { $exists: true };
+    // Add has links filter
+    if (filter?.hasLinks === true) {
+      queryFilter["links.0"] = { $exists: true };
     }
 
     let count = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).countDocuments(queryFilter);
@@ -343,15 +343,15 @@ export class Entities {
       history: [],
     };
 
-    // Create reciprocal relationships between Entities
-    for await (const relationship of joinedEntity.relationships) {
+    // Create reciprocal links between Entities
+    for await (const link of joinedEntity.links) {
       // Update the `source` component to include Entity information
-      relationship.source = {
+      link.source = {
         _id: joinedEntity._id,
         name: joinedEntity.name,
       };
 
-      await Entities.addRelationship(relationship);
+      await Entities.addLink(link);
     }
 
     for await (const project of entity.projects) {
@@ -394,7 +394,7 @@ export class Entities {
         archived: entity.archived,
         description: entity.description,
         projects: entity.projects,
-        relationships: entity.relationships,
+        links: entity.links,
         attributes: entity.attributes,
         attachments: entity.attachments,
         history: entity.history,
@@ -435,25 +435,25 @@ export class Entities {
       }
     }
 
-    // Relationships
-    if (!_.isUndefined(updated.relationships)) {
-      update.$set.relationships = updated.relationships;
+    // Links
+    if (!_.isUndefined(updated.links)) {
+      update.$set.links = updated.links;
 
-      // Create the collection of relationships added in the updated Entity
-      const addRelationships = updated.relationships.filter((r) => {
-        // Filter by relationships not in the original Entity
-        return !Entities.relationshipExists(r, entity.relationships);
+      // Create the collection of links added in the updated Entity
+      const addLinks = updated.links.filter((link) => {
+        // Filter by links not in the original Entity
+        return !Entities.linkExists(link, entity.links);
       });
-      for await (const relationship of addRelationships) {
-        await Entities.addRelationship(relationship);
+      for await (const link of addLinks) {
+        await Entities.addLink(link);
       }
 
-      // Create the collection of relationships to be removed from the Entity
-      const removeRelationships = entity.relationships.filter((r) => {
-        return !Entities.relationshipExists(r, updated.relationships);
+      // Create the collection of links to be removed from the Entity
+      const removeLinks = entity.links.filter((r) => {
+        return !Entities.linkExists(r, updated.links);
       });
-      for await (const relationship of removeRelationships) {
-        await Entities.removeRelationship(relationship);
+      for await (const link of removeLinks) {
+        await Entities.removeLink(link);
       }
     }
 
@@ -527,7 +527,7 @@ export class Entities {
       created: historyEntity.created,
       description: historyEntity.description,
       projects: historyEntity.projects,
-      relationships: historyEntity.relationships,
+      links: historyEntity.links,
       attributes: historyEntity.attributes,
       attachments: historyEntity.attachments,
     };
@@ -682,26 +682,26 @@ export class Entities {
   };
 
   /**
-   * Compare two `IRelationship` structures and determine if they are describing
-   * the same relationship or not
-   * @param a Relationship
-   * @param b Relationship
+   * Compare two `ILink` structures and determine if they are describing
+   * the same link or not
+   * @param a Link
+   * @param b Link
    * @return {boolean}
    */
-  private static relationshipIsEqual = (a: IRelationship, b: IRelationship): boolean => {
+  private static linkIsEqual = (a: ILink, b: ILink): boolean => {
     return _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
   };
 
   /**
-   * Search a collection of existing `IRelationship` structures to find if another
-   * `IRelationship` already exists in the collection or not
-   * @param relationship Relationship structure to search for
-   * @param relationships Collection of existing Relationships
+   * Search a collection of existing `ILink` structures to find if another
+   * `ILink` already exists in the collection or not
+   * @param {ILink} link Link structure to search for
+   * @param {ILink[]} links Collection of existing Links
    * @return {boolean}
    */
-  private static relationshipExists = (relationship: IRelationship, relationships: IRelationship[]): boolean => {
-    for (const r of relationships) {
-      if (Entities.relationshipIsEqual(r, relationship)) {
+  private static linkExists = (link: ILink, links: ILink[]): boolean => {
+    for (const l of links) {
+      if (Entities.linkIsEqual(l, link)) {
         return true;
       }
     }
@@ -709,14 +709,14 @@ export class Entities {
   };
 
   /**
-   * Add a new relationship to a target Entity
-   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * Add a new link to a target Entity
+   * @param {ILink} link Link data containing the source Entity, target Entity, and link type
    * @return {Promise<IResponseMessage>}
    */
-  static addRelationship = async (relationship: IRelationship): Promise<IResponseMessage> => {
-    // Create a clone of the `IRelationship` instance for the target Entity
-    const targetRelationship = _.cloneDeep(relationship);
-    const targetEntity = await Entities.getOne(targetRelationship.target._id);
+  static addLink = async (link: ILink): Promise<IResponseMessage> => {
+    // Create a clone of the `ILink` instance for the target Entity
+    const targetLink = _.cloneDeep(link);
+    const targetEntity = await Entities.getOne(targetLink.target._id);
 
     if (_.isNull(targetEntity)) {
       return {
@@ -726,58 +726,58 @@ export class Entities {
     }
 
     // Switch the source and target
-    const source = _.cloneDeep(relationship.source);
-    const target = _.cloneDeep(relationship.target);
-    targetRelationship.source = target;
-    targetRelationship.target = source;
+    const source = _.cloneDeep(link.source);
+    const target = _.cloneDeep(link.target);
+    targetLink.source = target;
+    targetLink.target = source;
 
-    // Amend the relationship depending on the relationship type
-    if (relationship.type === "child") {
+    // Amend the link depending on the link type
+    if (link.type === "child") {
       // Flip to "parent" type if "child" being added
-      targetRelationship.type = "parent";
-    } else if (relationship.type === "parent") {
+      targetLink.type = "parent";
+    } else if (link.type === "parent") {
       // Flip to "child" type if "parent" being added
-      targetRelationship.type = "child";
+      targetLink.type = "child";
     }
 
-    // Confirm that the relationship does not exist on the target Entity
-    if (Entities.relationshipExists(targetRelationship, targetEntity.relationships)) {
+    // Confirm that the link does not exist on the target Entity
+    if (Entities.linkExists(targetLink, targetEntity.links)) {
       return {
         success: false,
-        message: "Relationship between Entities already exists",
+        message: "Link between Entities already exists",
       };
     }
 
-    // Add the new `IRelationship` to the target Entity
-    const relationships: IRelationship[] = _.cloneDeep(targetEntity.relationships);
-    relationships.push(targetRelationship);
+    // Add the new `ILink` to the target Entity
+    const links: ILink[] = _.cloneDeep(targetEntity.links);
+    links.push(targetLink);
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
-        relationships: relationships,
+        links: links,
       },
     };
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: targetRelationship.source._id }, update);
+      .updateOne({ _id: targetLink.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus ? "Added relationship successfully" : "Unable to add relationship",
+      message: successStatus ? "Added link successfully" : "Unable to add link",
     };
   };
 
   /**
-   * Remove a relationship from a target Entity
-   * @param relationship Relationship data containing the source Entity, target Entity, and relationship type
+   * Remove a link from a target Entity
+   * @param {ILink} link Link data containing the source Entity, target Entity, and link type
    * @return {Promise<IResponseMessage>}
    */
-  static removeRelationship = async (relationship: IRelationship): Promise<IResponseMessage> => {
-    // Create a clone of the `IRelationship` instance for the target Entity
-    const targetRelationship = _.cloneDeep(relationship);
-    const targetEntity = await Entities.getOne(targetRelationship.target._id);
+  static removeLink = async (link: ILink): Promise<IResponseMessage> => {
+    // Create a clone of the `ILink` instance for the target Entity
+    const targetLink = _.cloneDeep(link);
+    const targetEntity = await Entities.getOne(targetLink.target._id);
 
     if (_.isNull(targetEntity)) {
       return {
@@ -787,47 +787,47 @@ export class Entities {
     }
 
     // Switch the source and target
-    const source = _.cloneDeep(relationship.source);
-    const target = _.cloneDeep(relationship.target);
-    targetRelationship.source = target;
-    targetRelationship.target = source;
+    const source = _.cloneDeep(link.source);
+    const target = _.cloneDeep(link.target);
+    targetLink.source = target;
+    targetLink.target = source;
 
-    // Amend the relationship depending on the relationship type
-    if (relationship.type === "child") {
+    // Amend the link depending on the link type
+    if (link.type === "child") {
       // Flip to "parent" type if "child" being added
-      targetRelationship.type = "parent";
-    } else if (relationship.type === "parent") {
+      targetLink.type = "parent";
+    } else if (link.type === "parent") {
       // Flip to "child" type if "parent" being added
-      targetRelationship.type = "child";
+      targetLink.type = "child";
     }
 
-    // Confirm that the relationship to remove currently exists on the target Entity
-    if (!Entities.relationshipExists(targetRelationship, targetEntity.relationships)) {
+    // Confirm that the link to remove currently exists on the target Entity
+    if (!Entities.linkExists(targetLink, targetEntity.links)) {
       return {
         success: false,
-        message: "Relationship between Entities does not exist",
+        message: "Link between Entities does not exist",
       };
     }
 
-    // Remove the existing `IRelationship`
-    const relationships: IRelationship[] = _.cloneDeep(targetEntity.relationships).filter((r) => {
-      return !Entities.relationshipIsEqual(r, targetRelationship);
+    // Remove the existing `ILink`
+    const links: ILink[] = _.cloneDeep(targetEntity.links).filter((l) => {
+      return !Entities.linkIsEqual(l, targetLink);
     });
 
     const update: { $set: Partial<EntityModel> } = {
       $set: {
-        relationships: relationships,
+        links: links,
       },
     };
 
     const response = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .updateOne({ _id: targetRelationship.source._id }, update);
+      .updateOne({ _id: targetLink.source._id }, update);
     const successStatus = response.modifiedCount == 1;
 
     return {
       success: successStatus,
-      message: successStatus ? "Removed relationship successfully" : "Unable to remove relationship",
+      message: successStatus ? "Removed link successfully" : "Unable to remove link",
     };
   };
 
@@ -990,18 +990,18 @@ export class Entities {
           } else if (_.isEqual(field, "description")) {
             // "description" data field
             formatted["description"] = entity.description;
-          } else if (_.startsWith(field, "relationship_")) {
-            // "relationship" data field
-            // Create an empty relationships structure
-            if (_.isUndefined(formatted.relationships)) {
-              formatted.relationships = [];
+          } else if (_.startsWith(field, "link_")) {
+            // "link" data field
+            // Create an empty links structure
+            if (_.isUndefined(formatted.links)) {
+              formatted.links = [];
             }
 
             const target = await Entities.getOne(field.split("_")[1]);
             if (!_.isNull(target)) {
-              // Get the relationship details and add to the collection of exported relationships
-              const relationship = entity.relationships.find((relationship) => {
-                return Entities.relationshipIsEqual(relationship, {
+              // Get the link details and add to the collection of exported links
+              const link = entity.links.find((link) => {
+                return Entities.linkIsEqual(link, {
                   source: {
                     _id: entity._id,
                     name: entity.name,
@@ -1010,11 +1010,11 @@ export class Entities {
                     _id: target._id,
                     name: target.name,
                   },
-                  type: field.split("_")[2] as RelationshipType,
+                  type: field.split("_")[2] as LinkType,
                 });
               });
-              if (relationship) {
-                formatted.relationships.push(relationship);
+              if (link) {
+                formatted.links.push(link);
               }
             }
           } else if (_.startsWith(field, "attribute_")) {
@@ -1046,8 +1046,8 @@ export class Entities {
       if (_.isUndefined(exportFields)) {
         exportFields = ["created", "owner", "description"];
 
-        for await (const relationship of entity.relationships) {
-          exportFields.push(`relationship_${relationship.target._id}_${relationship.type}`);
+        for await (const link of entity.links) {
+          exportFields.push(`link_${link.target._id}_${link.type}`);
         }
         for await (const project of entity.projects) {
           exportFields.push(`project_${project}`);
@@ -1067,10 +1067,10 @@ export class Entities {
         } else if (_.isEqual(field, "description")) {
           headers.push("Description");
           row.push(entity.description);
-        } else if (_.startsWith(field, "relationship_")) {
+        } else if (_.startsWith(field, "link_")) {
           const target = await Entities.getOne(field.split("_")[1]);
           if (!_.isNull(target)) {
-            headers.push(`Relationship (${field.split("_")[2]})`);
+            headers.push(`Link (${field.split("_")[2]})`);
             row.push(target.name);
           }
         } else if (_.startsWith(field, "attribute_")) {

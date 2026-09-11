@@ -1,6 +1,6 @@
 # Creating Metadata
 
-Accessible from the navigation menu, the "Create" portal provides a pathway to creating Entities, Projects, or Template Attributes from one location.
+Accessible from the navigation menu, the "Create" portal provides a pathway to creating Entities, Projects, or Attributes from one location.
 
 ![Create Portal](../img/create_portal.png)
 
@@ -12,10 +12,10 @@ Creating Entities: [Documentation](../Creating-Entities)
 
 Creating Projects: [Documentation](../Creating-Projects)
 
-Creating Template Attributes: [Documentation](../Creating-Templates)
+Creating Attributes: [Documentation](../Creating-Attributes)
 
 ## Creating Workspaces
 
-Workspaces are managed separately to Entities, Projects, and Template Attributes. Workspaces are created and managed via the Switcher present at the top of the navigation menu. Further documentation can be found via the pages listed below.
+Workspaces are managed separately to Entities, Projects, and Attributes. Workspaces are created and managed via the Switcher present at the top of the navigation menu. Further documentation can be found via the pages listed below.
 
 Creating Workspaces: [Documentation](../Creating-Workspaces)

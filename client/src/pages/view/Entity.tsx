@@ -23,15 +23,15 @@ import {
 import { Content } from "@components/Container";
 import DialogExport from "@components/DialogExport";
 import HistoryDrawer from "@components/HistoryDrawer";
-import RelationshipsGraph from "@components/RelationshipsGraph";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import DialogUpload from "@components/DialogUpload";
 import DialogAddAttribute from "@components/DialogAddAttribute";
 import SelectSearch from "@components/SelectSearch";
 import DialogAlert from "@components/DialogAlert";
-import DialogAddRelationship from "@components/DialogAddRelationship";
-import Relationships from "@components/Relationships";
+import DialogAddLinks from "@components/DialogAddLinks";
+import Links from "@components/Links";
+import LinksGraph from "@components/LinksGraph";
 import EntityBreadcrumb from "@components/EntityBreadcrumb";
 import EntityOverviewCard from "@components/EntityOverviewCard";
 import EntityAttributesTable from "@components/EntityAttributesTable";
@@ -50,7 +50,7 @@ import {
   IAttribute,
   IdentifierFormatModel,
   IGenericItem,
-  IRelationship,
+  ILink,
   ResponseData,
   WorkspaceModel,
 } from "@types";
@@ -114,8 +114,8 @@ const Entity = () => {
   const [selectedProject, setSelectedProject] = useState({} as IGenericItem);
   const [selectedProjects, setSelectedProjects] = useState<IGenericItem[]>([]);
 
-  // Add relationships dialog
-  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
+  // Add Links dialog
+  const [addLinksOpen, setAddLinksOpen] = useState(false);
 
   // Save message dialog
   const [saveMessageOpen, setSaveMessageOpen] = useState(false);
@@ -136,8 +136,8 @@ const Entity = () => {
   // Archive state
   const [entityArchived, setEntityArchived] = useState(false);
 
-  // Templates
-  const [templates, setTemplates] = useState<AttributeModel[]>([]);
+  // Attributes
+  const [attributes, setAttributes] = useState<AttributeModel[]>([]);
 
   // Controls the add-attribute dialog
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
@@ -184,7 +184,7 @@ const Entity = () => {
           value
           format
         }
-        relationships {
+        links {
           source {
             _id
             name
@@ -227,7 +227,7 @@ const Entity = () => {
             value
             format
           }
-          relationships {
+          links {
             source {
               _id
               name
@@ -260,7 +260,7 @@ const Entity = () => {
         _id
         name
       }
-      templates {
+      attributes {
         _id
         name
         description
@@ -291,7 +291,7 @@ const Entity = () => {
   const { loading, error, data, refetch } = useQuery<{
     entity: EntityModel;
     projects: IGenericItem[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
     workspace: WorkspaceModel;
     identifierFormats: IdentifierFormatModel[];
   }>(GET_ENTITY, {
@@ -323,18 +323,18 @@ const Entity = () => {
     createEntity: ResponseData<string>;
   }>(CREATE_ENTITY);
 
-  // Query to create a template Template
-  const CREATE_TEMPLATE = gql`
-    mutation CreateTemplate($template: AttributeCreateInput) {
-      createTemplate(template: $template) {
+  // Query to create an Attribute
+  const CREATE_ATTRIBUTE = gql`
+    mutation CreateAttribute($attribute: AttributeCreateInput) {
+      createAttribute(attribute: $attribute) {
         success
         message
       }
     }
   `;
-  const [createTemplate, { error: errorTemplateCreate }] = useMutation<{
-    createTemplate: ResponseData<string>;
-  }>(CREATE_TEMPLATE);
+  const [createAttribute, { error: errorAttributeCreate }] = useMutation<{
+    createAttribute: ResponseData<string>;
+  }>(CREATE_ATTRIBUTE);
 
   // Mutation to update Entity
   const UPDATE_ENTITY = gql`
@@ -377,7 +377,7 @@ const Entity = () => {
         setEntityArchived(data.entity.archived);
         setEntityDescription(data.entity.description || "");
         setEntityProjects(data.entity.projects || []);
-        setEntityRelationships(data.entity.relationships || []);
+        setEntityLinks(data.entity.links || []);
         setEntityAttributes(data.entity.attributes || []);
         setShowSecondaryIdentifier(!!data.entity.secondaryIdentifier?.value);
         setSecondaryIdentifier(data.entity.secondaryIdentifier?.value || "");
@@ -391,9 +391,9 @@ const Entity = () => {
       setClonedEntityName(`${data.entity.name} (cloned)`);
     }
 
-    // Unpack Template data
-    if (data?.templates) {
-      setTemplates(data.templates);
+    // Unpack Attribute data
+    if (data?.attributes) {
+      setAttributes(data.attributes);
     }
 
     // Store Workspace information
@@ -479,25 +479,25 @@ const Entity = () => {
   };
 
   /**
-   * Saves the current attribute form as a reusable Template.
-   * Called from the add-attribute dialog when the user clicks "Save as Template".
+   * Saves the current attribute form as a reusable Attribute.
+   * Called from the add-attribute dialog when the user clicks "Save as Attribute".
    */
-  const onSaveAsTemplate = async (attributeData: IAttribute) => {
-    const response = await createTemplate({
-      variables: { template: attributeData },
+  const onSaveAsAttribute = async (attributeData: IAttribute) => {
+    const response = await createAttribute({
+      variables: { attribute: attributeData },
     });
 
-    if (errorTemplateCreate || !response.data?.createTemplate) {
+    if (errorAttributeCreate || !response.data?.createAttribute) {
       toaster.create({
         title: "Error",
-        description: errorTemplateCreate?.message || "Unable to save Template",
+        description: errorAttributeCreate?.message || "Unable to save Attribute",
         type: "error",
         duration: 4000,
         closable: true,
       });
-    } else if (response.data.createTemplate.success) {
+    } else if (response.data.createAttribute.success) {
       toaster.create({ title: "Saved!", type: "success", duration: 2000, closable: true });
-      setTemplates([...templates, attributeData as AttributeModel]);
+      setAttributes([...attributes, attributeData as AttributeModel]);
     }
   };
 
@@ -506,7 +506,7 @@ const Entity = () => {
   const [entityName, setEntityName] = useState("");
   const [entityDescription, setEntityDescription] = useState("");
   const [entityProjects, setEntityProjects] = useState<string[]>([]);
-  const [entityRelationships, setEntityRelationships] = useState<IRelationship[]>([]);
+  const [entityLinks, setEntityLinks] = useState<ILink[]>([]);
   const [entityAttributes, setEntityAttributes] = useState<AttributeModel[]>([]);
   const [entityHistory, setEntityHistory] = useState<EntityHistory[]>([]);
 
@@ -526,9 +526,9 @@ const Entity = () => {
     return previewVersion ? previewVersion.projects : entityProjects;
   }, [previewVersion, entityProjects]);
 
-  const displayEntityRelationships = useMemo(() => {
-    return previewVersion ? previewVersion.relationships : entityRelationships;
-  }, [previewVersion, entityRelationships]);
+  const displayEntityLinks = useMemo(() => {
+    return previewVersion ? previewVersion.links : entityLinks;
+  }, [previewVersion, entityLinks]);
 
   const displayEntityAttributes = useMemo(() => {
     return previewVersion ? previewVersion.attributes : entityAttributes;
@@ -591,7 +591,7 @@ const Entity = () => {
         owner: entity.owner,
         description: entityDescription,
         projects: entityProjects,
-        relationships: entityRelationships,
+        links: entityLinks,
         attributes: entityAttributes,
         attachments: entityAttachments,
         secondaryIdentifier: {
@@ -642,7 +642,7 @@ const Entity = () => {
     setEntityName(entity.name);
     setEntityDescription(entity.description);
     setEntityProjects(entity.projects);
-    setEntityRelationships(entity.relationships);
+    setEntityLinks(entity.links);
     setEntityAttributes(entity.attributes);
     setEntityAttachments(entity.attachments);
     setEntityHistory(entity.history);
@@ -694,7 +694,7 @@ const Entity = () => {
         owner: entityVersion.owner,
         description: entityVersion.description || "",
         projects: entityVersion.projects || [],
-        relationships: entityVersion.relationships || [],
+        links: entityVersion.links || [],
         attributes: entityVersion.attributes || [],
         attachments: entityVersion.attachments || [],
         secondaryIdentifier: entityVersion.secondaryIdentifier || { value: "", format: "" },
@@ -713,10 +713,10 @@ const Entity = () => {
         closable: true,
       });
 
-      // Update the state (safely)
+      // Update the state
       setEntityDescription(entityVersion.description || "");
       setEntityProjects(entityVersion.projects || []);
-      setEntityRelationships(entityVersion.relationships || []);
+      setEntityLinks(entityVersion.links || []);
       setEntityAttributes(entityVersion.attributes || []);
       setEntityAttachments(entityVersion.attachments || []);
       setShowSecondaryIdentifier(!!entityVersion.secondaryIdentifier?.value);
@@ -768,7 +768,7 @@ const Entity = () => {
           archived: false,
           description: entity.description,
           projects: entity.projects,
-          relationships: entity.relationships,
+          links: entity.links,
           attributes: entity.attributes,
           attachments: entity.attachments,
           secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
@@ -1052,64 +1052,81 @@ const Entity = () => {
               </Menu.Trigger>
               <Portal>
                 <Menu.Positioner>
-                  <Menu.Content>
-                    <Menu.Item value={"print"} fontSize={"xs"} disabled>
-                      <Icon name={"print"} size={"xs"} />
-                      Print
-                    </Menu.Item>
-                    <Menu.Item value={"share"} fontSize={"xs"} onClick={handleShareClick}>
-                      <Icon name={"share"} size={"xs"} />
-                      Share
-                    </Menu.Item>
-                    <Menu.Item
-                      value={"visualize"}
-                      onClick={() => setGraphOpen(true)}
-                      fontSize={"xs"}
-                      disabled={editing || entityArchived || !!previewVersion}
-                    >
-                      <Icon name={"graph"} size={"xs"} />
-                      Visualize
-                    </Menu.Item>
-                    <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
-                      disabled={workspacePermissions.entities.create}
-                      showArrow
-                    >
+                  <Menu.Content p={"1"}>
+                    <Menu.ItemGroup title={"Tools"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Tools
+                      </Menu.ItemGroupLabel>
                       <Menu.Item
-                        value={"clone"}
-                        onClick={() => setCloneOpen(true)}
+                        value={"visualize"}
+                        onClick={() => setGraphOpen(true)}
                         fontSize={"xs"}
-                        disabled={entityArchived || !!previewVersion || !workspacePermissions.entities.create}
+                        disabled={editing || entityArchived || !!previewVersion}
                       >
-                        <Icon name={"copy"} size={"xs"} />
-                        Clone
+                        <Icon name={"graph"} size={"xs"} />
+                        Visualize Links
                       </Menu.Item>
-                    </Tooltip>
-                    <Menu.Item
-                      value={"export"}
-                      onClick={handleExportClick}
-                      fontSize={"xs"}
-                      disabled={editing || entityArchived || !!previewVersion}
-                    >
-                      <Icon name={"download"} size={"xs"} />
-                      Export
-                    </Menu.Item>
-                    <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
-                      disabled={workspacePermissions.entities.archive}
-                      showArrow
-                    >
+                    </Menu.ItemGroup>
+
+                    <Menu.ItemGroup title={"Share"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Share
+                      </Menu.ItemGroupLabel>
+                      <Menu.Item value={"print"} fontSize={"xs"} disabled>
+                        <Icon name={"print"} size={"xs"} />
+                        Print Entity
+                      </Menu.Item>
+                      <Menu.Item value={"share"} fontSize={"xs"} onClick={handleShareClick}>
+                        <Icon name={"share"} size={"xs"} />
+                        Share Entity
+                      </Menu.Item>
+                    </Menu.ItemGroup>
+
+                    <Menu.ItemGroup title={"Manage"}>
+                      <Menu.ItemGroupLabel fontSize={"xs"} p={"1"}>
+                        Manage
+                      </Menu.ItemGroupLabel>
+                      <Tooltip
+                        content={"Insufficient permissions in this Workspace"}
+                        disabled={workspacePermissions.entities.create}
+                        showArrow
+                      >
+                        <Menu.Item
+                          value={"clone"}
+                          onClick={() => setCloneOpen(true)}
+                          fontSize={"xs"}
+                          disabled={entityArchived || !!previewVersion || !workspacePermissions.entities.create}
+                        >
+                          <Icon name={"copy"} size={"xs"} />
+                          Clone Entity
+                        </Menu.Item>
+                      </Tooltip>
                       <Menu.Item
-                        id={"archiveEntityButton"}
-                        value={"archive"}
-                        onClick={() => setArchiveDialogOpen(true)}
+                        value={"export"}
+                        onClick={handleExportClick}
                         fontSize={"xs"}
-                        disabled={entityArchived || !workspacePermissions.entities.archive}
+                        disabled={editing || entityArchived || !!previewVersion}
                       >
-                        <Icon name={"archive"} size={"xs"} />
-                        Archive
+                        <Icon name={"download"} size={"xs"} />
+                        Export Entity
                       </Menu.Item>
-                    </Tooltip>
+                      <Tooltip
+                        content={"Insufficient permissions in this Workspace"}
+                        disabled={workspacePermissions.entities.archive}
+                        showArrow
+                      >
+                        <Menu.Item
+                          id={"archiveEntityButton"}
+                          value={"archive"}
+                          onClick={() => setArchiveDialogOpen(true)}
+                          fontSize={"xs"}
+                          disabled={entityArchived || !workspacePermissions.entities.archive}
+                        >
+                          <Icon name={"archive"} size={"xs"} />
+                          Archive Entity
+                        </Menu.Item>
+                      </Tooltip>
+                    </Menu.ItemGroup>
                   </Menu.Content>
                 </Menu.Positioner>
               </Portal>
@@ -1141,8 +1158,8 @@ const Entity = () => {
                   Are you sure you want to archive this Entity?
                 </Text>
                 <Text fontSize={"xs"}>
-                  This Entity will be moved to the Workspace archive. All relationships will be preserved, however it
-                  will not be visible. It can be restored at any time.
+                  This Entity will be moved to the Workspace archive. All links will be preserved, however it will not
+                  be visible. It can be restored at any time.
                 </Text>
               </Flex>
             </DialogAlert>
@@ -1180,9 +1197,9 @@ const Entity = () => {
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             <EntityAttributesTable
               attributes={displayEntityAttributes}
+              availableAttributes={attributes}
               editing={editing && !previewVersion}
               entityName={entityName}
-              templates={templates}
               onUpdate={onAttributeUpdate}
               onRemove={removeAttribute}
               onAddClick={() => setAddAttributesOpen(true)}
@@ -1198,9 +1215,9 @@ const Entity = () => {
             />
           </Flex>
 
-          {/* Relationships and Attachments */}
+          {/* Links and Attachments */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
-            {/* Relationships */}
+            {/* Links */}
             <Flex
               direction={"column"}
               p={"2"}
@@ -1219,7 +1236,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"0.5"} align={"center"}>
                     <Icon name={"graph"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                      Relationships ({entityRelationships.length})
+                      Links ({entityLinks.length})
                     </Text>
                   </Flex>
                   <Button
@@ -1227,18 +1244,14 @@ const Entity = () => {
                     size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
+                    onClick={() => setAddLinksOpen(true)}
                     disabled={!editing || !!previewVersion}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
-                <Relationships
-                  relationships={displayEntityRelationships}
-                  setRelationships={setEntityRelationships}
-                  viewOnly={!editing || !!previewVersion}
-                />
+                <Links links={displayEntityLinks} setLinks={setEntityLinks} viewOnly={!editing || !!previewVersion} />
               </Flex>
             </Flex>
 
@@ -1255,14 +1268,14 @@ const Entity = () => {
 
         {/* Add Attributes dialog */}
         <DialogAddAttribute
+          attributes={attributes}
           open={addAttributesOpen}
           onClose={() => setAddAttributesOpen(false)}
           owner={user}
-          templates={templates}
           entityName={entityName}
           entityDescription={entityDescription}
           onAdd={(attribute) => setEntityAttributes([...entityAttributes, attribute])}
-          onSaveAsTemplate={onSaveAsTemplate}
+          onSaveAsAttribute={onSaveAsAttribute}
         />
 
         {/* Add Projects dialog */}
@@ -1402,14 +1415,14 @@ const Entity = () => {
           </Portal>
         </Dialog.Root>
 
-        {/* Add Relationships dialog */}
-        <DialogAddRelationship
-          open={addRelationshipsOpen}
-          onClose={() => setAddRelationshipsOpen(false)}
+        {/* Add Links dialog */}
+        <DialogAddLinks
+          open={addLinksOpen}
+          onClose={() => setAddLinksOpen(false)}
           sourceId={entity._id}
           sourceName={entityName}
-          existingRelationships={entityRelationships}
-          onAdd={(relationships) => setEntityRelationships([...entityRelationships, ...relationships])}
+          existingLinks={entityLinks}
+          onAdd={(links: ILink[]) => setEntityLinks([...entityLinks, ...links])}
         />
 
         {/* Upload dialog */}
@@ -1452,7 +1465,7 @@ const Entity = () => {
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body p={"1"}>
-                <RelationshipsGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
+                <LinksGraph id={entity._id} entityNavigateHook={handleEntityNodeClick} />
               </Dialog.Body>
             </Dialog.Content>
           </Dialog.Positioner>

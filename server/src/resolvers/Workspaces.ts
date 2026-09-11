@@ -19,7 +19,7 @@ import { Workspaces } from "@models/Workspaces";
 import { User } from "@models/User";
 
 // Email
-import { sendEmail, templates } from "@lib/email";
+import { emailTemplates, sendEmail } from "@lib/email";
 
 // Posthog
 import { PostHogClient } from "@lib/posthog";
@@ -196,7 +196,7 @@ export const WorkspacesResolvers = {
       const workspaceActivity = activity.filter((activity) => {
         return (
           _.includes(workspace.activity, activity._id) && // Activity in Workspace
-          activity.target.type === "workspace" && // Activity on Workspace
+          activity.target.type === "workspaces" && // Activity on Workspace
           activity.type === "update" && // Activity is Workspace Updates
           activity.details.includes("Added") &&
           dayjs(activity.timestamp).isAfter(dayjs(Date.now()).subtract(1, "day")) // Within last 24 hours
@@ -258,7 +258,7 @@ export const WorkspacesResolvers = {
                   await sendEmail({
                     to: collaboratorResult.email,
                     subject: `You've been added to "${args.workspace.name}" on Metadatify`,
-                    html: templates.workspaceCollaboratorAdded(
+                    html: emailTemplates.workspaceCollaboratorAdded(
                       collaboratorResult.name,
                       args.workspace.name,
                       workspaceUrl,
@@ -276,7 +276,7 @@ export const WorkspacesResolvers = {
               details: `Added ${newCollaborators.length} Collaborator${newCollaborators.length !== 1 ? "s" : ""}`,
               target: {
                 _id: workspace._id,
-                type: "workspace",
+                type: "workspaces",
                 name: workspace.name,
               },
             });
@@ -294,7 +294,7 @@ export const WorkspacesResolvers = {
               details: `Removed ${removedCollaborators} Collaborator${removedCollaborators !== 1 ? "s" : ""}`,
               target: {
                 _id: workspace._id,
-                type: "workspace",
+                type: "workspaces",
                 name: workspace.name,
               },
             });
@@ -312,7 +312,7 @@ export const WorkspacesResolvers = {
               details: "Updated Workspace description",
               target: {
                 _id: workspace._id,
-                type: "workspace",
+                type: "workspaces",
                 name: workspace.name,
               },
             });
@@ -327,7 +327,7 @@ export const WorkspacesResolvers = {
               details: "Updated Workspace name",
               target: {
                 _id: workspace._id,
-                type: "workspace",
+                type: "workspaces",
                 name: workspace.name,
               },
             });

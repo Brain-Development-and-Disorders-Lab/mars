@@ -101,7 +101,7 @@ const Search = () => {
     endDate: "",
     hasAttachments: false,
     hasAttributes: false,
-    hasRelationships: false,
+    hasLinks: false,
   });
 
   // Collapsible state for text search filters
@@ -260,7 +260,7 @@ const Search = () => {
       textSearchFilters.endDate ||
       textSearchFilters.hasAttachments ||
       textSearchFilters.hasAttributes ||
-      textSearchFilters.hasRelationships;
+      textSearchFilters.hasLinks;
 
     const filters = hasFilters
       ? {
@@ -268,7 +268,7 @@ const Search = () => {
           endDate: textSearchFilters.endDate || undefined,
           hasAttachments: textSearchFilters.hasAttachments || undefined,
           hasAttributes: textSearchFilters.hasAttributes || undefined,
-          hasRelationships: textSearchFilters.hasRelationships || undefined,
+          hasLinks: textSearchFilters.hasLinks || undefined,
         }
       : undefined;
 
@@ -590,7 +590,7 @@ const Search = () => {
     if (textSearchFilters.endDate) count++;
     if (textSearchFilters.hasAttachments) count++;
     if (textSearchFilters.hasAttributes) count++;
-    if (textSearchFilters.hasRelationships) count++;
+    if (textSearchFilters.hasLinks) count++;
     setActiveFilterCount(count);
   }, [showArchived, textSearchFilters]);
 
@@ -831,17 +831,17 @@ const Search = () => {
                                 <Checkbox.Root
                                   size={"xs"}
                                   colorPalette={"blue"}
-                                  checked={textSearchFilters.hasRelationships}
+                                  checked={textSearchFilters.hasLinks}
                                   onCheckedChange={(details) =>
                                     setTextSearchFilters((prev) => ({
                                       ...prev,
-                                      hasRelationships: details.checked as boolean,
+                                      hasLinks: details.checked as boolean,
                                     }))
                                   }
                                 >
                                   <Checkbox.HiddenInput />
                                   <Checkbox.Control />
-                                  <Checkbox.Label fontSize={"xs"}>Has Relationships</Checkbox.Label>
+                                  <Checkbox.Label fontSize={"xs"}>Has Links</Checkbox.Label>
                                 </Checkbox.Root>
                               </Flex>
                             </Flex>
@@ -866,7 +866,7 @@ const Search = () => {
                               endDate: "",
                               hasAttachments: false,
                               hasAttributes: false,
-                              hasRelationships: false,
+                              hasLinks: false,
                             });
                             setResults([]);
                             setHasSearched(false);

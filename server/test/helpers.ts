@@ -5,7 +5,7 @@ import { connect, disconnect, getDatabase, getClient } from "@connectors/databas
 import { Workspaces } from "@models/Workspaces";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
-import { Templates } from "@models/Templates";
+import { Attributes } from "@models/Attributes";
 
 // Utility functions
 import dayjs from "dayjs";
@@ -78,7 +78,7 @@ export const clearDatabase = async (): Promise<void> => {
   await getDatabase().collection("entities").deleteMany({});
   await getDatabase().collection("projects").deleteMany({});
   await getDatabase().collection("session").deleteMany({});
-  await getDatabase().collection("templates").deleteMany({});
+  await getDatabase().collection("attributes").deleteMany({});
   await getDatabase().collection("user").deleteMany({});
   await getDatabase().collection("verification").deleteMany({});
   await getDatabase().collection("workspaces").deleteMany({});
@@ -97,7 +97,7 @@ export const closeConnection = async (): Promise<void> => {
 };
 
 /**
- * Create a workspace with seeded test data (entities, projects, templates)
+ * Create a workspace with seeded test data (Entities, Projects, Attributes)
  * Similar to seedTestDatabase but creates a new workspace instead of using the default one
  * @param workspaceName Name for the workspace
  * @return {Promise<string>} Workspace ID
@@ -113,7 +113,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     description: `Test workspace: ${workspaceName}`,
     entities: [],
     projects: [],
-    templates: [],
+    attributes: [],
     activity: [],
   });
 
@@ -144,7 +144,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Parent Entity",
     projects: [projectResult.data],
-    relationships: [],
+    links: [],
     attributes: [],
     attachments: [],
     history: [],
@@ -158,7 +158,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Child Entity",
     projects: [projectResult.data],
-    relationships: [
+    links: [
       {
         target: {
           _id: parentResult.data,
@@ -185,7 +185,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
     owner: TEST_USER_ID,
     description: "Description for test Entity",
     projects: [projectResult.data],
-    relationships: [],
+    links: [],
     attributes: [
       {
         _id: "a-ndl2n3k",
@@ -245,12 +245,12 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
   });
   await Workspaces.addEntity(workspaceId, entityResult.data);
 
-  // Create a Template
-  const templateResult: ResponseData<string> = await Templates.create({
-    name: "Test Template",
+  // Create an Attribute
+  const attributeResult: ResponseData<string> = await Attributes.create({
+    name: "Test Attribute",
     archived: false,
     owner: TEST_USER_ID,
-    description: "Description for test Template",
+    description: "Description for test Attribute",
     values: [
       {
         _id: "v-00",
@@ -260,7 +260,7 @@ export const createTestWorkspace = async (workspaceName: string): Promise<string
       },
     ],
   });
-  await Workspaces.addTemplate(workspaceId, templateResult.data);
+  await Workspaces.addAttribute(workspaceId, attributeResult.data);
 
   return workspaceId;
 };
@@ -281,7 +281,7 @@ export const createQueryTestEntity = async (workspaceId: string): Promise<void> 
     owner: TEST_USER_ID,
     description: "Entity for query builder tests",
     projects: [],
-    relationships: [],
+    links: [],
     attributes: [
       {
         _id: "a-query-test",

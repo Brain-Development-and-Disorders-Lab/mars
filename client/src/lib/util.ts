@@ -3,6 +3,7 @@ import _ from "lodash";
 
 // Custom types
 import {
+  AttributeModel,
   Collaborator,
   FormattedValueDisplay,
   IAttribute,
@@ -24,7 +25,7 @@ import dayjs from "dayjs";
 import {
   ACCEPTED_ATTACHMENTS,
   ACCEPTED_IMPORTS_ENTITIES,
-  ACCEPTED_IMPORTS_TEMPLATES,
+  ACCEPTED_IMPORTS_ATTRIBUTES,
   API_URL,
   CSV_MIME_TYPE,
   STYLES,
@@ -63,7 +64,9 @@ export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   }
 
   for (const value of values) {
-    isValidValue(value, allowEmptyValues);
+    if (!isValidValue(value, allowEmptyValues)) {
+      return false;
+    }
   }
   return true;
 };
@@ -123,7 +126,7 @@ export const setCollaboratorPermissions = (
  */
 const isModifyAll = (
   permissions: UserWorkspacePermissions,
-  category: "entities" | "projects" | "templates",
+  category: "entities" | "projects" | "attributes",
 ): boolean => {
   const permissionsCategory = permissions[category];
   return permissionsCategory.create && permissionsCategory.edit && permissionsCategory.archive;
@@ -138,7 +141,7 @@ const isModifyAll = (
  */
 const isModifyPartial = (
   permissions: UserWorkspacePermissions,
-  category: "entities" | "projects" | "templates",
+  category: "entities" | "projects" | "attributes",
 ): boolean => {
   const permissionsCategory = permissions[category];
   return permissionsCategory.create || permissionsCategory.edit || permissionsCategory.archive;
@@ -153,17 +156,17 @@ const isModifyPartial = (
 export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermissions): string[] => {
   const permissionsLabels = ["View"];
 
-  // "Modify (All)" only shown if all Entities, Projects, and Templates permissions enabled
+  // "Modify (All)" only shown if all Entities, Projects, and Attributes permissions enabled
   if (
     isModifyAll(permissions, "entities") &&
     isModifyAll(permissions, "projects") &&
-    isModifyAll(permissions, "templates")
+    isModifyAll(permissions, "attributes")
   ) {
     permissionsLabels.push("Modify (All)");
   } else if (
     isModifyPartial(permissions, "entities") ||
     isModifyPartial(permissions, "projects") ||
-    isModifyPartial(permissions, "templates")
+    isModifyPartial(permissions, "attributes")
   ) {
     permissionsLabels.push("Modify (Partial)");
   }
@@ -243,10 +246,24 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
   }
 
   for (const attribute of attributes) {
-    isValidAttribute(attribute);
+    if (!isValidAttribute(attribute)) {
+      return false;
+    }
   }
 
   return true;
+};
+
+/**
+ * Resolve the base Attribute an Entity's Attribute instance was created from, if any. An instance
+ * derived from a base Attribute has an `_id` of the form `${baseAttributeId}-${nanoid}`.
+ * @param {string} _id `_id` of the Entity's Attribute instance
+ * @param {AttributeModel[]} availableAttributes Attributes available in the Workspace
+ * @returns {string | undefined} `_id` of the matching base Attribute, or `undefined`
+ */
+export const getBaseAttributeId = (_id: string, availableAttributes: AttributeModel[]): string | undefined => {
+  return availableAttributes.find((attribute) => _.startsWith(_id, attribute._id) || _.isEqual(_id, attribute._id))
+    ?._id;
 };
 
 /**
@@ -387,8 +404,8 @@ export const getFileExtension = (mimeType: string): string => {
     } else {
       return _.upperCase(mimeType.split("/")[1]);
     }
-  } else if (ACCEPTED_IMPORTS_TEMPLATES.includes(mimeType)) {
-    // Handle imported Templates files
+  } else if (ACCEPTED_IMPORTS_ATTRIBUTES.includes(mimeType)) {
+    // Handle imported Attribute files
     return _.upperCase(mimeType.split("/")[1]);
   } else {
     return "UNKNOWN";
@@ -562,13 +579,13 @@ export const buildMongoQuery = (query: SearchQuery): Record<string, unknown> => 
         : { projects: { $elemMatch: { _id: rule.value } } };
     }
 
-    if (rule.field === "relationships") {
-      // "is parent/child of" filters by relationship type in addition to the target ID
+    if (rule.field === "links") {
+      // "is parent/child of" filters by link type in addition to the target ID
       const target = { "target._id": rule.value };
-      if (rule.operator === "is not related to") return { relationships: { $not: { $elemMatch: target } } };
-      if (rule.operator === "is parent of") return { relationships: { $elemMatch: { ...target, type: "parent" } } };
-      if (rule.operator === "is child of") return { relationships: { $elemMatch: { ...target, type: "child" } } };
-      return { relationships: { $elemMatch: target } };
+      if (rule.operator === "is not related to") return { links: { $not: { $elemMatch: target } } };
+      if (rule.operator === "is parent of") return { links: { $elemMatch: { ...target, type: "parent" } } };
+      if (rule.operator === "is child of") return { links: { $elemMatch: { ...target, type: "child" } } };
+      return { links: { $elemMatch: target } };
     }
 
     if (rule.field === "attributes") {

@@ -16,7 +16,7 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
     edit: false,
     archive: false,
   },
-  templates: {
+  attributes: {
     create: false,
     edit: false,
     archive: false,
@@ -62,7 +62,7 @@ export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spr
 // Accepted MIME types for attachments and imports
 export const ACCEPTED_ATTACHMENTS = ["image/jpeg", "image/png", "application/pdf", "application/vnd.dna"];
 export const ACCEPTED_IMPORTS_ENTITIES = [XLSX_MIME_TYPE, CSV_MIME_TYPE, JSON_MIME_TYPE];
-export const ACCEPTED_IMPORTS_TEMPLATES = ["application/json"];
+export const ACCEPTED_IMPORTS_ATTRIBUTES = ["application/json"];
 
 // Number of displayed columns on spreadsheet imports
 export const MAX_DISPLAYED_COLUMNS = 10;

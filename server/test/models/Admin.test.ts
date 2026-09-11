@@ -53,7 +53,7 @@ const createWorkspace = async (collaboratorPermissions: UserWorkspacePermissions
     collaborators: [{ _id: COLLABORATOR_ID, permissions: collaboratorPermissions }],
     entities: [],
     projects: [],
-    templates: [],
+    attributes: [],
     activity: [],
   });
   return result.data;
@@ -150,15 +150,15 @@ describe("Admin model permissions", () => {
 
     it("disables a previously enabled permission for a Collaborator", async () => {
       const enabled = _.cloneDeep(DEFAULT_WORKSPACE_PERMISSIONS);
-      enabled.templates.archive = true;
+      enabled.attributes.archive = true;
       const workspaceId = await createWorkspace(enabled);
 
       await Admin.setUserWorkspacePermissions(COLLABORATOR_ID, workspaceId, {
-        templates: { create: false, edit: false, archive: false },
+        attributes: { create: false, edit: false, archive: false },
       });
 
       const permissions = await Admin.getUserWorkspacePermissions(COLLABORATOR_ID, workspaceId);
-      expect(permissions.templates.archive).toBeFalsy();
+      expect(permissions.attributes.archive).toBeFalsy();
     });
 
     it("fails to update permissions for a User who isn't a Collaborator", async () => {

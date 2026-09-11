@@ -26,7 +26,7 @@ import {
   EntityModel,
   EntityMetrics,
   ProjectMetrics,
-  TemplateMetrics,
+  AttributeMetrics,
   CollaboratorMetrics,
   IGenericItem,
 } from "@types";
@@ -108,7 +108,7 @@ const GET_DASHBOARD = gql`
       all
       addedDay
     }
-    templateMetrics {
+    attributeMetrics {
       all
       addedDay
     }
@@ -157,7 +157,7 @@ const Dashboard = () => {
   // Metrics
   const [entityMetrics, setEntityMetrics] = useState<EntityMetrics>({} as EntityMetrics);
   const [projectMetrics, setProjectMetrics] = useState<ProjectMetrics>({} as ProjectMetrics);
-  const [templateMetrics, setTemplateMetrics] = useState<TemplateMetrics>({} as TemplateMetrics);
+  const [attributeMetrics, setAttributeMetrics] = useState<AttributeMetrics>({} as AttributeMetrics);
   const [collaboratorMetrics, setCollaboratorMetrics] = useState<CollaboratorMetrics>({} as CollaboratorMetrics);
 
   // Use custom breakpoint hook
@@ -188,7 +188,7 @@ const Dashboard = () => {
     entities: { entities: EntityModel[]; total: number };
     workspace: IGenericItem;
     entityMetrics: EntityMetrics;
-    templateMetrics: TemplateMetrics;
+    attributeMetrics: AttributeMetrics;
     collaboratorMetrics: CollaboratorMetrics;
   }>(GET_DASHBOARD, {
     variables: {
@@ -222,8 +222,8 @@ const Dashboard = () => {
     if (data?.projectMetrics) {
       setProjectMetrics(data.projectMetrics);
     }
-    if (data?.templateMetrics) {
-      setTemplateMetrics(data.templateMetrics);
+    if (data?.attributeMetrics) {
+      setAttributeMetrics(data.attributeMetrics);
     }
     if (data?.collaboratorMetrics) {
       setCollaboratorMetrics(data.collaboratorMetrics);
@@ -420,9 +420,9 @@ const Dashboard = () => {
       title: "Projects",
     },
     {
-      target: "#navTemplatesButtonDesktop",
-      content: "Here you can view all Template Attributes in the current Workspace.",
-      title: "Templates",
+      target: "#navAttributesButtonDesktop",
+      content: "Here you can view all Attribute Attributes in the current Workspace.",
+      title: "Attributes",
     },
     {
       target: "#workspaceSwitcherDesktop",
@@ -437,15 +437,15 @@ const Dashboard = () => {
     },
     {
       target: "#navCreateButtonDesktop",
-      content: "The Create portal allows you to manually create Entities, Projects, and Template Attributes.",
+      content: "The Create portal allows you to manually create Entities, Projects, and Attributes.",
       title: "Create",
     },
     {
       target: "#navImportButtonDesktop",
       content:
         breakpoint === "base"
-          ? "On desktop, upload and import CSV or JSON files to create or modify Entities and Templates."
-          : "Upload and import CSV or JSON files to create or modify Entities and Templates.",
+          ? "On desktop, upload and import CSV or JSON files to create or modify Entities and Attributes."
+          : "Upload and import CSV or JSON files to create or modify Entities and Attributes.",
       title: "Import",
     },
     {
@@ -568,22 +568,22 @@ const Dashboard = () => {
             rounded={"md"}
           >
             <Flex direction={"row"} align={"center"} gap={"1"}>
-              <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+              <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
               <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                Templates
+                Attributes
               </Text>
             </Flex>
             <Text fontSize={"2xl"} fontWeight={"bold"} lineHeight={"1"}>
-              {templateMetrics.all ?? "-"}
+              {attributeMetrics.all ?? "-"}
             </Text>
             <Badge
               px={"0"}
               variant={"plain"}
-              colorPalette={templateMetrics.addedDay > 0 ? "green" : "gray"}
+              colorPalette={attributeMetrics.addedDay > 0 ? "green" : "gray"}
               fontSize={"xs"}
             >
-              {templateMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
-              {templateMetrics.addedDay > 0 ? `+${templateMetrics.addedDay} today` : "No new today"}
+              {attributeMetrics.addedDay > 0 && <Icon name={"sort_up"} size={"xs"} />}
+              {attributeMetrics.addedDay > 0 ? `+${attributeMetrics.addedDay} today` : "No new today"}
             </Badge>
           </Flex>
 

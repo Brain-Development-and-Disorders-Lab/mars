@@ -19,7 +19,7 @@ Single-Entity imports only contain data for a single Entity, and are structured 
   "created": "2023-12-27T20:12:43.686Z",
   "description": "This is a Box that fits inside another Box.",
   "projects": ["pBwj_re8"],
-  "relationships": [
+  "links": [
     {
       "target": {
         "_id": "eqRN9NBH",
@@ -57,8 +57,8 @@ There are multiple requirements and considerations when importing a Single-Entit
 - If the `_id` field is not specified or does not exist, it will be ignored and a new Entity will be **created**. If the `_id` field corresponds to an existing Entity, that Entity will be **updated**.
 - The `owner` field will be reset to the ORCiD of the user uploading the file.
 - If any identifier in the `project` array does not exist, that Project membership will be skipped.
-- Even if a target Entity within the `relationships` array does not exist, the relationship will still be created. The non-existent Entity will be displayed as disabled and inaccessible.
-- Ideally, all fields should be specified in the JSON file. Else, default values will be specified. The following fields are expected: `_id`, `archived`, `name`, `owner`, `description`, `projects`, `relationships`, `attributes`, `attachments`.
+- Even if a target Entity within the `links` array does not exist, the link will still be created. The non-existent Entity will be displayed as disabled and inaccessible.
+- Ideally, all fields should be specified in the JSON file. Else, default values will be specified. The following fields are expected: `_id`, `archived`, `name`, `owner`, `description`, `projects`, `links`, `attributes`, `attachments`.
 
 A default Entity JSON file is shown below:
 
@@ -71,7 +71,7 @@ A default Entity JSON file is shown below:
   "created": "2000-01-01T00:00:00Z",
   "description": "Entity Description",
   "projects": ["PROJECT_ID"],
-  "relationships": [
+  "links": [
     {
       "target": {
         "_id": "TARGET_ENTITY_ID",
@@ -141,7 +141,7 @@ The _Project_ drop-down menu presents a list of all Projects in the current Work
 
 ![Import JSON - Step 3](../img/import_JSON_3.png)
 
-When importing Entities via JSON files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Template Attribute. The Attributes from this step will be added to all Entities as they are imported.
+When importing Entities via JSON files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Attribute. The Attributes from this step will be added to all Entities as they are imported.
 
 #### Step 4
 
@@ -188,7 +188,7 @@ The _Project_ drop-down menu presents a list of all Projects in the current Work
 
 ![Import CSV - Step 3](../img/import_CSV_3.png)
 
-When importing Entities via CSV files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Template Attribute.
+When importing Entities via CSV files, additional _Attributes_ can be added during the import steps. Use the green "Create" button to create a new Attribute or select an existing Attribute.
 
 Similar to Step 2, the data field in each Value comprising the Attribute must be mapped to a column in the CSV file. The Attributes from this step will be added to all Entities as they are imported.
 

@@ -272,7 +272,7 @@ const App = () => {
                 icon={"create"}
                 title={"Structured Metadata"}
                 description={
-                  "Define reusable Templates once and apply consistent Attribute structures across every Entity in your workspace."
+                  "Define reusable Attributes once and apply consistent metadata structures across every Entity in your workspace."
                 }
               />
               <FeatureCard
@@ -300,7 +300,7 @@ const App = () => {
                 icon={"clock"}
                 title={"Version History"}
                 description={
-                  "Every change is tracked. Browse the full edit history of any Entity, Project, or Template and restore earlier versions whenever needed."
+                  "Every change is tracked. Browse the full edit history of any Entity, Project, or Attribute and restore earlier versions whenever needed."
                 }
               />
               <FeatureCard
@@ -373,9 +373,9 @@ const App = () => {
               <FeatureCard
                 accent={"ai"}
                 icon={"lightning"}
-                title={"Template Matching"}
+                title={"Attribute Matching"}
                 description={
-                  "Name and describe a new Entity and Metadatify will suggest the best-fit metadata Template from your library, keeping Attribute structures consistent across similar Entities."
+                  "Name and describe a new Entity and Metadatify will suggest the best-fit metadata Attribute from your Workspace, keeping Attribute structures consistent across similar Entities."
                 }
               />
             </Flex>
@@ -425,7 +425,7 @@ const App = () => {
                   <Icon name={"serv_managed_hosted"} size={"md"} color={"blue.600"} />
                 </Flex>
                 <Text fontWeight={"bold"}>Managed Hosting</Text>
-                <Text>Sign in and start building your metadata library right away. No setup required.</Text>
+                <Text>Sign in and start collating your metadata right away. No setup required.</Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link color={"blue.600"} href={"https://app.metadatify.com"} isExternal>

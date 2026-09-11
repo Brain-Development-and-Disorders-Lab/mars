@@ -64,7 +64,7 @@ export const STYLES = {
       icon: "#2FBF9D",
     },
   },
-  template: {
+  attribute: {
     color: {
       default: "#8A63E8",
       light: "#F2ECFF",
@@ -133,7 +133,7 @@ export const STYLES = {
       default: "#4F83F1",
     },
   },
-  relationship: {
+  link: {
     parent: "#4F83F1",
     child: "#2FBF9D",
     general: "#8A63E8",

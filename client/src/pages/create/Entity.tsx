@@ -28,14 +28,14 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 import TagActor from "@components/TagActor";
 import DialogAddAttribute from "@components/DialogAddAttribute";
-import Relationships from "@components/Relationships";
-import AddRelationshipsDialog from "@components/DialogAddRelationship";
+import DialogAddLinks from "@components/DialogAddLinks";
+import Links from "@components/Links";
 import Linky from "@components/Linky";
 import { DialogUnsavedChanges } from "@components/DialogUnsavedChanges";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { AttributeModel, IdentifierFormatModel, IGenericItem, IRelationship, ResponseData } from "@types";
+import { AttributeModel, IdentifierFormatModel, IGenericItem, ILink, ResponseData } from "@types";
 
 // Utility functions and libraries
 import {
@@ -72,10 +72,11 @@ const Entity = () => {
   // Permissions
   const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
-  const [pageState, setPageState] = useState("start" as "start" | "attributes" | "relationships");
+  const [pageState, setPageState] = useState("start" as "start" | "project" | "links" | "attributes");
   const pageSteps = [
     { title: "Start", description: "Basic information" },
-    { title: "Relationships", description: "Relationships between Entities" },
+    { title: "Projects", description: "" },
+    { title: "Links", description: "Links between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
   const [pageStep, setPageStep] = useState(0);
@@ -90,7 +91,7 @@ const Entity = () => {
   const cancelBlockerRef = useRef(null);
 
   const [projects, setProjects] = useState([] as IGenericItem[]);
-  const [templates, setTemplates] = useState([] as AttributeModel[]);
+  const [attributes, setAttributes] = useState([] as AttributeModel[]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState("");
@@ -136,8 +137,8 @@ const Entity = () => {
     }
   };
 
-  const [relationships, setRelationships] = useState([] as IRelationship[]);
-  const [addRelationshipsOpen, setAddRelationshipsOpen] = useState(false);
+  const [links, setLinks] = useState([] as ILink[]);
+  const [addLinksOpen, setAddLinksOpen] = useState(false);
   const [selectedAttributes, setSelectedAttributes] = useState([] as AttributeModel[]);
   const [addAttributesOpen, setAddAttributesOpen] = useState(false);
 
@@ -176,7 +177,7 @@ const Entity = () => {
         name
         description
       }
-      templates {
+      attributes {
         _id
         name
         description
@@ -192,7 +193,7 @@ const Entity = () => {
   `;
   const { loading, error, data } = useQuery<{
     projects: IGenericItem[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
   }>(GET_CREATE_ENTITIES_DATA, { fetchPolicy: "network-only" });
 
   const GET_COUNTER_CURRENT = gql`
@@ -236,7 +237,7 @@ const Entity = () => {
 
   useEffect(() => {
     if (data?.projects) setProjects(data.projects);
-    if (data?.templates) setTemplates(data.templates);
+    if (data?.attributes) setAttributes(data.attributes);
   }, [data]);
 
   useEffect(() => {
@@ -264,13 +265,17 @@ const Entity = () => {
 
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
-      posthog.capture("client.create.entity_relationships");
-      setPageState("relationships");
+      posthog.capture("client.create.entity_project");
+      setPageState("project");
       setPageStep(1);
-    } else if (_.isEqual("relationships", pageState)) {
+    } else if (_.isEqual("project", pageState)) {
+      posthog.capture("client.create.entity_links");
+      setPageState("links");
+      setPageStep(2);
+    } else if (_.isEqual("links", pageState)) {
       posthog.capture("client.create.entity_attributes");
       setPageState("attributes");
-      setPageStep(2);
+      setPageStep(3);
     } else if (_.isEqual("attributes", pageState)) {
       posthog.capture("client.create.entity_finished");
       setIsSubmitting(true);
@@ -316,7 +321,7 @@ const Entity = () => {
             created,
             archived: false,
             description,
-            relationships,
+            links,
             projects: selectedProjects,
             attributes: selectedAttributes,
             attachments: [],
@@ -332,14 +337,18 @@ const Entity = () => {
   };
 
   const onPageBack = () => {
-    if (_.isEqual("relationships", pageState)) {
+    if (_.isEqual("project", pageState)) {
       posthog.capture("client.create.entity_start");
       setPageState("start");
       setPageStep(0);
-    } else if (_.isEqual("attributes", pageState)) {
-      posthog.capture("client.create.entity_relationships");
-      setPageState("relationships");
+    } else if (_.isEqual("links", pageState)) {
+      posthog.capture("client.create.entity_project");
+      setPageState("project");
       setPageStep(1);
+    } else if (_.isEqual("attributes", pageState)) {
+      posthog.capture("client.create.entity_links");
+      setPageState("links");
+      setPageStep(2);
     }
   };
 
@@ -571,8 +580,63 @@ const Entity = () => {
           </Flex>
         )}
 
-        {/* Relationships page */}
-        {_.isEqual("relationships", pageState) && (
+        {/* Project page */}
+        {_.isEqual("project", pageState) && (
+          <Flex direction={"column"} p={"1"} gap={"1"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
+            >
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                  Add to a Project
+                </Text>
+              </Flex>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                Projects group related Entities together for easier discovery and sharing, you can add this Entity to a
+                Project later from its page if you're not ready yet.
+              </Text>
+              <CheckboxGroup
+                value={selectedProjects}
+                onValueChange={(event: string[]) => {
+                  if (event) setSelectedProjects([...event]);
+                }}
+              >
+                <Stack gap={"1"} direction={"column"}>
+                  {projects.length > 0 ? (
+                    projects.map((project) => (
+                      <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Checkbox.Label>
+                          <Linky id={project._id} type={"projects"} />
+                        </Checkbox.Label>
+                      </Checkbox.Root>
+                    ))
+                  ) : (
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>No Projects</EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
+                  )}
+                </Stack>
+              </CheckboxGroup>
+            </Flex>
+          </Flex>
+        )}
+
+        {/* Links page */}
+        {_.isEqual("links", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
             <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
               <Flex
@@ -588,7 +652,7 @@ const Entity = () => {
                   <Flex direction={"row"} gap={"1"} align={"center"}>
                     <Icon size={"xs"} name={"graph"} color={STYLES.font.secondaryHeader.color} />
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                      Relationships
+                      Links
                     </Text>
                   </Flex>
                   <Button
@@ -596,68 +660,20 @@ const Entity = () => {
                     size={"xs"}
                     rounded={"md"}
                     colorPalette={"green"}
-                    onClick={() => setAddRelationshipsOpen(true)}
+                    onClick={() => setAddLinksOpen(true)}
                   >
                     Add
                     <Icon name={"add"} size={"xs"} />
                   </Button>
                 </Flex>
-                <Relationships relationships={relationships} setRelationships={setRelationships} viewOnly={false} />
-                <AddRelationshipsDialog
-                  open={addRelationshipsOpen}
-                  onClose={() => setAddRelationshipsOpen(false)}
+                <Links links={links} setLinks={setLinks} viewOnly={false} />
+                <DialogAddLinks
+                  open={addLinksOpen}
+                  onClose={() => setAddLinksOpen(false)}
                   sourceName={name}
-                  existingRelationships={relationships}
-                  onAdd={(added) => setRelationships([...relationships, ...added])}
+                  existingLinks={links}
+                  onAdd={(added: ILink[]) => setLinks([...links, ...added])}
                 />
-              </Flex>
-            </Flex>
-
-            <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={STYLES.border.style}
-                borderColor={STYLES.border.color}
-                bg={STYLES.surface.card}
-              >
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                    Projects
-                  </Text>
-                </Flex>
-                <CheckboxGroup
-                  value={selectedProjects}
-                  onValueChange={(event: string[]) => {
-                    if (event) setSelectedProjects([...event]);
-                  }}
-                >
-                  <Stack gap={"1"} direction={"column"}>
-                    {projects.length > 0 ? (
-                      projects.map((project) => (
-                        <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
-                          <Checkbox.HiddenInput />
-                          <Checkbox.Control />
-                          <Checkbox.Label>
-                            <Linky id={project._id} type={"projects"} />
-                          </Checkbox.Label>
-                        </Checkbox.Root>
-                      ))
-                    ) : (
-                      <EmptyState.Root>
-                        <EmptyState.Content>
-                          <EmptyState.Indicator>
-                            <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
-                          </EmptyState.Indicator>
-                          <EmptyState.Description>No Projects</EmptyState.Description>
-                        </EmptyState.Content>
-                      </EmptyState.Root>
-                    )}
-                  </Stack>
-                </CheckboxGroup>
               </Flex>
             </Flex>
           </Flex>
@@ -668,7 +684,7 @@ const Entity = () => {
           <Flex direction={"column"} gap={"2"} p={"1"}>
             <CreateEntityAttributesTable
               attributes={selectedAttributes}
-              templates={templates}
+              availableAttributes={attributes}
               onUpdate={onAttributeUpdate}
               onRemove={removeAttribute}
               onAddClick={() => setAddAttributesOpen(true)}
@@ -678,7 +694,7 @@ const Entity = () => {
               open={addAttributesOpen}
               onClose={() => setAddAttributesOpen(false)}
               owner={owner}
-              templates={templates}
+              attributes={attributes}
               entityName={name}
               entityDescription={description}
               onAdd={(attribute) => setSelectedAttributes([...selectedAttributes, attribute])}
@@ -789,6 +805,39 @@ const Entity = () => {
                         align={"start"}
                         p={"2"}
                         rounded={"md"}
+                        bg={"purple.50"}
+                        border={"1px solid"}
+                        borderColor={"purple.100"}
+                      >
+                        <Flex
+                          w={"18px"}
+                          h={"18px"}
+                          rounded={"full"}
+                          bg={"purple.400"}
+                          align={"center"}
+                          justify={"center"}
+                          shrink={"0"}
+                          mt={"0.5"}
+                        >
+                          <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
+                            2
+                          </Text>
+                        </Flex>
+                        <Flex direction={"column"} gap={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Project - Optional Grouping
+                          </Text>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                            Optionally add this Entity to one or more Projects, or skip and organise it later.
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        align={"start"}
+                        p={"2"}
+                        rounded={"md"}
                         bg={"status.warning.subtle"}
                         border={"1px solid"}
                         borderColor={"orange.100"}
@@ -804,15 +853,15 @@ const Entity = () => {
                           mt={"0.5"}
                         >
                           <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
-                            2
+                            3
                           </Text>
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
                           <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            Relationships - Link to Other Entities
+                            Links - Relationships with other Entities
                           </Text>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                            Define how this Entity relates to others and assign it to Projects.
+                            Define how this Entity relates to other Entities.
                           </Text>
                         </Flex>
                       </Flex>
@@ -837,7 +886,7 @@ const Entity = () => {
                           mt={"0.5"}
                         >
                           <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
-                            3
+                            4
                           </Text>
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
@@ -845,7 +894,7 @@ const Entity = () => {
                             Attributes - Attach Metadata
                           </Text>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                            Select Attribute Templates and add Values to describe this Entity's metadata.
+                            Select Attributes and add Values to describe this Entity's metadata.
                           </Text>
                         </Flex>
                       </Flex>

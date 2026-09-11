@@ -97,7 +97,6 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   entity: FaCube,
   project: FaLayerGroup,
   attribute: FaTable,
-  template: FaTable,
 
   // Signal and action icons
   activity: FaChartLine,
@@ -140,7 +139,7 @@ export const SYSTEM_ICONS: Record<string, IconType> = {
   graph: FaSitemap,
   clock: FaClockRotateLeft,
   rewind: FaRotateLeft,
-  link: FaLink,
+  url: FaLink,
   scan: FaMobileScreen,
   lock: FaLock,
   exit: FaPowerOff,

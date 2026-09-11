@@ -32,8 +32,8 @@ import consola from "consola";
 
 // Pages
 // Page type - View
-import Template from "@pages/view/Template";
-import Templates from "@pages/view/Templates";
+import Attribute from "@pages/view/Attribute";
+import Attributes from "@pages/view/Attributes";
 import Project from "@pages/view/Project";
 import Projects from "@pages/view/Projects";
 import Entity from "@pages/view/Entity";
@@ -44,7 +44,7 @@ import Activity from "@pages/view/Activity";
 
 // Page type - Create
 import CreateWorkspace from "@pages/create/Workspace";
-import CreateTemplate from "@pages/create/Template";
+import CreateAttribute from "@pages/create/Attribute";
 import CreateEntity from "@pages/create/Entity";
 import CreateProject from "@pages/create/Project";
 
@@ -66,8 +66,8 @@ import { Entities as PublicEntities } from "@pages/public/view/Entities";
 import { Entity as PublicEntity } from "@pages/public/view/Entity";
 import { Projects as PublicProjects } from "@pages/public/view/Projects";
 import { Project as PublicProject } from "@pages/public/view/Project";
-import { Templates as PublicTemplates } from "@pages/public/view/Templates";
-import { Template as PublicTemplate } from "@pages/public/view/Template";
+import { Attributes as PublicAttributes } from "@pages/public/view/Attributes";
+import { Attribute as PublicAttribute } from "@pages/public/view/Attribute";
 
 // Providers
 import { WorkspaceProvider } from "@hooks/useWorkspace";
@@ -125,7 +125,7 @@ const App = (): ReactElement => {
             <Route path={"/"} element={<Dashboard />} />
 
             {/* Create routes */}
-            <Route path={"/create/template"} element={<CreateTemplate />} />
+            <Route path={"/create/attribute"} element={<CreateAttribute />} />
             <Route path={"/create/project"} element={<CreateProject />} />
             <Route path={"/create/entity"} element={<CreateEntity />} />
 
@@ -146,10 +146,10 @@ const App = (): ReactElement => {
               <Route path={":id"} element={<Project />} />
             </Route>
 
-            {/* Templates routes */}
-            <Route path={"/templates"} element={<Templates />} />
-            <Route path={"templates"}>
-              <Route path={":id"} element={<Template />} />
+            {/* Attributes routes */}
+            <Route path={"/attributes"} element={<Attributes />} />
+            <Route path={"attributes"}>
+              <Route path={":id"} element={<Attribute />} />
             </Route>
 
             {/* Other routes */}
@@ -168,8 +168,8 @@ const App = (): ReactElement => {
           <Route path={"/public/:id/entities/:entity"} element={<PublicEntity />} />
           <Route path={"/public/:id/projects"} element={<PublicProjects />} />
           <Route path={"/public/:id/projects/:project"} element={<PublicProject />} />
-          <Route path={"/public/:id/templates"} element={<PublicTemplates />} />
-          <Route path={"/public/:id/templates/:template"} element={<PublicTemplate />} />
+          <Route path={"/public/:id/attributes"} element={<PublicAttributes />} />
+          <Route path={"/public/:id/attributes/:attribute"} element={<PublicAttribute />} />
         </Route>
       </Route>,
     ),

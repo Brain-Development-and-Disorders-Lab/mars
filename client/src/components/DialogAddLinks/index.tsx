@@ -10,29 +10,18 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { IGenericItem, IRelationship, DialogAddRelationshipProps, RelationshipType } from "@types";
+import { IGenericItem, ILink, DialogAddLinksProps, LinkType } from "@types";
 
 // Utility imports
 import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
-import {
-  RELATIONSHIP_TYPE_ARROW_COLOR,
-  RELATIONSHIP_TYPE_ARROW_ICON,
-  RELATIONSHIP_TYPE_PALETTE,
-} from "@components/Relationships";
+import { LINK_TYPE_ARROW_COLOR, LINK_TYPE_ARROW_ICON, LINK_TYPE_PALETTE } from "@components/Links";
 
-const DialogAddRelationship = ({
-  open,
-  onClose,
-  sourceId,
-  sourceName,
-  existingRelationships,
-  onAdd,
-}: DialogAddRelationshipProps) => {
-  const [staged, setStaged] = useState<IRelationship[]>([]);
-  const [selectedType, setSelectedType] = useState<RelationshipType>("general");
+const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, onAdd }: DialogAddLinksProps) => {
+  const [staged, setStaged] = useState<ILink[]>([]);
+  const [selectedType, setSelectedType] = useState<LinkType>("general");
   const [selectedTarget, setSelectedTarget] = useState<IGenericItem>({} as IGenericItem);
 
   const reset = () => {
@@ -46,35 +35,35 @@ const DialogAddRelationship = ({
     onClose();
   };
 
-  const stageRelationship = () => {
+  const stageLink = () => {
     if (_.isUndefined(selectedTarget._id)) return;
 
-    // Filter and handle insular relationships
+    // Filter and handle insular links
     if (sourceId && selectedTarget._id === sourceId) {
       toaster.create({
-        title: "Invalid Relationship",
-        description: "Cannot add a relationship to itself",
+        title: "Invalid Link",
+        description: "Cannot add a link to itself",
         type: "warning",
         duration: 2000,
         closable: true,
       });
       return;
     }
-    const candidate: IRelationship = {
+    const candidate: ILink = {
       source: { _id: sourceId || "", name: sourceName },
       target: { _id: selectedTarget._id, name: selectedTarget.name },
       type: selectedType,
     };
 
-    // Filter and handle duplicate relationships
-    const isDuplicate = [...existingRelationships, ...staged].some(
+    // Filter and handle duplicate links
+    const isDuplicate = [...existingLinks, ...staged].some(
       (r) =>
         r.source._id === candidate.source._id && r.target._id === candidate.target._id && r.type === candidate.type,
     );
     if (isDuplicate) {
       toaster.create({
-        title: "Invalid Relationship",
-        description: "This relationship already exists",
+        title: "Invalid Link",
+        description: "This link already exists",
         type: "warning",
         duration: 2000,
         closable: true,
@@ -100,18 +89,19 @@ const DialogAddRelationship = ({
         if (!event.open) handleClose();
       }}
       placement={"center"}
+      size={"xl"}
       closeOnEscape
       closeOnInteractOutside
     >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content w={["lg", "xl", "2xl"]}>
+          <Dialog.Content w={["xl", "2xl"]}>
             <Dialog.Header p={"2"} bg={"entity.light"} color={"entity.dark"} roundedTop={"md"}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"graph"} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  Add Relationships
+                  Add Links
                 </Text>
               </Flex>
               <Dialog.CloseTrigger asChild>
@@ -139,9 +129,9 @@ const DialogAddRelationship = ({
                     <Input size={"xs"} rounded={"md"} value={sourceName} readOnly disabled bg={"white"} />
                   </Flex>
                   <Icon
-                    name={RELATIONSHIP_TYPE_ARROW_ICON[selectedType]}
+                    name={LINK_TYPE_ARROW_ICON[selectedType]}
                     size={"sm"}
-                    color={RELATIONSHIP_TYPE_ARROW_COLOR[selectedType]}
+                    color={LINK_TYPE_ARROW_COLOR[selectedType]}
                   />
                   <Flex direction={"column"} gap={"1"} flex={"1"} minW={0}>
                     <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
@@ -152,46 +142,116 @@ const DialogAddRelationship = ({
                 </Flex>
 
                 {/* Type selector and stage button */}
-                <Flex direction={"row"} align={"center"} gap={"2"} p={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={STYLES.font.secondaryHeader.color}
-                    flexShrink={0}
-                  >
-                    Type
-                  </Text>
-                  <Flex gap={"1"}>
-                    {(["general", "parent", "child"] as RelationshipType[]).map((type) => (
-                      <Button
-                        key={type}
-                        size={"xs"}
-                        rounded={"md"}
-                        variant={selectedType === type ? "solid" : "outline"}
-                        colorPalette={selectedType === type ? RELATIONSHIP_TYPE_PALETTE[type] : "gray"}
-                        bg={selectedType === type ? undefined : "white"}
-                        color={selectedType === type ? undefined : "black"}
-                        onClick={() => setSelectedType(type)}
-                      >
-                        {_.capitalize(type)}
-                      </Button>
-                    ))}
+                <Flex direction={"column"} p={"1"} gap={"2"} w={"100%"}>
+                  <Flex direction={"row"} align={"center"} gap={"2"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={STYLES.font.secondaryHeader.color}
+                      flexShrink={0}
+                    >
+                      Link Type
+                    </Text>
+                    <Flex gap={"1"}>
+                      {(["general", "parent", "child"] as LinkType[]).map((type) => (
+                        <Button
+                          key={type}
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={selectedType === type ? "solid" : "outline"}
+                          colorPalette={selectedType === type ? LINK_TYPE_PALETTE[type] : "gray"}
+                          bg={selectedType === type ? undefined : "white"}
+                          color={selectedType === type ? undefined : "black"}
+                          onClick={() => setSelectedType(type)}
+                        >
+                          {_.capitalize(type)}
+                        </Button>
+                      ))}
+                    </Flex>
+                    <Spacer />
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      disabled={_.isUndefined(selectedTarget._id)}
+                      onClick={stageLink}
+                      flexShrink={0}
+                    >
+                      Create Link
+                      <Icon name={"add"} size={"xs"} />
+                    </Button>
                   </Flex>
-                  <Spacer />
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    disabled={_.isUndefined(selectedTarget._id)}
-                    onClick={stageRelationship}
-                    flexShrink={0}
-                  >
-                    Create
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
+
+                  <Flex direction={"row"} align={"center"} gap={"1"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={STYLES.font.secondaryHeader.color}
+                      flexShrink={0}
+                    >
+                      Link Description
+                    </Text>
+                    {selectedType === "general" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is related to
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                    {selectedType === "parent" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is the parent of
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                    {selectedType === "child" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is the child of
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                  </Flex>
                 </Flex>
 
-                {/* Staged relationships list */}
+                {/* Staged links list */}
                 <Flex
                   direction={"column"}
                   rounded={"md"}
@@ -218,14 +278,14 @@ const DialogAddRelationship = ({
                           </Text>
                         </Tooltip>
                         <Icon
-                          name={RELATIONSHIP_TYPE_ARROW_ICON[rel.type]}
+                          name={LINK_TYPE_ARROW_ICON[rel.type]}
                           size={"xs"}
-                          color={RELATIONSHIP_TYPE_ARROW_COLOR[rel.type]}
+                          color={LINK_TYPE_ARROW_COLOR[rel.type]}
                         />
                         <Flex flex={"1"} minW={0}>
                           <Linky id={rel.target._id} type={"entities"} truncate={18} />
                         </Flex>
-                        <Tag.Root size={"sm"} colorPalette={RELATIONSHIP_TYPE_PALETTE[rel.type]} flexShrink={0}>
+                        <Tag.Root size={"sm"} colorPalette={LINK_TYPE_PALETTE[rel.type]} flexShrink={0}>
                           <Tag.Label fontSize={"xs"}>{_.capitalize(rel.type)}</Tag.Label>
                         </Tag.Root>
                         <Button
@@ -241,10 +301,18 @@ const DialogAddRelationship = ({
                       </Flex>
                     ))
                   ) : (
-                    <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"} grow={"1"}>
+                    <Flex
+                      direction={"column"}
+                      gap={"3"}
+                      align={"center"}
+                      justify={"center"}
+                      p={"4"}
+                      grow={"1"}
+                      minH={"240px"}
+                    >
                       <Icon name={"graph"} size={"md"} color={"gray.300"} />
                       <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
-                        No Relationships
+                        No Links
                       </Text>
                     </Flex>
                   )}
@@ -266,7 +334,7 @@ const DialogAddRelationship = ({
                   onClick={confirm}
                   disabled={staged.length === 0}
                 >
-                  Add {staged.length} {staged.length === 1 ? "Relationship" : "Relationships"}
+                  Add {staged.length} {staged.length === 1 ? "Link" : "Links"}
                   <Icon name={"add"} size={"xs"} />
                 </Button>
               </Flex>
@@ -278,4 +346,4 @@ const DialogAddRelationship = ({
   );
 };
 
-export default DialogAddRelationship;
+export default DialogAddLinks;

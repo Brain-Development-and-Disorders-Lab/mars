@@ -11,9 +11,7 @@
   "updatedAt": "2022-05-19T22:34:29.501Z",
   "lastLogin": "2022-05-19T22:34:29.501Z",
   "hasSeenWalkthrough": false,
-  "api_keys": [
-    "<API key>"
-  ],
+  "api_keys": ["<API key>"],
   "account_orcid": "<User ORCiD>",
   "role": "user",
   "features": {

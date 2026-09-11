@@ -12,7 +12,7 @@ import { getAuth } from "../../../../server/test/helpers";
 // Models
 import { Entities } from "../../../../server/src/models/Entities";
 import { Projects } from "../../../../server/src/models/Projects";
-import { Templates } from "../../../../server/src/models/Templates";
+import { Attributes } from "../../../../server/src/models/Attributes";
 import { Workspaces } from "../../../../server/src/models/Workspaces";
 import { User } from "../../../../server/src/models/User";
 
@@ -43,7 +43,7 @@ export const createTestEntity = async (
     created: dayjs("2023-10-01").toISOString(),
     owner: owner,
     description: "Test Entity",
-    relationships: [],
+    links: [],
     projects: [],
     attributes: [
       {
@@ -112,21 +112,21 @@ export const createTestProject = async (
 };
 
 /**
- * Create a Template for use in testing
- * @param {string} name The name of the Template to create
- * @param {string} owner The owner of the Template
- * @param {string} workspace The _id of the Workspace to contain the Template
- * @param {boolean} archived Whether the Template should start archived
- * @return {Promise<string>} Created Template identifier
+ * Create an Attribute for use in testing
+ * @param {string} name The name of the Attribute to create
+ * @param {string} owner The owner of the Attribute
+ * @param {string} workspace The _id of the Workspace to contain the Attribute
+ * @param {boolean} archived Whether the Attribute should start archived
+ * @return {Promise<string>} Created Attribute identifier
  */
-export const createTestTemplate = async (
+export const createTestAttribute = async (
   name: string,
   owner: string,
   workspace: string,
   archived = false,
 ): Promise<string> => {
   await connect();
-  const template: IAttribute = {
+  const attribute: IAttribute = {
     archived: archived,
     name: name,
     description: "Test Attribute",
@@ -136,14 +136,14 @@ export const createTestTemplate = async (
       { _id: "vTest01", name: "Test Value 01", type: "number", data: "10" },
     ],
   };
-  const result: ResponseData<string> = await Templates.create(template);
+  const result: ResponseData<string> = await Attributes.create(attribute);
   if (!result.success) {
     await disconnect();
-    throw new Error("Could not create Template");
+    throw new Error("Could not create Attribute");
   }
 
-  // Add the Template to the Workspace
-  await Workspaces.addTemplate(workspace, result.data);
+  // Add the Attribute to the Workspace
+  await Workspaces.addAttribute(workspace, result.data);
   await disconnect();
   return result.data;
 };
@@ -169,7 +169,7 @@ export const createTestWorkspace = async (
     isPublic: false,
     entities: [],
     projects: [],
-    templates: [],
+    attributes: [],
     activity: [],
   };
 
@@ -263,9 +263,9 @@ export const switchWorkspace = async (page: Page, workspace: string): Promise<vo
 };
 
 /**
- * Navigate to a section (Entities, Projects, Templates)
+ * Navigate to a section (Entities, Projects, Attribute)
  */
-export const navigateToSection = async (page: Page, section: "Entities" | "Projects" | "Templates"): Promise<void> => {
+export const navigateToSection = async (page: Page, section: "Entities" | "Projects" | "Attributes"): Promise<void> => {
   await page.goto("/");
   await page.click(`button:has-text("${section}")`);
   await page.waitForLoadState("networkidle");
@@ -277,7 +277,7 @@ export const navigateToSection = async (page: Page, section: "Entities" | "Proje
 export const openItemFromTable = async (
   page: Page,
   itemName: string,
-  viewButtonLabel: "View Entity" | "View Project" | "View Template",
+  viewButtonLabel: "View Entity" | "View Project" | "View Attribute",
 ): Promise<void> => {
   const table = page.getByTestId("data-table-scroll-container");
   await table.waitFor({ state: "visible", timeout: 5000 });
@@ -339,7 +339,7 @@ export const openItemFromTable = async (
 
   // Wait for the client-side route transition to the detail page to finish
   const urlSegment =
-    viewButtonLabel === "View Entity" ? "entities" : viewButtonLabel === "View Project" ? "projects" : "templates";
+    viewButtonLabel === "View Entity" ? "entities" : viewButtonLabel === "View Project" ? "projects" : "attributes";
   await page.waitForURL(new RegExp(`/${urlSegment}/`), { timeout: 10000 });
   await page.getByRole("heading", { name: itemName, level: 2 }).waitFor({ state: "visible", timeout: 10000 });
   await page.waitForLoadState("networkidle");

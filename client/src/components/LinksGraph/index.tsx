@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 
 // Existing and custom components
-import { Button, Flex, Tag, Text, useToken } from "@chakra-ui/react";
+import { Flex, useToken } from "@chakra-ui/react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -14,16 +14,15 @@ import ReactFlow, {
   Edge,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import Icon from "@components/Icon";
-import Tooltip from "@components/Tooltip";
+import LinksGraphNode from "@components/LinksGraphNode";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { EntityNode } from "@types";
+import { EntityNode, ILink, LinksGraphNodeInput } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useApolloClient } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -32,29 +31,25 @@ import ELK, { ElkNode } from "elkjs";
 // Variables
 import { STYLES } from "@variables";
 
-const NODE_W = 185;
-const NODE_H = 85;
+const NODE_W = 220;
+const NODE_H = 148;
 
-const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string) => void }) => {
+const LinksGraph = (props: { id: string; entityNavigateHook: (id: string) => void }) => {
+  const client = useApolloClient();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // ReactFlow renders into SVG/inline style objects, where Chakra token
-  // strings don't resolve, so the actual CSS values are resolved once here
-  // via useToken, keeping STYLES as the single source for these colors.
-  const [edgeParent, edgeChild, edgeGeneral, nodePrimary, nodeSecondary, nodePrimaryBg, nodeCanvasBg, canvasDot] =
-    useToken("colors", [
-      "relationship.parent",
-      "relationship.child",
-      "relationship.general",
-      "graph.primary",
-      "graph.secondary",
-      "graph.primaryBg",
-      "surface.canvas",
-      "chart.canvasDot",
-    ]);
+  // Resolve Chakra color tokens to raw CSS values for ReactFlow's inline styles
+  const [edgeParent, edgeChild, edgeGeneral, nodeSecondary, nodeCanvasBg, canvasDot] = useToken("colors", [
+    "link.parent",
+    "link.child",
+    "link.general",
+    "graph.secondary",
+    "surface.canvas",
+    "chart.canvasDot",
+  ]);
   const edgeColors: Record<string, string> = { parent: edgeParent, child: edgeChild, general: edgeGeneral };
 
   const GET_ENTITY_DATA = gql`
@@ -62,7 +57,14 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       entity(_id: $_id) {
         _id
         name
-        relationships {
+        owner
+        created
+        archived
+        projects
+        attributes {
+          _id
+        }
+        links {
           target {
             _id
             name
@@ -77,62 +79,40 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     }
   `;
 
-  const [getEntity] = useLazyQuery<{ entity: EntityNode }>(GET_ENTITY_DATA);
-
   const getEntityData = async (id: string): Promise<EntityNode> => {
-    const result = await getEntity({ variables: { _id: id } });
+    const result = await client.query<{ entity: EntityNode }>({ query: GET_ENTITY_DATA, variables: { _id: id } });
     if (!result.data?.entity) throw new Error(`Unable to retrieve Entity data for ID: ${id}`);
     return result.data.entity;
   };
 
+  /** Map a fetched Entity to the details its graph node needs to render */
+  const toNodeInput = (entity: EntityNode, isPrimary: boolean): LinksGraphNodeInput => ({
+    id: entity._id,
+    name: entity.name,
+    isPrimary,
+    linkCount: entity.links.length,
+    owner: entity.owner,
+    created: entity.created,
+    projectCount: entity.projects?.length,
+    attributeCount: entity.attributes?.length,
+    archived: entity.archived,
+  });
+
   /** Label rendered inside each graph node */
-  const createLabel = (id: string, name: string, isPrimary: boolean, relCount?: number): React.JSX.Element => (
-    <Flex direction={"column"} w={"100%"} h={"100%"} justify={"center"} gap={"1.5"} px={"1"}>
-      <Flex align={"center"} gap={"1.5"} w={"100%"}>
-        <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
-        <Tooltip content={name} disabled={name.length < 22}>
-          <Text fontWeight={"semibold"} fontSize={"xs"} truncate>
-            {_.truncate(name, { length: 22 })}
-          </Text>
-        </Tooltip>
-      </Flex>
-      <Flex align={"center"} w={"100%"} gap={"1"}>
-        {relCount !== undefined && (
-          <Text fontSize={"xs"} color={"text.subtle"}>
-            {relCount} relationship{relCount !== 1 ? "s" : ""}
-          </Text>
-        )}
-        {isPrimary ? (
-          <Tag.Root size={"sm"} colorPalette={"entity"} ml={"auto"} flexShrink={0}>
-            <Tag.Label>Current</Tag.Label>
-          </Tag.Root>
-        ) : (
-          <Button
-            size={"2xs"}
-            ml={"auto"}
-            flexShrink={0}
-            onClick={(e) => {
-              e.stopPropagation();
-              props.entityNavigateHook(id);
-            }}
-          >
-            View <Icon name={"a_right"} size={"xs"} />
-          </Button>
-        )}
-      </Flex>
-    </Flex>
+  const buildLabel = (input: LinksGraphNodeInput): React.JSX.Element => (
+    <LinksGraphNode {...input} onView={props.entityNavigateHook} />
   );
 
   /** Build a ReactFlow node */
-  const buildNode = (id: string, name: string, isPrimary: boolean, relCount?: number, dashed = false): Node => ({
-    id,
+  const buildNode = (input: LinksGraphNodeInput): Node => ({
+    id: input.id,
     type: "default",
-    data: { label: createLabel(id, name, isPrimary, relCount) },
+    data: { label: buildLabel(input) },
     position: { x: 0, y: 0 },
     style: {
-      border: `2px ${dashed ? "dashed" : "solid"}`,
-      borderColor: isPrimary ? nodePrimary : nodeSecondary,
-      backgroundColor: isPrimary ? nodePrimaryBg : nodeCanvasBg,
+      border: "2px solid",
+      borderColor: nodeSecondary,
+      backgroundColor: nodeCanvasBg,
       width: `${NODE_W}px`,
       height: `${NODE_H}px`,
       borderRadius: "6px",
@@ -140,14 +120,22 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     },
   });
 
-  /** Build a ReactFlow edge with type-colored stroke and arrowhead */
-  const buildEdge = (source: string, target: string, type: string): Edge => ({
-    id: `${source}_${target}`,
-    source,
-    target,
-    markerEnd: type !== "general" ? { type: MarkerType.ArrowClosed, color: edgeColors[type] } : undefined,
-    style: { stroke: edgeColors[type], strokeWidth: 2 },
-  });
+  /** Build a ReactFlow edge, flipping "child" links so every edge flows parent to child */
+  const buildEdge = (source: string, target: string, type: string): Edge => {
+    const [from, to] = type === "child" ? [target, source] : [source, target];
+    return {
+      id: `${source}_${target}`,
+      source: from,
+      target: to,
+      label: type === "general" ? "Related to" : "Parent of",
+      labelStyle: { fill: edgeColors[type], fontWeight: 600, fontSize: 10 },
+      labelBgStyle: { fill: nodeCanvasBg, fillOpacity: 0.9 },
+      labelBgPadding: [4, 2],
+      labelBgBorderRadius: 4,
+      markerEnd: type !== "general" ? { type: MarkerType.ArrowClosed, color: edgeColors[type] } : undefined,
+      style: { stroke: edgeColors[type], strokeWidth: 2 },
+    };
+  };
 
   const generateLayout = async (layoutNodes: Node[], layoutEdges: Edge[]): Promise<ElkNode> => {
     const elk = new ELK();
@@ -169,21 +157,25 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       return pos?.x !== undefined && pos?.y !== undefined ? { ...node, position: { x: pos.x, y: pos.y } } : node;
     });
 
+  /** Fetch full details for every Entity a link points to that isn't already known */
+  const fetchNewTargets = (links: ILink[], knownIds: string[]): Promise<EntityNode[]> => {
+    const newIds = _.uniq(links.map((link) => link.target._id)).filter((id) => !knownIds.includes(id));
+    return Promise.all(newIds.map((id) => getEntityData(id)));
+  };
+
   const setupGraph = async () => {
     try {
       const entity = await getEntityData(props.id);
+      const targetEntities = await fetchNewTargets(entity.links, []);
 
-      // Use a Map to deduplicate nodes when multiple relationships reference the same target
       const nodesMap = new Map<string, Node>();
-      nodesMap.set(props.id, buildNode(props.id, entity.name, true, entity.relationships.length));
-      for (const rel of entity.relationships) {
-        if (!nodesMap.has(rel.target._id)) {
-          nodesMap.set(rel.target._id, buildNode(rel.target._id, rel.target.name, false));
-        }
+      nodesMap.set(props.id, buildNode(toNodeInput(entity, true)));
+      for (const targetEntity of targetEntities) {
+        nodesMap.set(targetEntity._id, buildNode(toNodeInput(targetEntity, false)));
       }
 
       const initialNodes = Array.from(nodesMap.values());
-      const initialEdges = entity.relationships.map((rel) => buildEdge(rel.source._id, rel.target._id, rel.type));
+      const initialEdges = entity.links.map((link) => buildEdge(link.source._id, link.target._id, link.type));
 
       const layout = await generateLayout(initialNodes, initialEdges);
       setNodes(applyLayout(layout, initialNodes));
@@ -192,7 +184,7 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
       toaster.create({
         title: "Graph Error",
         type: "error",
-        description: "Could not set up the relationship graph.",
+        description: "Could not set up the link graph.",
         duration: 4000,
         closable: true,
       });
@@ -206,38 +198,40 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
     let updatedNodes = _.cloneDeep(nodes);
     let updatedEdges = _.cloneDeep(edges);
 
-    // Reveal relationship count on the clicked node now that we have its data
+    // Reveal full details on the clicked node now that we have its data
     updatedNodes = updatedNodes.map((n) =>
-      n.id === node.id
-        ? { ...n, data: { label: createLabel(node.id, entity.name, false, entity.relationships.length) } }
-        : n,
+      n.id === node.id ? { ...n, data: { label: buildLabel(toNodeInput(entity, false)) } } : n,
     );
 
-    let addedCount = 0;
-    for (const rel of entity.relationships) {
-      if (!updatedNodes.some((n) => n.id === rel.target._id)) {
-        updatedNodes = [...updatedNodes, buildNode(rel.target._id, rel.target.name, false, undefined, true)];
-        addedCount++;
-      }
+    const newTargetEntities = await fetchNewTargets(
+      entity.links,
+      updatedNodes.map((n) => n.id),
+    );
+    for (const targetEntity of newTargetEntities) {
+      updatedNodes = [...updatedNodes, buildNode(toNodeInput(targetEntity, false))];
+    }
+    const addedCount = newTargetEntities.length;
+
+    for (const link of entity.links) {
       const edgeExists = updatedEdges.some(
         (e) =>
-          (e.source === rel.source._id && e.target === rel.target._id) ||
-          (e.source === rel.target._id && e.target === rel.source._id),
+          (e.source === link.source._id && e.target === link.target._id) ||
+          (e.source === link.target._id && e.target === link.source._id),
       );
       if (!edgeExists) {
-        updatedEdges = [...updatedEdges, buildEdge(rel.source._id, rel.target._id, rel.type)];
+        updatedEdges = [...updatedEdges, buildEdge(link.source._id, link.target._id, link.type)];
       }
     }
 
     if (addedCount > 0) {
       const layout = await generateLayout(updatedNodes, updatedEdges);
       updatedNodes = applyLayout(layout, updatedNodes);
-      if (!toaster.isVisible("toast-retrieved-relationships")) {
+      if (!toaster.isVisible("toast-retrieved-links")) {
         toaster.create({
-          id: "toast-retrieved-relationships",
-          title: "Retrieved relationships",
+          id: "toast-retrieved-links",
+          title: "Retrieved links",
           type: "success",
-          description: `Showing ${addedCount} new relationship${addedCount !== 1 ? "s" : ""} for "${entity.name}"`,
+          description: `Showing ${addedCount} new link${addedCount !== 1 ? "s" : ""} for "${entity.name}"`,
           duration: 4000,
           closable: true,
         });
@@ -298,6 +292,9 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            edgesUpdatable={false}
             attributionPosition={"bottom-right"}
             fitView
             fitViewOptions={{ padding: 0.2 }}
@@ -319,4 +316,4 @@ const RelationshipsGraph = (props: { id: string; entityNavigateHook: (id: string
   );
 };
 
-export default RelationshipsGraph;
+export default LinksGraph;

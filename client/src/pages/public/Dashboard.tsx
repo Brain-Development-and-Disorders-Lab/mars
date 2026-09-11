@@ -56,7 +56,7 @@ const GET_WORKSPACE = gql`
       timestamp
       entities
       projects
-      templates
+      attributes
     }
     projects(limit: $projectLimit, archived: $projectsArchived) {
       _id
@@ -66,7 +66,7 @@ const GET_WORKSPACE = gql`
       created
       entities
     }
-    templates {
+    attributes {
       _id
       owner
       name
@@ -107,19 +107,19 @@ export const Dashboard = () => {
   const [workspaceOwner, setWorkspaceOwner] = useState<string>("");
   const [workspaceEntityCount, setWorkspaceEntityCount] = useState<number>(0);
   const [workspaceProjectCount, setWorkspaceProjectCount] = useState<number>(0);
-  const [workspaceTemplateCount, setWorkspaceTemplateCount] = useState<number>(0);
+  const [workspaceAttributeCount, setWorkspaceAttributeCount] = useState<number>(0);
   const [workspaceEntities, setWorkspaceEntities] = useState<EntityModel[]>([]);
   const [workspaceProjects, setWorkspaceProjects] = useState(
     [] as { _id: string; name: string; description: string; created: string }[],
   );
-  const [workspaceTemplates, setWorkspaceTemplates] = useState<AttributeModel[]>([]);
+  const [workspaceAttributes, setWorkspaceAttributes] = useState<AttributeModel[]>([]);
 
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data } = useQuery<{
     workspace: WorkspaceModel;
     entities: { entities: EntityModel[]; total: number };
     projects: ProjectModel[];
-    templates: AttributeModel[];
+    attributes: AttributeModel[];
   }>(GET_WORKSPACE, {
     variables: {
       workspace: id,
@@ -144,7 +144,7 @@ export const Dashboard = () => {
       setWorkspaceOwner(data.workspace.owner);
       setWorkspaceEntityCount(data.workspace.entities?.length ?? 0);
       setWorkspaceProjectCount(data.workspace.projects?.length ?? 0);
-      setWorkspaceTemplateCount(data.workspace.templates?.length ?? 0);
+      setWorkspaceAttributeCount(data.workspace.attributes?.length ?? 0);
     }
     if (data?.entities) {
       setWorkspaceEntities(data.entities.entities);
@@ -152,8 +152,8 @@ export const Dashboard = () => {
     if (data?.projects) {
       setWorkspaceProjects(data.projects);
     }
-    if (data?.templates) {
-      setWorkspaceTemplates(data.templates);
+    if (data?.attributes) {
+      setWorkspaceAttributes(data.attributes);
     }
   }, [data]);
 
@@ -317,16 +317,16 @@ export const Dashboard = () => {
     }),
   ];
 
-  // Configure Template table
-  const templateTableColumnHelper = createColumnHelper<AttributeModel>();
-  const templateTableColumns = [
-    templateTableColumnHelper.accessor("name", {
+  // Configure Attribute table
+  const attributeTableColumnHelper = createColumnHelper<AttributeModel>();
+  const attributeTableColumns = [
+    attributeTableColumnHelper.accessor("name", {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
               <Flex gap={"1"} align={"center"}>
-                <Icon name={"template"} color={STYLES.template.color.icon} size={"xs"} />
+                <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                   {_.truncate(info.getValue(), { length: 48 })}
                 </Text>
@@ -338,7 +338,7 @@ export const Dashboard = () => {
               variant="subtle"
               colorPalette="gray"
               aria-label={"View Project"}
-              onClick={() => navigate(`/public/${id}/templates/${info.row.original._id}`)}
+              onClick={() => navigate(`/public/${id}/attributes/${info.row.original._id}`)}
             >
               View
               <Icon name={"a_right"} size={"xs"} />
@@ -351,12 +351,12 @@ export const Dashboard = () => {
         minWidth: 300,
       },
     }),
-    templateTableColumnHelper.accessor("owner", {
+    attributeTableColumnHelper.accessor("owner", {
       cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
-    templateTableColumnHelper.accessor("timestamp", {
+    attributeTableColumnHelper.accessor("timestamp", {
       cell: (info) => <CreatedCell value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
@@ -365,7 +365,7 @@ export const Dashboard = () => {
         maxWidth: 120,
       },
     }),
-    templateTableColumnHelper.accessor("description", {
+    attributeTableColumnHelper.accessor("description", {
       cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
@@ -373,7 +373,7 @@ export const Dashboard = () => {
         minWidth: 300,
       },
     }),
-    templateTableColumnHelper.accessor("values", {
+    attributeTableColumnHelper.accessor("values", {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.values}
@@ -545,7 +545,7 @@ export const Dashboard = () => {
                     h={"52px"}
                     w={"fit-content"}
                     border={STYLES.border.style}
-                    borderColor={STYLES.template.color.border}
+                    borderColor={STYLES.attribute.color.border}
                     rounded={"md"}
                     overflow={"hidden"}
                     flexShrink={0}
@@ -553,13 +553,13 @@ export const Dashboard = () => {
                     <Flex
                       align={"center"}
                       justify={"center"}
-                      bg={STYLES.template.color.light}
+                      bg={STYLES.attribute.color.light}
                       px={"1.5"}
                       h={"100%"}
                       borderRight={"1px solid"}
-                      borderColor={STYLES.template.color.border}
+                      borderColor={STYLES.attribute.color.border}
                     >
-                      <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+                      <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
                     </Flex>
                     <Flex
                       direction={"column"}
@@ -571,10 +571,10 @@ export const Dashboard = () => {
                       bg={"white"}
                     >
                       <Text fontSize={"sm"} fontWeight={"bold"} color={STYLES.font.secondaryHeader.color}>
-                        {workspaceTemplateCount}
+                        {workspaceAttributeCount}
                       </Text>
                       <Text fontSize={"xs"} fontWeight={"medium"} color={"text.faint"}>
-                        {workspaceTemplateCount === 1 ? "Template" : "Templates"}
+                        {workspaceAttributeCount === 1 ? "Attribute" : "Attributes"}
                       </Text>
                     </Flex>
                   </Flex>
@@ -709,7 +709,7 @@ export const Dashboard = () => {
           </Flex>
         </Flex>
 
-        {/* Recent Templates */}
+        {/* Recent Attributes */}
         <Flex
           direction={"column"}
           p={"2"}
@@ -722,29 +722,29 @@ export const Dashboard = () => {
           maxW={"100%"}
         >
           <Flex direction={"row"} align={"center"} gap={"1"} py={"1.5"} ml={"1.5"}>
-            <Icon name={"template"} size={"xs"} color={STYLES.template.color.icon} />
+            <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
             <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-              Recent Templates
+              Recent Attributes
             </Text>
           </Flex>
 
-          {!loading && workspaceTemplates.length > 0 && (
+          {!loading && workspaceAttributes.length > 0 && (
             <DataTable
-              columns={templateTableColumns}
-              data={workspaceTemplates}
+              columns={attributeTableColumns}
+              data={workspaceAttributes}
               visibleColumns={visibleColumns}
               selectedRows={{}}
               fill
             />
           )}
 
-          {!loading && _.isEmpty(workspaceTemplates) && (
+          {!loading && _.isEmpty(workspaceAttributes) && (
             <EmptyState.Root>
               <EmptyState.Content>
                 <EmptyState.Indicator>
-                  <Icon name={"template"} size={"lg"} color={STYLES.template.color.default} />
+                  <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.default} />
                 </EmptyState.Indicator>
-                <EmptyState.Description>No Templates</EmptyState.Description>
+                <EmptyState.Description>No Attributes</EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
           )}
@@ -755,9 +755,9 @@ export const Dashboard = () => {
               rounded={"md"}
               variant={"solid"}
               colorPalette={"blue"}
-              onClick={() => navigate(`/public/${id}/templates`)}
+              onClick={() => navigate(`/public/${id}/attributes`)}
             >
-              All Templates
+              All Attributes
               <Icon name={"a_right"} size={"xs"} />
             </Button>
           </Flex>

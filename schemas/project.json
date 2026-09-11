@@ -6,16 +6,14 @@
   "created": "2022-05-19T22:34:29.501Z",
   "timestamp": "2022-05-19T22:34:29.501Z",
   "description": "Project description",
-  "entities": [
-    "<Entity ID>"
-  ],
+  "entities": ["<Entity ID>"],
   "history": [
     {
       "author": "<User ID>",
       "message": "History message",
       "timestamp": "2022-05-19T22:34:29.501Z",
       "version": "History version",
-      
+
       "_comment": "The omitted fields contain Project data from the specific version"
     }
   ]

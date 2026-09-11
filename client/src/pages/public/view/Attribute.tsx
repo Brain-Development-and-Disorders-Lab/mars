@@ -5,9 +5,9 @@ import React, { useEffect, useState } from "react";
 import { Flex, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import Values from "@components/Values";
-import TemplateBreadcrumb from "@components/TemplateBreadcrumb";
-import TemplateOverviewCard from "@components/TemplateOverviewCard";
-import TemplateUsageTable from "@components/TemplateUsageTable";
+import AttributeBreadcrumb from "@components/AttributeBreadcrumb";
+import AttributeOverviewCard from "@components/AttributeOverviewCard";
+import AttributeUsageTable from "@components/AttributeUsageTable";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
@@ -27,23 +27,23 @@ import { useQuery } from "@apollo/client/react";
 // Variables
 import { STYLES } from "@variables";
 
-export const Template = () => {
+export const Attribute = () => {
   const navigate = useNavigate();
-  const { id: workspace, template } = useParams();
+  const { id: workspace, attribute } = useParams();
   const [workspaceName, setWorkspaceName] = useState("");
 
-  const [templateName, setTemplateName] = useState("");
-  const [templateDescription, setTemplateDescription] = useState("");
-  const [templateOwner, setTemplateOwner] = useState("");
-  const [templateTimestamp, setTemplateTimestamp] = useState("");
-  const [templateArchived, setTemplateArchived] = useState(false);
-  const [templateValues, setTemplateValues] = useState<IValue[]>([]);
-  const [templateUsage, setTemplateUsage] = useState<AttributeUsage[]>([]);
+  const [attributeName, setAttributeName] = useState("");
+  const [attributeDescription, setAttributeDescription] = useState("");
+  const [attributeOwner, setAttributeOwner] = useState("");
+  const [attributeTimestamp, setAttributeTimestamp] = useState("");
+  const [attributeArchived, setAttributeArchived] = useState(false);
+  const [attributeValues, setAttributeValues] = useState<IValue[]>([]);
+  const [attributeUsage, setAttributeUsage] = useState<AttributeUsage[]>([]);
 
   // GraphQL operations
-  const GET_TEMPLATE = gql`
-    query GetTemplate($_id: String, $workspace: String) {
-      template(_id: $_id) {
+  const GET_ATTRIBUTE = gql`
+    query GetAttribute($_id: String, $workspace: String) {
+      attribute(_id: $_id) {
         _id
         name
         timestamp
@@ -81,11 +81,11 @@ export const Template = () => {
     }
   `;
   const { loading, error, data } = useQuery<{
-    template: AttributeModel;
+    attribute: AttributeModel;
     workspace: IGenericItem;
-  }>(GET_TEMPLATE, {
+  }>(GET_ATTRIBUTE, {
     variables: {
-      _id: template,
+      _id: attribute,
       workspace: workspace,
     },
     fetchPolicy: "no-cache",
@@ -94,9 +94,9 @@ export const Template = () => {
     },
   });
 
-  const GET_TEMPLATE_USAGE = gql`
-    query GetTemplateUsage($_id: String) {
-      templateUsage(_id: $_id) {
+  const GET_ATTRIBUTE_USAGE = gql`
+    query GetAttributeUsage($_id: String) {
+      attributeUsage(_id: $_id) {
         entity
         modifications
       }
@@ -107,10 +107,10 @@ export const Template = () => {
     error: usageError,
     data: usageData,
   } = useQuery<{
-    templateUsage: AttributeUsage[];
-  }>(GET_TEMPLATE_USAGE, {
+    attributeUsage: AttributeUsage[];
+  }>(GET_ATTRIBUTE_USAGE, {
     variables: {
-      _id: template,
+      _id: attribute,
     },
     fetchPolicy: "no-cache",
     context: {
@@ -120,21 +120,21 @@ export const Template = () => {
 
   // Manage data once retrieved
   useEffect(() => {
-    if (data?.template) {
-      setTemplateName(data.template.name);
-      setTemplateArchived(data.template.archived);
-      setTemplateOwner(data.template.owner);
-      setTemplateTimestamp(data.template.timestamp);
-      setTemplateDescription(data.template.description || "");
-      setTemplateValues(data.template.values);
+    if (data?.attribute) {
+      setAttributeName(data.attribute.name);
+      setAttributeArchived(data.attribute.archived);
+      setAttributeOwner(data.attribute.owner);
+      setAttributeTimestamp(data.attribute.timestamp);
+      setAttributeDescription(data.attribute.description || "");
+      setAttributeValues(data.attribute.values);
     }
 
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
     }
 
-    if (usageData?.templateUsage) {
-      setTemplateUsage(usageData.templateUsage);
+    if (usageData?.attributeUsage) {
+      setAttributeUsage(usageData.attributeUsage);
     }
   }, [loading, usageLoading]);
 
@@ -143,7 +143,7 @@ export const Template = () => {
       toaster.create({
         title: "Error",
         type: "error",
-        description: "Unable to retrieve Template information",
+        description: "Unable to retrieve Attribute information",
         duration: 4000,
         closable: true,
       });
@@ -154,31 +154,31 @@ export const Template = () => {
     <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
       <Flex direction={"column"}>
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <TemplateBreadcrumb
+          <AttributeBreadcrumb
             loading={loading}
             workspaceName={workspaceName}
             onNavigateHome={() => navigate(`/public/${workspace}`)}
-            onNavigateTemplates={() => navigate(`/public/${workspace}/templates`)}
-            archived={templateArchived}
-            name={templateName}
+            onNavigateAttributes={() => navigate(`/public/${workspace}/attributes`)}
+            archived={attributeArchived}
+            name={attributeName}
           />
         </Flex>
 
         <Flex direction={"column"} gap={"2"} pt={"0"} p={"1"}>
-          {/* Template Overview and Description */}
-          <TemplateOverviewCard
-            name={templateName}
+          {/* Attribute Overview and Description */}
+          <AttributeOverviewCard
+            name={attributeName}
             nameReadOnly
-            owner={templateOwner}
-            timestamp={templateTimestamp}
+            owner={attributeOwner}
+            timestamp={attributeTimestamp}
             visibilityIsPublic={true}
-            description={templateDescription}
+            description={attributeDescription}
             descriptionReadOnly
             workspace={workspace}
             isPublic
           />
 
-          {/* Template Values and Usage */}
+          {/* Attribute Values and Usage */}
           <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
             {/* Values */}
             <Flex
@@ -195,21 +195,21 @@ export const Template = () => {
               minW={{ base: "100%", md: "calc(50% - 4px)" }}
             >
               <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
-                Values ({templateValues.length})
+                Values ({attributeValues.length})
               </Text>
               <Values
                 key={"current"}
                 viewOnly={true}
-                values={templateValues}
-                setValues={setTemplateValues}
+                values={attributeValues}
+                setValues={setAttributeValues}
                 workspace={workspace}
                 isPublic
               />
             </Flex>
 
             {/* Usage */}
-            <TemplateUsageTable
-              templateUsage={templateUsage}
+            <AttributeUsageTable
+              attributeUsage={attributeUsage}
               onViewEntity={(entityId) => navigate(`/public/${workspace}/entities/${entityId}`)}
               workspace={workspace}
               isPublic
@@ -221,4 +221,4 @@ export const Template = () => {
   );
 };
 
-export default Template;
+export default Attribute;

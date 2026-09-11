@@ -200,7 +200,7 @@ export const clientPathVisible = (name: string, path: string, locator: (page: Pa
 };
 
 /**
- * The "Archive" item inside a view page's "Actions" menu, shared shape across Entities, Projects, and Templates
+ * The "Archive" item inside a view page's "Actions" menu, shared shape across Entities, Projects, and Attribute
  * @param {string} name Path name
  * @param {string} path Exact path
  * @return {ClientPath}

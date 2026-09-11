@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { TemplateBreadcrumbProps } from "@types";
+import { AttributeBreadcrumbProps } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -18,14 +18,14 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 // Variables
 import { STYLES } from "@variables";
 
-const TemplateBreadcrumb = ({
+const AttributeBreadcrumb = ({
   loading,
   workspaceName,
   onNavigateHome,
-  onNavigateTemplates,
+  onNavigateAttributes,
   archived,
   name,
-}: TemplateBreadcrumbProps) => {
+}: AttributeBreadcrumbProps) => {
   const { isBreakpointActive } = useBreakpoint();
 
   return (
@@ -50,14 +50,14 @@ const TemplateBreadcrumb = ({
           <Breadcrumb.Separator />
           <Breadcrumb.Item
             gap={"1"}
-            onClick={onNavigateTemplates}
+            onClick={onNavigateAttributes}
             _hover={{
               cursor: "pointer",
               textDecoration: "underline",
             }}
           >
-            <Icon size={"xs"} name={"template"} color={STYLES.template.color.icon} />
-            Templates
+            <Icon size={"xs"} name={"attribute"} color={STYLES.attribute.color.icon} />
+            Attributes
           </Breadcrumb.Item>
           <Breadcrumb.Separator />
         </Breadcrumb.List>
@@ -65,16 +65,16 @@ const TemplateBreadcrumb = ({
 
       <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
         <Flex
-          id={"templateNameTag"}
+          id={"attributeNameTag"}
           align={"center"}
           gap={"1"}
           p={"1"}
           border={"2px solid"}
-          borderColor={archived ? "gray.500" : STYLES.template.color.icon}
-          bg={archived ? STYLES.card.bg : STYLES.template.color.light}
+          borderColor={archived ? "gray.500" : STYLES.attribute.color.icon}
+          bg={archived ? STYLES.card.bg : STYLES.attribute.color.light}
           rounded={"md"}
         >
-          <Icon name={"template"} size={"sm"} color={archived ? "gray.500" : STYLES.template.color.icon} />
+          <Icon name={"attribute"} size={"sm"} color={archived ? "gray.500" : STYLES.attribute.color.icon} />
           <Tooltip content={`${archived ? "Archived: " : ""}${name}`} showArrow>
             <Heading fontWeight={"semibold"} size={"sm"}>
               {_.truncate(name, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
@@ -87,4 +87,4 @@ const TemplateBreadcrumb = ({
   );
 };
 
-export default TemplateBreadcrumb;
+export default AttributeBreadcrumb;

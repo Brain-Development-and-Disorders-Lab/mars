@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 // Variables
 import { STYLES } from "@variables";
 
-// Shared `DataTable` cell renderers repeated across the Entities, Projects, and Templates list pages
+// Shared `DataTable` cell renderers repeated across the Entities, Projects, and Attributes list pages
 
 export const CreatedCell = (props: CreatedCellProps) => (
   <Tooltip content={dayjs(props.value).format("[Created:] DD MMMM YYYY, HH:MM A")} showArrow>

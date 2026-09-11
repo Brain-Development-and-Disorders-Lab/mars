@@ -10,7 +10,11 @@ import { FieldTagListProps } from "@types";
 
 const FieldTagList = (props: FieldTagListProps) => {
   if (props.items.length === 0) {
-    return props.emptyLabel ? <EmptyTag label={props.emptyLabel} /> : null;
+    return props.emptyLabel ? (
+      <Flex>
+        <EmptyTag label={props.emptyLabel} />
+      </Flex>
+    ) : null;
   }
 
   const overflow = props.items.length - props.max;

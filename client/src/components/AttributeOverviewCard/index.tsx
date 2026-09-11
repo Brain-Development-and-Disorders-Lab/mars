@@ -8,12 +8,12 @@ import TagTimestamp from "@components/TagTimestamp";
 import TagVisibility from "@components/TagVisibility";
 
 // Existing and custom types
-import { TemplateOverviewCardProps } from "@types";
+import { AttributeOverviewCardProps } from "@types";
 
 // Variables
 import { STYLES } from "@variables";
 
-const TemplateOverviewCard = ({
+const AttributeOverviewCard = ({
   name,
   onNameChange,
   nameReadOnly,
@@ -25,7 +25,7 @@ const TemplateOverviewCard = ({
   descriptionReadOnly,
   workspace,
   isPublic,
-}: TemplateOverviewCardProps) => (
+}: AttributeOverviewCardProps) => (
   <Flex direction={"row"} gap={"2"} p={"0"} wrap={"wrap"} align={"stretch"}>
     {/* Overview */}
     <Flex
@@ -113,4 +113,4 @@ const TemplateOverviewCard = ({
   </Flex>
 );
 
-export default TemplateOverviewCard;
+export default AttributeOverviewCard;

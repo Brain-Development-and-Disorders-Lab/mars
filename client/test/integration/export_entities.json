@@ -8,7 +8,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Box that fits inside another Box.",
       "projects": ["pBwj_re8"],
-      "relationships": [
+      "links": [
         {
           "target": {
             "_id": "eqRN9NBH",
@@ -47,7 +47,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Box that fits in another Box updated by same name Entity.",
       "projects": ["pBwj_re8"],
-      "relationships": [
+      "links": [
         {
           "target": {
             "_id": "eqRN9NBH",
@@ -86,7 +86,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Example Box 2.",
       "projects": ["pBwj_re8"],
-      "relationships": [],
+      "links": [],
       "attributes": [
         {
           "_id": "a-eOZ4E6Qw-0EmAiB",
@@ -113,7 +113,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Example Box 1.",
       "projects": ["pBwj_re8"],
-      "relationships": [
+      "links": [
         {
           "target": {
             "_id": "eDDyDMjQ",
@@ -137,7 +137,7 @@
       "created": "2023-12-27T20:12:43.686Z",
       "description": "Mini Box that fits in another Box, JSON.",
       "projects": ["pBwj_re8"],
-      "relationships": [
+      "links": [
         {
           "target": {
             "_id": "eqRN9NBH",

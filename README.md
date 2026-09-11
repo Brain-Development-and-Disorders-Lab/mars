@@ -14,7 +14,7 @@
 - Export partial or complete metadata into multiple different file types (CSV, JSON files)
 - AI-assisted search, text-based search, and advanced query system for searching deeply through metadata
 - Manage metadata across projects and share with external users using Workspaces
-- Establish relationships between metadata entries, visualize these relationships
+- Establish links between metadata entries, visualize these links
 - Edit history and version restore for metadata entries
 - User accounts supporting [ORCiD](https://orcid.org) sign-in
 

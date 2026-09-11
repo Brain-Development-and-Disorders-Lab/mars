@@ -41,7 +41,7 @@ import { STYLES } from "@variables";
 const TITLES = {
   entity: "Entity History",
   project: "Project History",
-  template: "Template History",
+  attribute: "Attribute History",
 };
 
 const SORT_OPTIONS = createListCollection({

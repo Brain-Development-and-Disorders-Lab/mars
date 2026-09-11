@@ -1,15 +1,13 @@
 {
   "_id": "<Entity ID>",
   "name": "Entity name",
-  "owner" : "<User ID>",
+  "owner": "<User ID>",
   "created": "2022-05-19T22:34:29.501Z",
   "timestamp": "2022-05-19T22:34:29.501Z",
   "archived": false,
   "description": "Entity description",
-  "projects": [
-    "<Project ID>"
-  ],
-  "relationships": [
+  "projects": ["<Project ID>"],
+  "links": [
     {
       "source": {
         "_id": "<Entity ID>",
@@ -19,7 +17,7 @@
         "_id": "<Entity ID>",
         "name": "Target name"
       },
-      "type": "<type:RelationshipType>"
+      "type": "<type:LinkType>"
     }
   ],
   "attributes": [
@@ -60,7 +58,7 @@
       "message": "History message",
       "timestamp": "2022-05-19T22:34:29.501Z",
       "version": "History version",
-      
+
       "_comment": "The omitted fields contain Entity data from the specific version"
     }
   ]
