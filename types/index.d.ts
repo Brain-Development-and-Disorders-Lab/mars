@@ -534,6 +534,29 @@ export type EntityModel = IEntity & {
 
 export type EntityNode = IGenericItem & {
   links: ILink[];
+  owner?: string;
+  created?: string;
+  archived?: boolean;
+  projects?: string[];
+  attributes?: IGenericItem[];
+};
+
+// Details known about an Entity when building its `LinksGraph` node
+export type LinksGraphNodeInput = {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+  linkCount?: number;
+  owner?: string;
+  created?: string;
+  projectCount?: number;
+  attributeCount?: number;
+  archived?: boolean;
+};
+
+// Utility type to specify the props of `LinksGraphNode`
+export type LinksGraphNodeProps = LinksGraphNodeInput & {
+  onView: (id: string) => void;
 };
 
 export type EntityHistory = {
