@@ -29,7 +29,7 @@ import { gql } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
-import { createSelectOptions } from "@lib/util";
+import { createSelectOptions, isValidValues } from "@lib/util";
 import _ from "lodash";
 import dayjs from "dayjs";
 import { nanoid } from "nanoid";
@@ -113,7 +113,7 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
   }, [props.open]);
 
   useEffect(() => {
-    setIsValueError(values.length === 0 || values.some((v) => v.name === ""));
+    setIsValueError(!isValidValues(values, true));
   }, [values]);
 
   const reset = () => {
@@ -212,46 +212,48 @@ const DialogAddAttribute = (props: DialogAddAttributeProps) => {
                   }}
                 >
                   <Select.Label fontSize={"xs"} ml={"0.5"}>
-                    <Flex direction={"row"} gap={"1"} align={"center"}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"}>
-                        Use Attribute ({attributesCollection.items.length} available)
-                      </Text>
-                      {globalPermissions.features.ai && (
-                        <Flex direction={"row"} gap={"1"} align={"center"}>
-                          {isSuggestingAttribute && (
-                            <React.Fragment>
-                              <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
-                              <Text fontSize={"xs"} color={"purple.300"}>
-                                Suggesting...
-                              </Text>
-                            </React.Fragment>
-                          )}
+                    <Flex direction={"column"} gap={"0.5"}>
+                      <Flex direction={"row"} gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} fontWeight={"semibold"}>
+                          Use existing Attribute ({attributesCollection.items.length} available)
+                        </Text>
+                        {globalPermissions.features.ai && (
+                          <Flex direction={"row"} gap={"1"} align={"center"}>
+                            {isSuggestingAttribute && (
+                              <React.Fragment>
+                                <Icon name={"lightning"} size={"xs"} color={"purple.300"} />
+                                <Text fontSize={"xs"} color={"purple.300"}>
+                                  Suggesting...
+                                </Text>
+                              </React.Fragment>
+                            )}
 
-                          {!isSuggestingAttribute && suggestedAttributeId && (
-                            <React.Fragment>
-                              <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
-                              <Text
-                                fontSize={"xs"}
-                                color={"purple.600"}
-                                cursor={"pointer"}
-                                _hover={{ textDecoration: "underline" }}
-                                onClick={() => applyAttribute(suggestedAttributeId)}
-                              >
-                                Suggested: {props.attributes.find((t) => t._id === suggestedAttributeId)?.name}
-                              </Text>
-                            </React.Fragment>
-                          )}
+                            {!isSuggestingAttribute && suggestedAttributeId && (
+                              <React.Fragment>
+                                <Icon name={"lightning"} size={"xs"} color={"purple.600"} />
+                                <Text
+                                  fontSize={"xs"}
+                                  color={"purple.600"}
+                                  cursor={"pointer"}
+                                  _hover={{ textDecoration: "underline" }}
+                                  onClick={() => applyAttribute(suggestedAttributeId)}
+                                >
+                                  Suggested: {props.attributes.find((t) => t._id === suggestedAttributeId)?.name}
+                                </Text>
+                              </React.Fragment>
+                            )}
 
-                          {!isSuggestingAttribute && suggestedAttributeId === null && (
-                            <React.Fragment>
-                              <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
-                              <Text fontSize={"xs"} color={"text.faint"}>
-                                No Suggestions
-                              </Text>
-                            </React.Fragment>
-                          )}
-                        </Flex>
-                      )}
+                            {!isSuggestingAttribute && suggestedAttributeId === null && (
+                              <React.Fragment>
+                                <Icon name={"lightning"} size={"xs"} color={"text.faint"} />
+                                <Text fontSize={"xs"} color={"text.faint"}>
+                                  No Suggestions
+                                </Text>
+                              </React.Fragment>
+                            )}
+                          </Flex>
+                        )}
+                      </Flex>
                     </Flex>
                   </Select.Label>
                   <Select.HiddenSelect />

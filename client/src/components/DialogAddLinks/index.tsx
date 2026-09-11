@@ -89,13 +89,14 @@ const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, on
         if (!event.open) handleClose();
       }}
       placement={"center"}
+      size={"xl"}
       closeOnEscape
       closeOnInteractOutside
     >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content w={["lg", "xl", "2xl"]}>
+          <Dialog.Content w={["xl", "2xl"]}>
             <Dialog.Header p={"2"} bg={"entity.light"} color={"entity.dark"} roundedTop={"md"}>
               <Flex direction={"row"} gap={"0.5"} align={"center"} ml={"0.5"}>
                 <Icon name={"graph"} size={"xs"} />
@@ -141,43 +142,113 @@ const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, on
                 </Flex>
 
                 {/* Type selector and stage button */}
-                <Flex direction={"row"} align={"center"} gap={"2"} p={"1"}>
-                  <Text
-                    fontSize={"xs"}
-                    fontWeight={"semibold"}
-                    color={STYLES.font.secondaryHeader.color}
-                    flexShrink={0}
-                  >
-                    Type
-                  </Text>
-                  <Flex gap={"1"}>
-                    {(["general", "parent", "child"] as LinkType[]).map((type) => (
-                      <Button
-                        key={type}
-                        size={"xs"}
-                        rounded={"md"}
-                        variant={selectedType === type ? "solid" : "outline"}
-                        colorPalette={selectedType === type ? LINK_TYPE_PALETTE[type] : "gray"}
-                        bg={selectedType === type ? undefined : "white"}
-                        color={selectedType === type ? undefined : "black"}
-                        onClick={() => setSelectedType(type)}
-                      >
-                        {_.capitalize(type)}
-                      </Button>
-                    ))}
+                <Flex direction={"column"} p={"1"} gap={"2"} w={"100%"}>
+                  <Flex direction={"row"} align={"center"} gap={"2"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={STYLES.font.secondaryHeader.color}
+                      flexShrink={0}
+                    >
+                      Link Type
+                    </Text>
+                    <Flex gap={"1"}>
+                      {(["general", "parent", "child"] as LinkType[]).map((type) => (
+                        <Button
+                          key={type}
+                          size={"xs"}
+                          rounded={"md"}
+                          variant={selectedType === type ? "solid" : "outline"}
+                          colorPalette={selectedType === type ? LINK_TYPE_PALETTE[type] : "gray"}
+                          bg={selectedType === type ? undefined : "white"}
+                          color={selectedType === type ? undefined : "black"}
+                          onClick={() => setSelectedType(type)}
+                        >
+                          {_.capitalize(type)}
+                        </Button>
+                      ))}
+                    </Flex>
+                    <Spacer />
+                    <Button
+                      size={"xs"}
+                      rounded={"md"}
+                      colorPalette={"green"}
+                      disabled={_.isUndefined(selectedTarget._id)}
+                      onClick={stageLink}
+                      flexShrink={0}
+                    >
+                      Create Link
+                      <Icon name={"add"} size={"xs"} />
+                    </Button>
                   </Flex>
-                  <Spacer />
-                  <Button
-                    size={"xs"}
-                    rounded={"md"}
-                    colorPalette={"green"}
-                    disabled={_.isUndefined(selectedTarget._id)}
-                    onClick={stageLink}
-                    flexShrink={0}
-                  >
-                    Create
-                    <Icon name={"add"} size={"xs"} />
-                  </Button>
+
+                  <Flex direction={"row"} align={"center"} gap={"1"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={"semibold"}
+                      color={STYLES.font.secondaryHeader.color}
+                      flexShrink={0}
+                    >
+                      Link Description
+                    </Text>
+                    {selectedType === "general" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is related to
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                    {selectedType === "parent" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is the parent of
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                    {selectedType === "child" && (
+                      <Flex gap={"1"} align={"center"}>
+                        <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} flexShrink={0}>
+                          {sourceName} is the child of
+                        </Text>
+                        {selectedTarget._id ? (
+                          <Linky id={selectedTarget._id} type={"entities"} />
+                        ) : (
+                          <Text
+                            fontSize={"xs"}
+                            fontWeight={"semibold"}
+                            color={STYLES.font.secondaryHeader.color}
+                            flexShrink={0}
+                          >
+                            Select Entity
+                          </Text>
+                        )}
+                      </Flex>
+                    )}
+                  </Flex>
                 </Flex>
 
                 {/* Staged links list */}
@@ -230,7 +301,15 @@ const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, on
                       </Flex>
                     ))
                   ) : (
-                    <Flex direction={"column"} gap={"3"} align={"center"} justify={"center"} p={"4"} grow={"1"}>
+                    <Flex
+                      direction={"column"}
+                      gap={"3"}
+                      align={"center"}
+                      justify={"center"}
+                      p={"4"}
+                      grow={"1"}
+                      minH={"240px"}
+                    >
                       <Icon name={"graph"} size={"md"} color={"gray.300"} />
                       <Text fontSize={"xs"} fontWeight={"semibold"} color={"text.faint"}>
                         No Links

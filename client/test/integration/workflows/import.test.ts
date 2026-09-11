@@ -82,7 +82,7 @@ test.describe("Import", () => {
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
-      await page.locator("text=No Attributes added").waitFor({ state: "visible", timeout: 10000 });
+      await page.locator("text=No Attributes").waitFor({ state: "visible", timeout: 10000 });
       await page.waitForLoadState("networkidle");
 
       await clickButtonWhenEnabled(page, "#importContinueButton");

@@ -72,9 +72,10 @@ const Entity = () => {
   // Permissions
   const { workspacePermissions, loading: permissionsLoading } = usePermissions();
 
-  const [pageState, setPageState] = useState("start" as "start" | "attributes" | "links");
+  const [pageState, setPageState] = useState("start" as "start" | "project" | "links" | "attributes");
   const pageSteps = [
     { title: "Start", description: "Basic information" },
+    { title: "Projects", description: "" },
     { title: "Links", description: "Links between Entities" },
     { title: "Attributes", description: "Specify metadata" },
   ];
@@ -264,13 +265,17 @@ const Entity = () => {
 
   const onPageNext = async () => {
     if (_.isEqual("start", pageState)) {
+      posthog.capture("client.create.entity_project");
+      setPageState("project");
+      setPageStep(1);
+    } else if (_.isEqual("project", pageState)) {
       posthog.capture("client.create.entity_links");
       setPageState("links");
-      setPageStep(1);
+      setPageStep(2);
     } else if (_.isEqual("links", pageState)) {
       posthog.capture("client.create.entity_attributes");
       setPageState("attributes");
-      setPageStep(2);
+      setPageStep(3);
     } else if (_.isEqual("attributes", pageState)) {
       posthog.capture("client.create.entity_finished");
       setIsSubmitting(true);
@@ -332,14 +337,18 @@ const Entity = () => {
   };
 
   const onPageBack = () => {
-    if (_.isEqual("links", pageState)) {
+    if (_.isEqual("project", pageState)) {
       posthog.capture("client.create.entity_start");
       setPageState("start");
       setPageStep(0);
+    } else if (_.isEqual("links", pageState)) {
+      posthog.capture("client.create.entity_project");
+      setPageState("project");
+      setPageStep(1);
     } else if (_.isEqual("attributes", pageState)) {
       posthog.capture("client.create.entity_links");
       setPageState("links");
-      setPageStep(1);
+      setPageStep(2);
     }
   };
 
@@ -571,6 +580,61 @@ const Entity = () => {
           </Flex>
         )}
 
+        {/* Project page */}
+        {_.isEqual("project", pageState) && (
+          <Flex direction={"column"} p={"1"} gap={"1"}>
+            <Flex
+              direction={"column"}
+              p={"2"}
+              gap={"2"}
+              rounded={"md"}
+              border={STYLES.border.style}
+              borderColor={STYLES.border.color}
+              bg={STYLES.surface.card}
+            >
+              <Flex direction={"row"} gap={"1"} align={"center"}>
+                <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
+                <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
+                  Add to a Project
+                </Text>
+              </Flex>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                Projects group related Entities together for easier discovery and sharing, you can add this Entity to a
+                Project later from its page if you're not ready yet.
+              </Text>
+              <CheckboxGroup
+                value={selectedProjects}
+                onValueChange={(event: string[]) => {
+                  if (event) setSelectedProjects([...event]);
+                }}
+              >
+                <Stack gap={"1"} direction={"column"}>
+                  {projects.length > 0 ? (
+                    projects.map((project) => (
+                      <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
+                        <Checkbox.HiddenInput />
+                        <Checkbox.Control />
+                        <Checkbox.Label>
+                          <Linky id={project._id} type={"projects"} />
+                        </Checkbox.Label>
+                      </Checkbox.Root>
+                    ))
+                  ) : (
+                    <EmptyState.Root>
+                      <EmptyState.Content>
+                        <EmptyState.Indicator>
+                          <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
+                        </EmptyState.Indicator>
+                        <EmptyState.Description>No Projects</EmptyState.Description>
+                      </EmptyState.Content>
+                    </EmptyState.Root>
+                  )}
+                </Stack>
+              </CheckboxGroup>
+            </Flex>
+          </Flex>
+        )}
+
         {/* Links page */}
         {_.isEqual("links", pageState) && (
           <Flex direction={"row"} gap={"0"} wrap={"wrap"}>
@@ -610,54 +674,6 @@ const Entity = () => {
                   existingLinks={links}
                   onAdd={(added: ILink[]) => setLinks([...links, ...added])}
                 />
-              </Flex>
-            </Flex>
-
-            <Flex direction={"column"} p={"1"} gap={"1"} flex={{ base: "0 0 100%", md: "1" }}>
-              <Flex
-                direction={"column"}
-                p={"2"}
-                gap={"2"}
-                rounded={"md"}
-                border={STYLES.border.style}
-                borderColor={STYLES.border.color}
-                bg={STYLES.surface.card}
-              >
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon size={"xs"} name={"project"} color={STYLES.project.color.icon} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                    Projects
-                  </Text>
-                </Flex>
-                <CheckboxGroup
-                  value={selectedProjects}
-                  onValueChange={(event: string[]) => {
-                    if (event) setSelectedProjects([...event]);
-                  }}
-                >
-                  <Stack gap={"1"} direction={"column"}>
-                    {projects.length > 0 ? (
-                      projects.map((project) => (
-                        <Checkbox.Root key={project._id} value={project._id} size={"xs"} colorPalette={"blue"}>
-                          <Checkbox.HiddenInput />
-                          <Checkbox.Control />
-                          <Checkbox.Label>
-                            <Linky id={project._id} type={"projects"} />
-                          </Checkbox.Label>
-                        </Checkbox.Root>
-                      ))
-                    ) : (
-                      <EmptyState.Root>
-                        <EmptyState.Content>
-                          <EmptyState.Indicator>
-                            <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
-                          </EmptyState.Indicator>
-                          <EmptyState.Description>No Projects</EmptyState.Description>
-                        </EmptyState.Content>
-                      </EmptyState.Root>
-                    )}
-                  </Stack>
-                </CheckboxGroup>
               </Flex>
             </Flex>
           </Flex>
@@ -789,6 +805,39 @@ const Entity = () => {
                         align={"start"}
                         p={"2"}
                         rounded={"md"}
+                        bg={"purple.50"}
+                        border={"1px solid"}
+                        borderColor={"purple.100"}
+                      >
+                        <Flex
+                          w={"18px"}
+                          h={"18px"}
+                          rounded={"full"}
+                          bg={"purple.400"}
+                          align={"center"}
+                          justify={"center"}
+                          shrink={"0"}
+                          mt={"0.5"}
+                        >
+                          <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
+                            2
+                          </Text>
+                        </Flex>
+                        <Flex direction={"column"} gap={"0.5"}>
+                          <Text fontSize={"xs"} fontWeight={"semibold"}>
+                            Project - Optional Grouping
+                          </Text>
+                          <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
+                            Optionally add this Entity to one or more Projects, or skip and organise it later.
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Flex
+                        direction={"row"}
+                        gap={"2"}
+                        align={"start"}
+                        p={"2"}
+                        rounded={"md"}
                         bg={"status.warning.subtle"}
                         border={"1px solid"}
                         borderColor={"orange.100"}
@@ -804,7 +853,7 @@ const Entity = () => {
                           mt={"0.5"}
                         >
                           <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
-                            2
+                            3
                           </Text>
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>
@@ -812,7 +861,7 @@ const Entity = () => {
                             Links - Relationships with other Entities
                           </Text>
                           <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                            Define how this Entity relates to others and assign it to Projects.
+                            Define how this Entity relates to other Entities.
                           </Text>
                         </Flex>
                       </Flex>
@@ -837,7 +886,7 @@ const Entity = () => {
                           mt={"0.5"}
                         >
                           <Text fontSize={"xs"} color={"white"} fontWeight={"bold"} lineHeight={"1"}>
-                            3
+                            4
                           </Text>
                         </Flex>
                         <Flex direction={"column"} gap={"0.5"}>

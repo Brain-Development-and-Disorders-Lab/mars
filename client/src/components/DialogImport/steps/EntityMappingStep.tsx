@@ -169,7 +169,7 @@ const EntityMappingStep = ({
               <EmptyState.Indicator>
                 <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.light} />
               </EmptyState.Indicator>
-              <EmptyState.Description>No Attributes added</EmptyState.Description>
+              <EmptyState.Description>No Attributes</EmptyState.Description>
             </EmptyState.Content>
           </EmptyState.Root>
         </Flex>

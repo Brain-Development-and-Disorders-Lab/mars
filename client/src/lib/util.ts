@@ -64,7 +64,9 @@ export const isValidValues = (values: IValue[], allowEmptyValues = false) => {
   }
 
   for (const value of values) {
-    isValidValue(value, allowEmptyValues);
+    if (!isValidValue(value, allowEmptyValues)) {
+      return false;
+    }
   }
   return true;
 };
@@ -244,7 +246,9 @@ export const isValidAttributes = (attributes: IAttribute[]) => {
   }
 
   for (const attribute of attributes) {
-    isValidAttribute(attribute);
+    if (!isValidAttribute(attribute)) {
+      return false;
+    }
   }
 
   return true;
