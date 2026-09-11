@@ -27,12 +27,15 @@ test.describe("Entity", () => {
       await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for navigation.");
 
       await page.click("[data-testid='create-entity-continue']");
-      await expect(page.locator("text=No Links")).toBeVisible();
+      await expect(page.locator("text=No Projects")).toBeVisible();
 
       // Back navigation must restore the form state
       await page.click("[data-testid='create-entity-back']");
       await expect(page.locator("h2:has-text('Create Entity')")).toBeVisible();
       await expect(page.locator("[data-testid='create-entity-name']")).toHaveValue(entityName);
+
+      await page.click("[data-testid='create-entity-continue']");
+      await expect(page.locator("text=No Projects")).toBeVisible();
 
       await page.click("[data-testid='create-entity-continue']");
       await expect(page.locator("text=No Links")).toBeVisible();
@@ -50,6 +53,7 @@ test.describe("Entity", () => {
       await page.locator("[data-testid='create-entity-name']").fill(entityName);
       await page.locator('input[type="datetime-local"]').fill("2023-10-01T12:00");
       await page.locator("[data-testid='create-entity-description']").fill("This is a test entity for completion.");
+      await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-continue']");
       await page.click("[data-testid='create-entity-finish']");
