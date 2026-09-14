@@ -46,12 +46,12 @@ import { useNavigate } from "react-router-dom";
 // GraphQL
 import { useLazyQuery, useMutation } from "@apollo/client/react";
 import {
-  PREPARE_ENTITY_CSV,
+  PREPARE_ENTITY_SPREADSHEET,
   GET_MAPPING_DATA,
-  REVIEW_ENTITY_CSV,
+  REVIEW_ENTITY_SPREADSHEET,
   GET_COUNTER_VALUES,
   SUGGEST_COLUMN_MAPPING,
-  IMPORT_ENTITY_CSV,
+  IMPORT_ENTITY_SPREADSHEET,
   REVIEW_ENTITY_JSON,
   IMPORT_ENTITY_JSON,
   REVIEW_ATTRIBUTE_JSON,
@@ -212,23 +212,23 @@ const DialogImport = (props: DialogImportProps) => {
   }, [props.open, session, sessionErrorState]);
 
   /** GraphQL queries and mutations */
-  const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{
-    prepareEntityCSV: ColumnInfo[];
-  }>(PREPARE_ENTITY_CSV);
+  const [prepareEntitySpreadsheet, { error: prepareEntitySpreadsheetError }] = useMutation<{
+    prepareEntitySpreadsheet: ColumnInfo[];
+  }>(PREPARE_ENTITY_SPREADSHEET);
   const [getMappingData, { error: mappingDataError }] = useLazyQuery<{
     projects: IGenericItem[];
     attributes: AttributeModel[];
   }>(GET_MAPPING_DATA);
-  const [reviewEntityCSV, { error: reviewEntityCSVError }] = useMutation<{
-    reviewEntityCSV: ResponseData<EntityImportReview[]>;
-  }>(REVIEW_ENTITY_CSV);
+  const [reviewEntitySpreadsheet, { error: reviewEntitySpreadsheetError }] = useMutation<{
+    reviewEntitySpreadsheet: ResponseData<EntityImportReview[]>;
+  }>(REVIEW_ENTITY_SPREADSHEET);
   const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
     nextCounterValues: ResponseData<string[]>;
   }>(GET_COUNTER_VALUES);
   const [runSuggestColumnMapping] = useLazyQuery<{
     suggestColumnMapping: { name: string | null; description: string | null };
   }>(SUGGEST_COLUMN_MAPPING, { fetchPolicy: "network-only" });
-  const [importEntityCSV, { error: importEntityCSVError }] = useMutation(IMPORT_ENTITY_CSV);
+  const [importEntitySpreadsheet, { error: importEntitySpreadsheetError }] = useMutation(IMPORT_ENTITY_SPREADSHEET);
   const [reviewEntityJSON, { error: reviewEntityJSONError }] = useMutation<{
     reviewEntityJSON: ResponseData<EntityImportReview[]>;
   }>(REVIEW_ENTITY_JSON);
@@ -245,8 +245,9 @@ const DialogImport = (props: DialogImportProps) => {
   // Effect to manipulate 'Continue' button state for 'upload' page, also re-disabling it
   // if the file is removed after being accepted
   useEffect(() => {
-    if (_.isEqual(entityImportPage, "upload")) {
+    if (_.isEqual(entityImportPage, "upload") || _.isEqual(attributeImportPage, "upload")) {
       setContinueDisabled(!(fileName !== "" && importTypeSelected));
+      setIsTypeSelectDisabled(fileName !== "");
     }
   }, [fileName, importTypeSelected]);
 
@@ -266,7 +267,7 @@ const DialogImport = (props: DialogImportProps) => {
     }
   }, [entityImportPage]);
 
-  // Effect to disable 'Continue' on the mapping page when any Attribute is incomplete
+  // Effect to disable 'Continue' on the Entity mapping page when any Attribute is incomplete
   useEffect(() => {
     if (!_.isEqual(entityImportPage, "mapping")) return;
     const allValid =
@@ -311,9 +312,9 @@ const DialogImport = (props: DialogImportProps) => {
       return parsed;
     } catch {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Entity Import JSON Error",
         type: "error",
-        description: "Could not parse file contents",
+        description: "Could not parse Entity JSON file contents",
         duration: 4000,
         closable: true,
       });
@@ -329,9 +330,9 @@ const DialogImport = (props: DialogImportProps) => {
   const validEntityJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
     if (parsed.entities === undefined) {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Entity Import JSON Error",
         type: "error",
-        description: 'File does not contain top-level "entities" key',
+        description: 'Entity JSON file does not contain top-level "entities" key',
         duration: 4000,
         closable: true,
       });
@@ -341,9 +342,9 @@ const DialogImport = (props: DialogImportProps) => {
     // Check that it contains `EntityModel` instances
     if (parsed.entities.length === 0) {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Entity Import JSON Error",
         type: "error",
-        description: "File does not contain any Entity data",
+        description: "Entity JSON file does not contain any Entities",
         duration: 4000,
         closable: true,
       });
@@ -389,27 +390,27 @@ const DialogImport = (props: DialogImportProps) => {
     } else if (isSpreadsheetFile(fileType)) {
       // Mutation query with CSV or XLSX file
       setImportLoading(true);
-      const response = await prepareEntityCSV({
+      const response = await prepareEntitySpreadsheet({
         variables: {
           file: fileUpload.acceptedFiles[0],
         },
       });
       setImportLoading(false);
 
-      if (prepareEntityCSVError || !response.data) {
+      if (prepareEntitySpreadsheetError || !response.data) {
         toaster.create({
-          title: "CSV Import Error",
+          title: "Entity Import Spreadsheet Error",
           type: "error",
-          description: "Error while preparing file",
+          description: "Error while preparing Entity spreadsheet file",
           duration: 4000,
           closable: true,
         });
         return false;
       }
 
-      if (response.data.prepareEntityCSV.length > 0) {
+      if (response.data.prepareEntitySpreadsheet.length > 0) {
         // Strip Excel placeholder columns for genuinely empty cells
-        const filteredColumnSet = response.data.prepareEntityCSV.filter(
+        const filteredColumnSet = response.data.prepareEntitySpreadsheet.filter(
           (col: ColumnInfo) => !_.startsWith(col.name, "__EMPTY"),
         );
         setColumns(filteredColumnSet);
@@ -423,9 +424,9 @@ const DialogImport = (props: DialogImportProps) => {
         return true;
       } else {
         toaster.create({
-          title: "CSV Import Error",
+          title: "Entity Import Spreadsheet Error",
           type: "error",
-          description: "File is empty",
+          description: "Entity spreadsheet file is empty",
           duration: 4000,
           closable: true,
         });
@@ -447,11 +448,15 @@ const DialogImport = (props: DialogImportProps) => {
     setImportLoading(false);
 
     if (response.data?.attributes) {
-      // Attributes containing "Entity" or "Select"-type Values can't be mapped to CSV columns
-      const supportedAttributes = response.data.attributes.filter((a: AttributeModel) =>
-        a.values.every((v) => !["entity", "select"].includes(v.type)),
-      );
-      setAttributes(supportedAttributes);
+      if (!_.isEqual(fileType, JSON_MIME_TYPE)) {
+        // Attributes containing "Entity" or "Select"-type Values can't be mapped to CSV columns
+        const supportedAttributes = response.data.attributes.filter((a: AttributeModel) =>
+          a.values.every((v) => !["entity", "select"].includes(v.type)),
+        );
+        setAttributes(supportedAttributes);
+      } else {
+        setAttributes(response.data.attributes);
+      }
     }
     if (response.data?.projects) {
       setProjectsCollection(
@@ -465,9 +470,9 @@ const DialogImport = (props: DialogImportProps) => {
 
     if (mappingDataError) {
       toaster.create({
-        title: "Import Error",
+        title: "Entity Import Column Error",
         type: "error",
-        description: "Could not retrieve data for mapping columns",
+        description: "Could not retrieve data for mapping spreadsheet columns",
         duration: 4000,
         closable: true,
       });
@@ -513,9 +518,9 @@ const DialogImport = (props: DialogImportProps) => {
 
     if (reviewEntityJSONError) {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Entity Import JSON Error",
         type: "error",
-        description: "Error while reviewing JSON file",
+        description: "Error while reviewing Entity JSON file",
         duration: 4000,
         closable: true,
       });
@@ -525,11 +530,11 @@ const DialogImport = (props: DialogImportProps) => {
   /**
    * Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable
    */
-  const setupEntityReviewCSV = async () => {
+  const setupEntityReviewSpreadsheet = async () => {
     const columnMapping = buildEntityColumnMapping();
 
     setImportLoading(true);
-    const reviewResponse = await reviewEntityCSV({
+    const reviewResponse = await reviewEntitySpreadsheet({
       variables: {
         columnMapping: removeTypename(columnMapping),
         file: fileUpload.acceptedFiles[0],
@@ -537,13 +542,13 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    if (reviewResponse.data && reviewResponse.data.reviewEntityCSV.data) {
-      setReviewEntities(reviewResponse.data.reviewEntityCSV.data);
+    if (reviewResponse.data && reviewResponse.data.reviewEntitySpreadsheet.data) {
+      setReviewEntities(reviewResponse.data.reviewEntitySpreadsheet.data);
     }
 
     // Retrieve and splice in counter values if being used for names
-    if (nameUseCounter && reviewResponse.data?.reviewEntityCSV?.data) {
-      const reviewData = reviewResponse.data.reviewEntityCSV.data;
+    if (nameUseCounter && reviewResponse.data?.reviewEntitySpreadsheet?.data) {
+      const reviewData = reviewResponse.data.reviewEntitySpreadsheet.data;
       const counterResponse = await getCounterValues({
         variables: {
           _id: counter,
@@ -564,7 +569,7 @@ const DialogImport = (props: DialogImportProps) => {
 
       if (counterValuesError || !counterValues || counterValues.length === 0) {
         toaster.create({
-          title: "CSV Import Error",
+          title: "Entity Import Error",
           type: "error",
           description: "Error while retrieving counter values",
           duration: 4000,
@@ -573,9 +578,9 @@ const DialogImport = (props: DialogImportProps) => {
       }
     }
 
-    if (reviewEntityCSVError) {
+    if (reviewEntitySpreadsheetError) {
       toaster.create({
-        title: "CSV Import Error",
+        title: "Entity Import Spreadsheet Error",
         type: "error",
         description: "Error while generating Entities for review",
         duration: 4000,
@@ -600,7 +605,7 @@ const DialogImport = (props: DialogImportProps) => {
 
     if (importEntityJSONError) {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Entity Import JSON Error",
         type: "error",
         description: "Error while importing JSON file",
         duration: 4000,
@@ -616,14 +621,14 @@ const DialogImport = (props: DialogImportProps) => {
   };
 
   /**
-   * Executes the final CSV/XLSX entity import and resets state on success
+   * Executes the final spreadsheet Entity import and resets state on success
    */
-  const finishEntityImportCSV = async () => {
+  const finishEntityImportSpreadsheet = async () => {
     const columnMapping = buildEntityColumnMapping();
     const options = { counters: nameUseCounter ? [{ field: "name", _id: counter }] : [] };
 
     setImportLoading(true);
-    await importEntityCSV({
+    await importEntitySpreadsheet({
       variables: {
         columnMapping: removeTypename(columnMapping),
         options: removeTypename(options),
@@ -632,11 +637,11 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    if (importEntityCSVError) {
+    if (importEntitySpreadsheetError) {
       toaster.create({
-        title: "CSV Import Error",
+        title: "Entity Import Spreadsheet Error",
         type: "error",
-        description: "Error while importing CSV file",
+        description: "Error while importing Entity spreadsheet file",
         duration: 4000,
         closable: true,
       });
@@ -654,8 +659,9 @@ const DialogImport = (props: DialogImportProps) => {
   /** Helper functions for importing Attributes via JSON */
   /**
    * Runs the server-side review for a JSON Attribute import and populates `reviewAttributes`
+   * @return {Promise<boolean>}
    */
-  const setupAttributeReviewJSON = async () => {
+  const setupAttributeReviewJSON = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await reviewAttributeJSON({
       variables: {
@@ -673,6 +679,8 @@ const DialogImport = (props: DialogImportProps) => {
         duration: 4000,
         closable: true,
       });
+      setContinueDisabled(true);
+      return false;
     } else if (response.data.reviewAttributeJSON.success === false) {
       // Error: Unsuccessful check server-side
       toaster.create({
@@ -682,8 +690,12 @@ const DialogImport = (props: DialogImportProps) => {
         duration: 4000,
         closable: true,
       });
+      setContinueDisabled(true);
+      return false;
     } else {
       setReviewAttributes(response.data.reviewAttributeJSON.data);
+      setContinueDisabled(false);
+      return true;
     }
   };
 
@@ -701,7 +713,7 @@ const DialogImport = (props: DialogImportProps) => {
 
     if (importAttributeJSONError) {
       toaster.create({
-        title: "JSON Import Error",
+        title: "Attribute Import JSON Error",
         type: "error",
         description: "Error while importing JSON file",
         duration: 4000,
@@ -868,7 +880,7 @@ const DialogImport = (props: DialogImportProps) => {
         if (fileType === JSON_MIME_TYPE) {
           await setupEntityReviewJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await setupEntityReviewCSV();
+          await setupEntityReviewSpreadsheet();
         }
 
         // Proceed to the next page
@@ -893,7 +905,7 @@ const DialogImport = (props: DialogImportProps) => {
         if (fileType === JSON_MIME_TYPE) {
           await finishEntityImportJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await finishEntityImportCSV();
+          await finishEntityImportSpreadsheet();
         }
         setImportLoading(false);
       }
@@ -907,11 +919,15 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Run the review setup function for Attribute JSON files
-        await setupAttributeReviewJSON();
+        setImportLoading(true);
+        const importResult = await setupAttributeReviewJSON();
+        setImportLoading(false);
 
-        // Proceed to the next page
-        setAttributeStep(1);
-        setAttributeImportPage("review");
+        if (importResult) {
+          // Proceed to the next page if the setup step completed successfully
+          setAttributeStep(1);
+          setAttributeImportPage("review");
+        }
       } else if (_.isEqual(attributeImportPage, "review")) {
         // Capture event
         posthog.capture("client.import.finish", {
@@ -1012,7 +1028,7 @@ const DialogImport = (props: DialogImportProps) => {
           if (fileType === JSON_MIME_TYPE) {
             await finishEntityImportJSON();
           } else if (isSpreadsheetFile(fileType)) {
-            await finishEntityImportCSV();
+            await finishEntityImportSpreadsheet();
           }
           setImportLoading(false);
         }}
@@ -1047,7 +1063,7 @@ const DialogImport = (props: DialogImportProps) => {
             {_.isEqual(importType, "entities") && (
               <Steps.Root
                 step={entityStep}
-                colorPalette={"blue"}
+                colorPalette={"entity"}
                 onStepChange={(event) => setEntityStep(event.step)}
                 count={entitySteps.length}
                 p={"1"}
@@ -1070,7 +1086,7 @@ const DialogImport = (props: DialogImportProps) => {
             {(_.isEqual(importType, "attribute") || _.isUndefined(importType)) && (
               <Steps.Root
                 step={attributeStep}
-                colorPalette={"blue"}
+                colorPalette={_.isUndefined(importType) ? "gray" : "attribute"}
                 onStepChange={(event) => setAttributeStep(event.step)}
                 count={attributeSteps.length}
                 p={"1"}
@@ -1100,7 +1116,7 @@ const DialogImport = (props: DialogImportProps) => {
               />
             )}
 
-            {/* Display filename and list of columns if a CSV file after upload */}
+            {/* Display filename and list of columns if a spreadsheet file uploaded */}
             {_.isEqual(importType, "entities") && !_.isEqual(entityImportPage, "upload") && (
               <Flex
                 w={"100%"}

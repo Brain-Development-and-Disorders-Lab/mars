@@ -13,7 +13,7 @@ import {
   AttributeImportReview,
   IColumnMapping,
   IRow,
-  CSVImportOptions,
+  SpreadsheetImportOptions,
 } from "@types";
 
 // Utility functions and libraries
@@ -312,7 +312,7 @@ export class Data {
    * @param {IFile[]} file File object
    * @return {Promise<{ name: string; inferredType: IValueType }[]>} Column descriptors
    */
-  static prepareEntityCSV = async (file: IFile[]): Promise<{ name: string; inferredType: IValueType }[]> => {
+  static prepareEntitySpreadsheet = async (file: IFile[]): Promise<{ name: string; inferredType: IValueType }[]> => {
     const { mimetype } = await file[0];
     if (!Data.SPREADSHEET_MIME_TYPES.includes(mimetype)) return [];
 
@@ -335,7 +335,7 @@ export class Data {
    * @param {IFile[]} file Spreadsheet file (CSV or XLSX)
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
-  static reviewEntityCSV = async (
+  static reviewEntitySpreadsheet = async (
     columnMapping: IColumnMapping,
     file: IFile[],
   ): Promise<ResponseData<EntityImportReview[]>> => {
@@ -368,14 +368,14 @@ export class Data {
    * Maps columns to Entity fields using the provided mapping, then persists each imported Entity.
    * @param {IColumnMapping} columnMapping Mapping of Entity fields to column names or fixed values
    * @param {IFile[]} file Spreadsheet file (CSV or XLSX)
-   * @param {CSVImportOptions} options Additional import options such as counter configuration
+   * @param {SpreadsheetImportOptions} options Additional import options such as counter configuration
    * @param {Context} context Request context containing user and Workspace identifiers
    * @return {Promise<IResponseMessage>}
    */
-  static importEntityCSV = async (
+  static importEntitySpreadsheet = async (
     columnMapping: IColumnMapping,
     file: IFile[],
-    options: CSVImportOptions,
+    options: SpreadsheetImportOptions,
     context: Context,
   ): Promise<IResponseMessage> => {
     try {
@@ -465,13 +465,19 @@ export class Data {
       const output = await Data.bufferHelper(createReadStream());
       const parsed = JSON.parse(output.toString());
 
-      if (
-        _.isUndefined(parsed["name"]) ||
-        _.isUndefined(parsed["description"]) ||
-        _.isUndefined(parsed["archived"]) ||
-        _.isUndefined(parsed["values"])
-      ) {
-        return { success: false, message: "Attribute JSON file is missing required fields", data: [] };
+      const missingFields = [];
+      for (const field of ["name", "description", "values"]) {
+        if (_.isUndefined(parsed[field])) {
+          missingFields.push(field);
+        }
+      }
+
+      if (missingFields.length > 0) {
+        return {
+          success: false,
+          message: `Attribute JSON file is missing the following required fields: ${missingFields.join(", ")}`,
+          data: [],
+        };
       }
 
       const exists = !_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id));
@@ -580,13 +586,18 @@ export class Data {
       const output = await Data.bufferHelper(createReadStream());
       const parsed = JSON.parse(output.toString());
 
-      if (
-        _.isUndefined(parsed["name"]) ||
-        _.isUndefined(parsed["description"]) ||
-        _.isUndefined(parsed["archived"]) ||
-        _.isUndefined(parsed["values"])
-      ) {
-        return { success: false, message: "Attribute JSON file is missing required fields" };
+      const missingFields = [];
+      for (const field of ["name", "description", "values"]) {
+        if (_.isUndefined(parsed[field])) {
+          missingFields.push(field);
+        }
+      }
+
+      if (missingFields.length > 0) {
+        return {
+          success: false,
+          message: `Attribute JSON file is missing the following required fields: ${missingFields.join(", ")}`,
+        };
       }
 
       if (!_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id))) {

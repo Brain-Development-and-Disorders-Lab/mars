@@ -951,7 +951,7 @@ export class Entities {
   /**
    * Generate export data for the Entity
    * @param _id Entity identifier
-   * @param format File format of exported data, either JSON or CSV
+   * @param format File format of exported data, either JSON or spreadsheet format (CSV, XLSX)
    * @param fields Optional argument to specify Entity data fields for export
    * @returns {Promise<string>}
    */
@@ -1134,7 +1134,7 @@ export class Entities {
    */
   static exportMany = async (
     entities: string[],
-    format: string,
+    format: "json" | "csv" | "xlsx",
     includeAttributes = true,
     includeHistory = false,
   ): Promise<string> => {

@@ -509,8 +509,8 @@ export const typedefs = `#graphql
     counters: [CounterInput]
   }
 
-  # "CSVImportOptions" input
-  input CSVImportDataInput {
+  # "SpreadsheetImportOptions" input
+  input SpreadsheetImportDataInput {
     columnMapping: ColumnMappingInput
     options: OptionsInput
     file: [Upload]!
@@ -868,10 +868,10 @@ export const typedefs = `#graphql
     # Data mutations
     uploadAttachment(target: String, file: Upload!): ResponseDataString
 
-    # Data import CSV mutations
-    prepareEntityCSV(file: [Upload]!): [ColumnInfo]
-    reviewEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
-    importEntityCSV(columnMapping: ColumnMappingInput, file: [Upload]!, options: OptionsInput): ResponseMessage
+    # Data import spreadsheet mutations
+    prepareEntitySpreadsheet(file: [Upload]!): [ColumnInfo]
+    reviewEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
+    importEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!, options: OptionsInput): ResponseMessage
 
     # Data import JSON mutations
     reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview

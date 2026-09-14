@@ -326,13 +326,13 @@ export class Projects {
   /**
    * Generate export data for the Project
    * @param _id Project identifier
-   * @param format File format, either JSON or CSV
+   * @param format File format, either JSON or spreadsheet
    * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
   static export = async (
     _id: string,
-    format: "json" | "csv",
+    format: "json" | "spreadsheet",
     fields?: string[],
     includeHistory = false,
   ): Promise<string> => {
@@ -349,8 +349,8 @@ export class Projects {
     if (_.isEqual(format, "csv")) {
       let exportFields = fields;
 
-      // Handle CSV format
-      const headers: string[] = ["ID", "Name"]; // Headers for CSV file
+      // Handle spreadsheet format
+      const headers: string[] = ["ID", "Name"]; // Headers for spreadsheet file
       const row: string[] = [project._id, project.name]; // First row containing export data
 
       // Default behavior is to export all fields
@@ -374,7 +374,7 @@ export class Projects {
         }
       }
 
-      // Collate and format data as a CSV string
+      // Collate and format data as a CSV string (spreadsheet)
       const collated = [headers, row];
       const formatted = Papa.unparse(collated);
       return formatted;

@@ -89,7 +89,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
             rounded={"md"}
             flex={"1"}
             variant={importType === type ? "solid" : "outline"}
-            colorPalette={importType === type ? "blue" : "gray"}
+            colorPalette={type === "entities" ? "entity" : "attribute"}
             onClick={() => onSelectImportType(type)}
             disabled={isTypeSelectDisabled}
             data-testid={`import-type-select-trigger-${type}`}
@@ -165,7 +165,7 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
                     <Flex direction={"column"} w={"100%"} justify={"center"} align={"center"} gap={"3"}>
                       <Icon
                         name={importType === "entities" ? "entity" : "attribute"}
-                        size={"xl"}
+                        size={"lg"}
                         color={importType === "entities" ? STYLES.entity.color.light : STYLES.attribute.color.light}
                       />
                       <Text fontSize={"xs"} fontWeight={"semibold"}>

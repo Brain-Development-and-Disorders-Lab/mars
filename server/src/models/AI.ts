@@ -357,8 +357,8 @@ export class AI {
   };
 
   /**
-   * Suggest CSV column mappings for entity "name" and "description" fields
-   * @param columns CSV column names from the uploaded file
+   * Suggest spreadsheet column mappings for entity "name" and "description" fields
+   * @param {string[]} columns Spreadsheet column names from the uploaded file
    * @return Suggested column names, or null if no confident match
    */
   static suggestColumnMapping = async (
@@ -375,7 +375,7 @@ export class AI {
       messages: [
         {
           role: "user",
-          content: `From these CSV column headers, pick which one best represents an entity name (title/identifier) and which best represents a description. Return ONLY a JSON object — use the exact column string or JSON null:\n{"name":"exact_column_or_null","description":"exact_column_or_null"}\nColumns: ${columns.join(", ")}`,
+          content: `From these spreadsheet column headers, pick which one best represents an entity name (title/identifier) and which best represents a description. Return ONLY a JSON object — use the exact column string or JSON null:\n{"name":"exact_column_or_null","description":"exact_column_or_null"}\nColumns: ${columns.join(", ")}`,
         },
       ],
       max_completion_tokens: 64,

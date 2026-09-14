@@ -188,7 +188,7 @@ export type CompareAttributeFieldDiffProps = {
   setUseOriginal: (v: boolean) => void;
 };
 
-// Column descriptor returned by prepareEntityCSV
+// Column descriptor returned by prepareEntitySpreadsheet
 export type ColumnInfo = {
   name: string;
   inferredType: IValueType;
@@ -706,8 +706,8 @@ export type AttributeImportReview = {
 export type IRow = Record<string, any>;
 export type IColumnMapping = Record<string, any>;
 
-// Import options for CSV files
-export type CSVImportOptions = {
+// Import options for spreadsheet files
+export type SpreadsheetImportOptions = {
   counters: { field: string; _id: string }[];
 };
 

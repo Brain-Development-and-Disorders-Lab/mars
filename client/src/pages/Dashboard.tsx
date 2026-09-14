@@ -444,8 +444,8 @@ const Dashboard = () => {
       target: "#navImportButtonDesktop",
       content:
         breakpoint === "base"
-          ? "On desktop, upload and import CSV or JSON files to create or modify Entities and Attributes."
-          : "Upload and import CSV or JSON files to create or modify Entities and Attributes.",
+          ? "On desktop, upload and import spreadsheet or JSON files to create or modify Entities and Attributes."
+          : "Upload and import spreadsheet or JSON files to create or modify Entities and Attributes.",
       title: "Import",
     },
     {

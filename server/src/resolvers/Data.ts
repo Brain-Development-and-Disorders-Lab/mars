@@ -2,7 +2,6 @@
 import {
   AttributeModel,
   Context,
-  CSVImportOptions,
   EntityImportReview,
   AttributeImportReview,
   IColumnMapping,
@@ -10,6 +9,7 @@ import {
   IResolverParent,
   IResponseMessage,
   ResponseData,
+  SpreadsheetImportOptions,
   ColumnInfo,
 } from "@types";
 
@@ -78,8 +78,8 @@ export const DataResolvers = {
       return await Data.uploadAttachment(args.target, args.file);
     },
 
-    // Prepare a CSV file, returning the collection of column names (if present)
-    prepareEntityCSV: async (
+    // Prepare a spreadsheet file, returning the collection of column names (if present)
+    prepareEntitySpreadsheet: async (
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
@@ -94,11 +94,11 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.prepareEntityCSV(args.file);
+      return await Data.prepareEntitySpreadsheet(args.file);
     },
 
-    // Review a CSV file, return collection of Entity names and their updates
-    reviewEntityCSV: async (
+    // Review a spreadsheet file, return collection of Entity names and their updates
+    reviewEntitySpreadsheet: async (
       _parent: IResolverParent,
       args: { columnMapping: Record<string, string>; file: IFile[] },
       context: Context,
@@ -113,16 +113,16 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.reviewEntityCSV(args.columnMapping, args.file);
+      return await Data.reviewEntitySpreadsheet(args.columnMapping, args.file);
     },
 
-    // Map CSV file columns to Entity fields
-    importEntityCSV: async (
+    // Map spreadsheet file columns to Entity fields
+    importEntitySpreadsheet: async (
       _parent: IResolverParent,
       args: {
         columnMapping: IColumnMapping;
         file: IFile[];
-        options: CSVImportOptions;
+        options: SpreadsheetImportOptions;
       },
       context: Context,
     ): Promise<IResponseMessage> => {
@@ -136,7 +136,7 @@ export const DataResolvers = {
         });
       }
 
-      return await Data.importEntityCSV(args.columnMapping, args.file, args.options, context);
+      return await Data.importEntitySpreadsheet(args.columnMapping, args.file, args.options, context);
     },
 
     // Review a JSON file, return collection of Entity names and their updates

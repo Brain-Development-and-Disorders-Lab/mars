@@ -29,16 +29,16 @@ test.describe("Import", () => {
       await page.goto("/");
     });
 
-    test("should import a CSV file successfully", async ({ page }) => {
+    test("should import a spreadsheet file successfully", async ({ page }) => {
       await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
 
       // Select the import type first, which enables the `FileUpload` dropzone
       await page.click('[data-testid="import-type-select-trigger-entities"]');
 
-      // Upload CSV file
-      const csvPath = path.resolve(process.cwd(), "test/integration/export_entities.csv");
+      // Upload spreadsheet file
+      const spreadsheetPath = path.resolve(process.cwd(), "test/integration/export_entities.csv");
       const fileInput = page.locator('input[type="file"]').first();
-      await fileInput.setInputFiles(csvPath);
+      await fileInput.setInputFiles(spreadsheetPath);
 
       await clickButtonWhenEnabled(page, "#importContinueButton");
 
