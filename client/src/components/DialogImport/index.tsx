@@ -213,7 +213,7 @@ const DialogImport = (props: DialogImportProps) => {
     setOwnerField(session.user.id);
   }, [props.open, session, sessionErrorState]);
 
-  // Apollo hooks
+  /** GraphQL queries and mutations */
   const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{
     prepareEntityCSV: ColumnInfo[];
   }>(PREPARE_ENTITY_CSV);
@@ -252,7 +252,7 @@ const DialogImport = (props: DialogImportProps) => {
     }
   }, [fileName, importTypeSelected]);
 
-  // Effect to manipulate 'Continue' button state when mapping fields from a spreadsheet file
+  // Effect to manipulate 'Continue' button state when mapping columns from a spreadsheet file
   useEffect(() => {
     if (_.isEqual(entityInterfacePage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
       setContinueDisabled(false);
@@ -268,7 +268,7 @@ const DialogImport = (props: DialogImportProps) => {
     }
   }, [entityInterfacePage]);
 
-  // Effect to disable 'Continue' on the mapping page when any attribute is incomplete
+  // Effect to disable 'Continue' on the mapping page when any Attribute is incomplete
   useEffect(() => {
     if (!_.isEqual(entityInterfacePage, "mapping")) return;
     const allValid =
@@ -277,7 +277,32 @@ const DialogImport = (props: DialogImportProps) => {
     setContinueDisabled(!allValid);
   }, [entityInterfacePage, attributesField]);
 
-  const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
+  // Effect to fetch AI column mapping suggestions when columns become available
+  useEffect(() => {
+    if (!globalPermissions.features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
+
+    const fetchSuggestions = async () => {
+      setIsSuggesting(true);
+      try {
+        const result = await runSuggestColumnMapping({ variables: { columns: columns.map((c) => c.name) } });
+        if (result.data?.suggestColumnMapping) {
+          setSuggestions(result.data.suggestColumnMapping);
+        }
+      } finally {
+        setIsSuggesting(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [columns]);
+
+  /** Helper functions for importing Entities via CSV, XLSX, or JSON */
+  /**
+   * Utility function to parse the JSON file at the client-level
+   * @param {File} file JSON file containing Entity information
+   * @return {Promise<{ entities: EntityModel[] }>}
+   */
+  const parseEntityJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
     // Attempt to parse the JSON file
     setImportLoading(true);
     const data = await file.text();
@@ -298,7 +323,12 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
+  /**
+   * Validate the content structure of an uploaded JSON file at the client-level
+   * @param {{ entities: EntityModel[] }} parsed Parsed contents of the JSON file containing Entity information
+   * @return {boolean}
+   */
+  const validEntityJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
     if (parsed.entities === undefined) {
       toaster.create({
         title: "JSON Import Error",
@@ -326,8 +356,12 @@ const DialogImport = (props: DialogImportProps) => {
     return true;
   };
 
-  /** Returns true if `columnName` is already assigned to a field or an Attribute value. */
-  const columnSelected = (columnName: string) => {
+  /**
+   * Returns true if `columnName` is already assigned to a field or an Attribute value
+   * @param {string} columnName Name of the column being checked
+   * @return {boolean}
+   */
+  const columnIsAssigned = (columnName: string): boolean => {
     if (_.includes([nameField?.name, descriptionField?.name, identifierField?.name], columnName)) return true;
 
     for (const attribute of attributesField) {
@@ -339,18 +373,21 @@ const DialogImport = (props: DialogImportProps) => {
     return false;
   };
 
-  /** Parses and validates the uploaded file. Populates `columns` for spreadsheet files. */
-  const setupImport = async (): Promise<boolean> => {
+  /**
+   * Parses and validates the uploaded file, populates `columns` for CSV and XLSX files
+   * @return {Promise<boolean>}
+   */
+  const setupEntityImport = async (): Promise<boolean> => {
     setContinueDisabled(true);
 
     if (fileType === JSON_MIME_TYPE) {
       // Handle JSON data separately
       setImportLoading(true);
-      const data = await parseJSONFile(fileUpload.acceptedFiles[0]);
+      const data = await parseEntityJSONFile(fileUpload.acceptedFiles[0]);
       setImportLoading(false);
 
       // Validate the JSON data
-      return validJSONFile(data);
+      return validEntityJSONFile(data);
     } else if (isSpreadsheetFile(fileType)) {
       // Mutation query with CSV or XLSX file
       setImportLoading(true);
@@ -402,8 +439,11 @@ const DialogImport = (props: DialogImportProps) => {
     return true;
   };
 
-  /** Fetches Projects and Attributes to populate the mapping step dropdowns */
-  const setupMapping = async (): Promise<boolean> => {
+  /**
+   * Fetches Projects and Attributes to populate the mapping step dropdowns
+   * @return {boolean}
+   */
+  const setupEntityColumnMapping = async (): Promise<boolean> => {
     setImportLoading(true);
     const response = await getMappingData();
     setImportLoading(false);
@@ -439,8 +479,28 @@ const DialogImport = (props: DialogImportProps) => {
     return true;
   };
 
-  /** Runs the server-side review for a JSON entity import and populates `reviewEntities`. */
-  const setupReviewEntityJSON = async () => {
+  /**
+   * Builds the column mapping object from current state
+   * @return {IColumnMapping}
+   */
+  const buildEntityColumnMapping = (): IColumnMapping => ({
+    namePrefix: namePrefixField,
+    name: nameField?.name,
+    secondaryIdentifier: {
+      value: identifierField?.name,
+      format: identifierFormat[0] || "",
+    },
+    description: descriptionField?.name,
+    created: dayjs(Date.now()).toISOString(),
+    owner: ownerField,
+    project: projectField,
+    attributes: removeTypename(attributesField),
+  });
+
+  /**
+   * Runs the server-side review for a JSON Entity import and populates `reviewEntities`
+   */
+  const setupEntityReviewJSON = async () => {
     setImportLoading(true);
     const response = await reviewEntityJSON({
       variables: {
@@ -464,24 +524,11 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Builds the column mapping object from current form state. */
-  const buildColumnMapping = (): IColumnMapping => ({
-    namePrefix: namePrefixField,
-    name: nameField?.name,
-    secondaryIdentifier: {
-      value: identifierField?.name,
-      format: identifierFormat[0] || "",
-    },
-    description: descriptionField?.name,
-    created: dayjs(Date.now()).toISOString(),
-    owner: ownerField,
-    project: projectField,
-    attributes: removeTypename(attributesField),
-  });
-
-  /** Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable. */
-  const setupReviewEntityCSV = async () => {
-    const columnMapping = buildColumnMapping();
+  /**
+   * Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable
+   */
+  const setupEntityReviewCSV = async () => {
+    const columnMapping = buildEntityColumnMapping();
 
     setImportLoading(true);
     const reviewResponse = await reviewEntityCSV({
@@ -539,33 +586,10 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Runs the server-side review for a JSON Attribute import and populates `reviewAttributes`. */
-  const setupReviewAttributeJSON = async () => {
-    setImportLoading(true);
-    const response = await reviewAttributeJSON({
-      variables: {
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (response.data && response.data.reviewAttributeJSON.data) {
-      setReviewAttributes(response.data.reviewAttributeJSON.data);
-    }
-
-    if (reviewAttributeJSONError) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Error while reviewing JSON file",
-        duration: 4000,
-        closable: true,
-      });
-    }
-  };
-
-  /** Executes the final JSON entity import and resets state on success. */
-  const finishImportEntityJSON = async () => {
+  /**
+   * Executes the final JSON entity import and resets state on success
+   */
+  const finishEntityImportJSON = async () => {
     setImportLoading(true);
     const response = await importEntityJSON({
       variables: {
@@ -593,9 +617,11 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Executes the final CSV/XLSX entity import and resets state on success. */
-  const finishImportEntityCSV = async () => {
-    const columnMapping = buildColumnMapping();
+  /**
+   * Executes the final CSV/XLSX entity import and resets state on success
+   */
+  const finishEntityImportCSV = async () => {
+    const columnMapping = buildEntityColumnMapping();
     const options = { counters: nameUseCounter ? [{ field: "name", _id: counter }] : [] };
 
     setImportLoading(true);
@@ -622,8 +648,47 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Executes the final JSON Attribute import and resets state on success. */
-  const finishImportAttributeJSON = async () => {
+  // Generate the total number of warnings for an Entity import
+  const importEntityWarningCount = reviewEntities.filter(
+    (entity) => entity.warnings && entity.warnings.length > 0,
+  ).length;
+
+  /** Helper functions for importing Attributes via JSON */
+  /**
+   * Runs the server-side review for a JSON Attribute import and populates `reviewAttributes`
+   */
+  const setupAttributeReviewJSON = async () => {
+    setImportLoading(true);
+    const response = await reviewAttributeJSON({
+      variables: {
+        file: fileUpload.acceptedFiles[0],
+      },
+    });
+    setImportLoading(false);
+
+    // Error: Unsuccessful check server-side
+
+    console.info("Response:", response);
+
+    if (response.data && response.data.reviewAttributeJSON.data) {
+      setReviewAttributes(response.data.reviewAttributeJSON.data);
+    }
+
+    if (reviewAttributeJSONError) {
+      toaster.create({
+        title: "JSON Import Error",
+        type: "error",
+        description: "Error while reviewing JSON file",
+        duration: 4000,
+        closable: true,
+      });
+    }
+  };
+
+  /**
+   * Executes the final JSON Attribute import and resets state on success
+   */
+  const finishAttributeImportJSON = async () => {
     setImportLoading(true);
     await importAttributeJSON({
       variables: {
@@ -646,31 +711,19 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  // Fetch AI column mapping suggestions when columns become available
-  useEffect(() => {
-    if (!globalPermissions.features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
-
-    const fetchSuggestions = async () => {
-      setIsSuggesting(true);
-      try {
-        const result = await runSuggestColumnMapping({ variables: { columns: columns.map((c) => c.name) } });
-        if (result.data?.suggestColumnMapping) {
-          setSuggestions(result.data.suggestColumnMapping);
-        }
-      } finally {
-        setIsSuggesting(false);
-      }
-    };
-
-    fetchSuggestions();
-  }, [columns]);
-
-  /** Renders a column-picker `Select` bound to a `ColumnInfo` value, showing the inferred type icon. */
+  /** Helper functions generating and presenting UI */
+  /**
+   * Renders a column-picker `Select` bound to a `ColumnInfo` value, showing the inferred type icon
+   * @param {string} key Unique key for the Select component
+   * @param {ColumnInfo | undefined} currentValue Current value of the Select component
+   * @param {React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>} onValueChange Callback function for when the value is changed
+   * @return {React.JSX.Element}
+   */
   const getSelectComponent = (
     key: string,
     currentValue: ColumnInfo | undefined,
     onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
-  ) => {
+  ): React.JSX.Element => {
     const triggerIcon = getValueTypeIconProps(currentValue?.inferredType);
     return (
       <Select.Root
@@ -720,7 +773,9 @@ const DialogImport = (props: DialogImportProps) => {
     );
   };
 
-  /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
+  /**
+   * Steps back one page in the entity import flow, re-enabling the type selector when returning to upload
+   */
   const onBackClick = () => {
     if (_.isEqual(entityInterfacePage, "details")) {
       setEntityStep(0);
@@ -736,8 +791,11 @@ const DialogImport = (props: DialogImportProps) => {
     }
   };
 
-  /** Advances the import flow one step, running any required setup or validation before proceeding. */
-  const onContinueClick = async () => {
+  /**
+   * Advances the import flow one step, running any required setup or validation before proceeding
+   * @return {Promise<void>}
+   */
+  const onContinueClick = async (): Promise<void> => {
     // Disable changing the type of import unless import canceled
     setIsTypeSelectDisabled(true);
 
@@ -752,8 +810,8 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run setup for import and mapping
         setImportLoading(true);
-        const importResult = await setupImport();
-        const mappingResult = await setupMapping();
+        const importResult = await setupEntityImport();
+        const mappingResult = await setupEntityColumnMapping();
         setImportLoading(false);
 
         if (importResult && mappingResult) {
@@ -797,9 +855,9 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run the review setup function depending on file type
         if (fileType === JSON_MIME_TYPE) {
-          await setupReviewEntityJSON();
+          await setupEntityReviewJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await setupReviewEntityCSV();
+          await setupEntityReviewCSV();
         }
 
         // Proceed to the next page
@@ -822,9 +880,9 @@ const DialogImport = (props: DialogImportProps) => {
         // Run the final import function depending on file type
         setImportLoading(true);
         if (fileType === JSON_MIME_TYPE) {
-          await finishImportEntityJSON();
+          await finishEntityImportJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await finishImportEntityCSV();
+          await finishEntityImportCSV();
         }
         setImportLoading(false);
       }
@@ -838,7 +896,7 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Run the review setup function for Attribute JSON files
-        await setupReviewAttributeJSON();
+        await setupAttributeReviewJSON();
 
         // Proceed to the next page
         setAttributeStep(1);
@@ -851,12 +909,15 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run the final import function for Attribute JSON files
         setImportLoading(true);
-        await finishImportAttributeJSON();
+        await finishAttributeImportJSON();
         setImportLoading(false);
       }
     }
   };
 
+  /**
+   * Reset the UI state
+   */
   const resetState = () => {
     // Reset UI state
     setImportType(undefined);
@@ -908,12 +969,13 @@ const DialogImport = (props: DialogImportProps) => {
     setConfirmWarningsOpen(false);
   };
 
+  /**
+   * Perform state cleanup when the UI is closed
+   */
   const handleOnClose = () => {
     resetState();
     props.setOpen(false);
   };
-
-  const warningCount = reviewEntities.filter((entity) => entity.warnings && entity.warnings.length > 0).length;
 
   return (
     <Dialog.Root
@@ -937,9 +999,9 @@ const DialogImport = (props: DialogImportProps) => {
           posthog.capture("client.import.finish", { importType: "entities" });
           setImportLoading(true);
           if (fileType === JSON_MIME_TYPE) {
-            await finishImportEntityJSON();
+            await finishEntityImportJSON();
           } else if (isSpreadsheetFile(fileType)) {
-            await finishImportEntityCSV();
+            await finishEntityImportCSV();
           }
           setImportLoading(false);
         }}
@@ -947,7 +1009,7 @@ const DialogImport = (props: DialogImportProps) => {
         <Flex direction={"column"} gap={"2"}>
           <Text fontSize={"xs"}>
             <Text as={"span"} fontWeight={"semibold"}>
-              {warningCount} {warningCount === 1 ? "row has" : "rows have"}
+              {importEntityWarningCount} {importEntityWarningCount === 1 ? "row has" : "rows have"}
             </Text>{" "}
             data validation warnings. Blank or default values will be substituted for any unresolvable data.
           </Text>
@@ -1062,11 +1124,15 @@ const DialogImport = (props: DialogImportProps) => {
                       getKey={(column) => column.name}
                       renderTag={(column) => {
                         const iconProps = getValueTypeIconProps(column.inferredType);
-                        const used = columnSelected(column.name);
+                        const assigned = columnIsAssigned(column.name);
                         return (
-                          <Tag.Root bg={used ? "green.100" : "white"} colorPalette={used ? "green" : "gray"}>
+                          <Tag.Root bg={assigned ? "green.100" : "white"} colorPalette={assigned ? "green" : "gray"}>
                             <Tag.StartElement>
-                              <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
+                              <Icon
+                                name={iconProps.name}
+                                size={"xs"}
+                                color={assigned ? "green.600" : iconProps.color}
+                              />
                             </Tag.StartElement>
                             <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
                           </Tag.Root>
