@@ -126,10 +126,8 @@ const DialogImport = (props: DialogImportProps) => {
   };
 
   // State management to generate and present different pages
-  const [entityInterfacePage, setEntityInterfacePage] = useState(
-    "upload" as "upload" | "details" | "mapping" | "review",
-  );
-  const [attributeInterfacePage, setAttributeInterfacePage] = useState("upload" as "upload" | "review");
+  const [entityImportPage, setEntityImportPage] = useState("upload" as "upload" | "details" | "mapping" | "review");
+  const [attributeImportPage, setAttributeImportPage] = useState("upload" as "upload" | "review");
 
   // Used to generated numerical steps and a progress bar
   // Entity steps
@@ -247,35 +245,35 @@ const DialogImport = (props: DialogImportProps) => {
   // Effect to manipulate 'Continue' button state for 'upload' page, also re-disabling it
   // if the file is removed after being accepted
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload")) {
+    if (_.isEqual(entityImportPage, "upload")) {
       setContinueDisabled(!(fileName !== "" && importTypeSelected));
     }
   }, [fileName, importTypeSelected]);
 
   // Effect to manipulate 'Continue' button state when mapping columns from a spreadsheet file
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
+    if (_.isEqual(entityImportPage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
       setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "details") && counter !== "" && nameUseCounter) {
+    } else if (_.isEqual(entityImportPage, "details") && counter !== "" && nameUseCounter) {
       setContinueDisabled(false);
     }
   }, [nameField, counter]);
 
   // Effect to manipulate 'Continue' button state when importing JSON file
   useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && fileType === JSON_MIME_TYPE) {
+    if (_.isEqual(entityImportPage, "details") && fileType === JSON_MIME_TYPE) {
       setContinueDisabled(false);
     }
-  }, [entityInterfacePage]);
+  }, [entityImportPage]);
 
   // Effect to disable 'Continue' on the mapping page when any Attribute is incomplete
   useEffect(() => {
-    if (!_.isEqual(entityInterfacePage, "mapping")) return;
+    if (!_.isEqual(entityImportPage, "mapping")) return;
     const allValid =
       attributesField.length === 0 ||
       attributesField.every((attr) => attr.name !== "" && attr.description !== "" && isValidValues(attr.values));
     setContinueDisabled(!allValid);
-  }, [entityInterfacePage, attributesField]);
+  }, [entityImportPage, attributesField]);
 
   // Effect to fetch AI column mapping suggestions when columns become available
   useEffect(() => {
@@ -666,22 +664,26 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    // Error: Unsuccessful check server-side
-
-    console.info("Response:", response);
-
-    if (response.data && response.data.reviewAttributeJSON.data) {
-      setReviewAttributes(response.data.reviewAttributeJSON.data);
-    }
-
-    if (reviewAttributeJSONError) {
+    if (_.isUndefined(response.data) || _.isUndefined(response.data.reviewAttributeJSON) || reviewAttributeJSONError) {
+      // Error: Invalid file processed by the server
       toaster.create({
-        title: "JSON Import Error",
+        title: "Attribute Import JSON Error",
         type: "error",
-        description: "Error while reviewing JSON file",
+        description: "Invalid response returned by server when validating JSON",
         duration: 4000,
         closable: true,
       });
+    } else if (response.data.reviewAttributeJSON.success === false) {
+      // Error: Unsuccessful check server-side
+      toaster.create({
+        title: "Attribute Import JSON Error",
+        type: "error",
+        description: response.data.reviewAttributeJSON.message,
+        duration: 4000,
+        closable: true,
+      });
+    } else {
+      setReviewAttributes(response.data.reviewAttributeJSON.data);
     }
   };
 
@@ -777,17 +779,26 @@ const DialogImport = (props: DialogImportProps) => {
    * Steps back one page in the entity import flow, re-enabling the type selector when returning to upload
    */
   const onBackClick = () => {
-    if (_.isEqual(entityInterfacePage, "details")) {
+    if (_.isEqual(entityImportPage, "details")) {
+      // Entity: Details -> Upload
       setEntityStep(0);
-      setEntityInterfacePage("upload");
+      setEntityImportPage("upload");
       setIsTypeSelectDisabled(false);
       setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "mapping")) {
+    } else if (_.isEqual(entityImportPage, "mapping")) {
+      // Entity: Mapping -> Details
       setEntityStep(1);
-      setEntityInterfacePage("details");
-    } else if (_.isEqual(entityInterfacePage, "review")) {
+      setEntityImportPage("details");
+    } else if (_.isEqual(entityImportPage, "review")) {
+      // Entity: Review -> Mapping
       setEntityStep(2);
-      setEntityInterfacePage("mapping");
+      setEntityImportPage("mapping");
+    } else if (_.isEqual(attributeImportPage, "review")) {
+      // Attribute: Review -> Upload
+      setAttributeStep(0);
+      setAttributeImportPage("upload");
+      setIsTypeSelectDisabled(false);
+      setContinueDisabled(false);
     }
   };
 
@@ -800,7 +811,7 @@ const DialogImport = (props: DialogImportProps) => {
     setIsTypeSelectDisabled(true);
 
     if (_.isEqual(importType, "entities")) {
-      if (_.isEqual(entityInterfacePage, "upload")) {
+      if (_.isEqual(entityImportPage, "upload")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "entities",
@@ -817,9 +828,9 @@ const DialogImport = (props: DialogImportProps) => {
         if (importResult && mappingResult) {
           // Proceed to the next page if both setup steps completed successfully
           setEntityStep(1);
-          setEntityInterfacePage("details");
+          setEntityImportPage("details");
         }
-      } else if (_.isEqual(entityInterfacePage, "details")) {
+      } else if (_.isEqual(entityImportPage, "details")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "entities",
@@ -829,8 +840,8 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Proceed to the next page
         setEntityStep(2);
-        setEntityInterfacePage("mapping");
-      } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        setEntityImportPage("mapping");
+      } else if (_.isEqual(entityImportPage, "mapping")) {
         // Validate all attributes are complete before proceeding
         const incompleteAttribute = attributesField.find(
           (attr) => attr.name === "" || attr.description === "" || !isValidValues(attr.values),
@@ -862,8 +873,8 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Proceed to the next page
         setEntityStep(3);
-        setEntityInterfacePage("review");
-      } else if (_.isEqual(entityInterfacePage, "review")) {
+        setEntityImportPage("review");
+      } else if (_.isEqual(entityImportPage, "review")) {
         // If any rows have validation warnings, require explicit confirmation before importing
         const hasWarnings =
           isSpreadsheetFile(fileType) && reviewEntities.some((e) => e.warnings && e.warnings.length > 0);
@@ -887,7 +898,7 @@ const DialogImport = (props: DialogImportProps) => {
         setImportLoading(false);
       }
     } else if (_.isEqual(importType, "attribute")) {
-      if (_.isEqual(attributeInterfacePage, "upload")) {
+      if (_.isEqual(attributeImportPage, "upload")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "attribute",
@@ -900,8 +911,8 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Proceed to the next page
         setAttributeStep(1);
-        setAttributeInterfacePage("review");
-      } else if (_.isEqual(attributeInterfacePage, "review")) {
+        setAttributeImportPage("review");
+      } else if (_.isEqual(attributeImportPage, "review")) {
         // Capture event
         posthog.capture("client.import.finish", {
           importType: "attribute",
@@ -924,9 +935,9 @@ const DialogImport = (props: DialogImportProps) => {
     setImportTypeSelected(false);
 
     setEntityStep(0);
-    setEntityInterfacePage("upload");
+    setEntityImportPage("upload");
     setAttributeStep(0);
-    setAttributeInterfacePage("upload");
+    setAttributeImportPage("upload");
 
     setContinueDisabled(true);
     setImportLoading(false);
@@ -1090,7 +1101,7 @@ const DialogImport = (props: DialogImportProps) => {
             )}
 
             {/* Display filename and list of columns if a CSV file after upload */}
-            {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+            {_.isEqual(importType, "entities") && !_.isEqual(entityImportPage, "upload") && (
               <Flex
                 w={"100%"}
                 justify={"left"}
@@ -1146,7 +1157,7 @@ const DialogImport = (props: DialogImportProps) => {
 
             {/* Entity Steps */}
             {/* Entity Step 1: Simple mapping, details */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && (
+            {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "details") && (
               <EntityDetailsStep
                 fileType={fileType}
                 columns={columns}
@@ -1176,7 +1187,7 @@ const DialogImport = (props: DialogImportProps) => {
             )}
 
             {/* Entity Step 2: Advanced mapping */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && (
+            {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "mapping") && (
               <EntityMappingStep
                 attributesField={attributesField}
                 onAttributesFieldChange={setAttributesField}
@@ -1190,13 +1201,13 @@ const DialogImport = (props: DialogImportProps) => {
             )}
 
             {/* Entity Step 3: Review */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
+            {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "review") && (
               <EntityReviewStep reviewEntities={reviewEntities} />
             )}
 
             {/* Attribute Steps */}
             {/* Attribute Step 1: Review */}
-            {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && (
+            {_.isEqual(importType, "attribute") && _.isEqual(attributeImportPage, "review") && (
               <AttributeReviewStep reviewAttributes={reviewAttributes} />
             )}
           </Dialog.Body>
@@ -1223,7 +1234,22 @@ const DialogImport = (props: DialogImportProps) => {
                   Cancel
                   <Icon name="cross" size={"xs"} />
                 </Button>
-                {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+                {/* Entity import "Back" button */}
+                {_.isEqual(importType, "entities") && !_.isEqual(entityImportPage, "upload") && (
+                  <Button
+                    size={"xs"}
+                    rounded={"md"}
+                    colorPalette={"orange"}
+                    variant={"solid"}
+                    onClick={onBackClick}
+                    disabled={importLoading}
+                  >
+                    <Icon name={"c_left"} size={"xs"} />
+                    Back
+                  </Button>
+                )}
+                {/* Attribute import "Back" button */}
+                {_.isEqual(importType, "attribute") && !_.isEqual(attributeImportPage, "upload") && (
                   <Button
                     size={"xs"}
                     rounded={"md"}
@@ -1244,9 +1270,7 @@ const DialogImport = (props: DialogImportProps) => {
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={
-                    _.isEqual(attributeInterfacePage, "review") || _.isEqual(entityInterfacePage, "review")
-                      ? "green"
-                      : "blue"
+                    _.isEqual(attributeImportPage, "review") || _.isEqual(entityImportPage, "review") ? "green" : "blue"
                   }
                   variant={"solid"}
                   onClick={onContinueClick}
@@ -1258,18 +1282,18 @@ const DialogImport = (props: DialogImportProps) => {
                   {entityStep === 0 && attributeStep === 0 && "Continue"}
 
                   {/* Entities import type */}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && "Continue"}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && "Continue"}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "details") && "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "mapping") && "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityImportPage, "review") && "Finish"}
 
                   {/* Attribute import type */}
-                  {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && "Finish"}
+                  {_.isEqual(importType, "attribute") && _.isEqual(attributeImportPage, "review") && "Finish"}
 
                   {/* Icon */}
-                  {_.includes(["upload", "details", "mapping"], entityInterfacePage) ? (
-                    <Icon name={"c_right"} size={"xs"} />
-                  ) : (
+                  {_.isEqual(entityImportPage, "review") || _.isEqual(attributeImportPage, "review") ? (
                     <Icon name={"check"} size={"xs"} />
+                  ) : (
+                    <Icon name={"c_right"} size={"xs"} />
                   )}
                 </Button>
               </Flex>
