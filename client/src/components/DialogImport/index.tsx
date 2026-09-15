@@ -512,18 +512,31 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    if (response.data && response.data.reviewEntityJSON.data) {
-      setReviewEntities(response.data.reviewEntityJSON.data);
-    }
-
-    if (reviewEntityJSONError) {
+    if (_.isUndefined(response.data) || _.isUndefined(response.data.reviewEntityJSON) || reviewEntityJSONError) {
+      // Error: Invalid file processed by the server
       toaster.create({
         title: "Entity Import JSON Error",
         type: "error",
-        description: "Error while reviewing Entity JSON file",
+        description: "Invalid response returned by server when validating JSON",
         duration: 4000,
         closable: true,
       });
+      setContinueDisabled(true);
+      return false;
+    } else if (response.data.reviewEntityJSON.success === false) {
+      // Error: Unsuccessful check server-side
+      toaster.create({
+        title: "Entity Import JSON Error",
+        type: "error",
+        description: response.data.reviewEntityJSON.message,
+        duration: 4000,
+        closable: true,
+      });
+      setContinueDisabled(true);
+      return false;
+    } else {
+      setReviewEntities(response.data.reviewEntityJSON.data);
+      return true;
     }
   };
 
@@ -534,7 +547,7 @@ const DialogImport = (props: DialogImportProps) => {
     const columnMapping = buildEntityColumnMapping();
 
     setImportLoading(true);
-    const reviewResponse = await reviewEntitySpreadsheet({
+    const response = await reviewEntitySpreadsheet({
       variables: {
         columnMapping: removeTypename(columnMapping),
         file: fileUpload.acceptedFiles[0],
@@ -542,50 +555,67 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    if (reviewResponse.data && reviewResponse.data.reviewEntitySpreadsheet.data) {
-      setReviewEntities(reviewResponse.data.reviewEntitySpreadsheet.data);
-    }
-
-    // Retrieve and splice in counter values if being used for names
-    if (nameUseCounter && reviewResponse.data?.reviewEntitySpreadsheet?.data) {
-      const reviewData = reviewResponse.data.reviewEntitySpreadsheet.data;
-      const counterResponse = await getCounterValues({
-        variables: {
-          _id: counter,
-          count: reviewData.length,
-        },
-      });
-
-      const counterValues = counterResponse.data?.nextCounterValues?.data;
-      if (counterValues && counterValues.length > 0) {
-        const counterValuesSpliced = reviewData.map((entity: EntityImportReview, index: number) => {
-          return {
-            ...entity,
-            name: counterValues[index],
-          };
-        });
-        setReviewEntities(counterValuesSpliced);
-      }
-
-      if (counterValuesError || !counterValues || counterValues.length === 0) {
-        toaster.create({
-          title: "Entity Import Error",
-          type: "error",
-          description: "Error while retrieving counter values",
-          duration: 4000,
-          closable: true,
-        });
-      }
-    }
-
-    if (reviewEntitySpreadsheetError) {
+    if (
+      _.isUndefined(response.data) ||
+      _.isUndefined(response.data.reviewEntitySpreadsheet) ||
+      reviewEntitySpreadsheetError
+    ) {
+      // Error: Invalid file processed by the server
       toaster.create({
         title: "Entity Import Spreadsheet Error",
         type: "error",
-        description: "Error while generating Entities for review",
+        description: "Invalid response returned by server when validating spreadsheet",
         duration: 4000,
         closable: true,
       });
+      setContinueDisabled(true);
+      return false;
+    } else if (response.data.reviewEntitySpreadsheet.success === false) {
+      // Error: Unsuccessful check server-side
+      toaster.create({
+        title: "Entity Import Spreadsheet Error",
+        type: "error",
+        description: response.data.reviewEntitySpreadsheet.message,
+        duration: 4000,
+        closable: true,
+      });
+      setContinueDisabled(true);
+      return false;
+    } else {
+      // Retrieve and splice in counter values if being used for names
+      if (nameUseCounter) {
+        const reviewData = response.data.reviewEntitySpreadsheet.data;
+        const counterResponse = await getCounterValues({
+          variables: {
+            _id: counter,
+            count: reviewData.length,
+          },
+        });
+
+        const counterValues = counterResponse.data?.nextCounterValues?.data;
+        if (counterValues && counterValues.length > 0) {
+          const counterValuesSpliced = reviewData.map((entity: EntityImportReview, index: number) => {
+            return {
+              ...entity,
+              name: counterValues[index],
+            };
+          });
+          setReviewEntities(counterValuesSpliced);
+        }
+
+        if (counterValuesError || !counterValues || counterValues.length === 0) {
+          toaster.create({
+            title: "Entity Import Spreadsheet Error",
+            type: "error",
+            description: "Error while retrieving counter values",
+            duration: 4000,
+            closable: true,
+          });
+          return false;
+        }
+      }
+      setReviewEntities(response.data.reviewEntitySpreadsheet.data);
+      return true;
     }
   };
 
@@ -603,20 +633,34 @@ const DialogImport = (props: DialogImportProps) => {
     });
     setImportLoading(false);
 
-    if (importEntityJSONError) {
+    if (_.isUndefined(response.data) || _.isUndefined(response.data.importEntityJSON) || importEntityJSONError) {
+      // Error: Invalid file processed by the server
       toaster.create({
         title: "Entity Import JSON Error",
         type: "error",
-        description: "Error while importing JSON file",
+        description: "Invalid response returned by server when validating JSON",
         duration: 4000,
         closable: true,
       });
-    }
-
-    if (response.data?.importEntityJSON?.success === true) {
+      setContinueDisabled(true);
+      return false;
+    } else if (response.data.importEntityJSON.success === false) {
+      // Error: Unsuccessful check server-side
+      toaster.create({
+        title: "Entity Import JSON Error",
+        type: "error",
+        description: response.data.importEntityJSON.message,
+        duration: 4000,
+        closable: true,
+      });
+      setContinueDisabled(true);
+      return false;
+    } else {
       // Close the `DialogImport` UI
+      props.setOpen(false);
       resetState();
       navigate(0);
+      return true;
     }
   };
 
@@ -646,6 +690,7 @@ const DialogImport = (props: DialogImportProps) => {
         closable: true,
       });
     } else {
+      props.setOpen(false);
       resetState();
       navigate(0);
     }
@@ -720,6 +765,7 @@ const DialogImport = (props: DialogImportProps) => {
         closable: true,
       });
     } else {
+      props.setOpen(false);
       resetState();
       navigate(0);
     }
@@ -877,15 +923,18 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Run the review setup function depending on file type
+        let setupEntityReviewResult = false;
         if (fileType === JSON_MIME_TYPE) {
-          await setupEntityReviewJSON();
+          setupEntityReviewResult = await setupEntityReviewJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await setupEntityReviewSpreadsheet();
+          setupEntityReviewResult = await setupEntityReviewSpreadsheet();
         }
 
-        // Proceed to the next page
-        setEntityStep(3);
-        setEntityImportPage("review");
+        if (setupEntityReviewResult) {
+          // Proceed to the next page
+          setEntityStep(3);
+          setEntityImportPage("review");
+        }
       } else if (_.isEqual(entityImportPage, "review")) {
         // If any rows have validation warnings, require explicit confirmation before importing
         const hasWarnings =
@@ -1000,8 +1049,8 @@ const DialogImport = (props: DialogImportProps) => {
    * Perform state cleanup when the UI is closed
    */
   const handleOnClose = () => {
-    resetState();
     props.setOpen(false);
+    resetState();
   };
 
   return (

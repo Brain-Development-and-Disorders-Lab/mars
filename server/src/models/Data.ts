@@ -432,6 +432,28 @@ export class Data {
 
       if (_.isUndefined(parsed["entities"])) {
         return { success: false, message: 'JSON file does not contain "entities" field', data: [] };
+      } else if (parsed["entities"].length === 0) {
+        return { success: false, message: "JSON file does not contain any Entities", data: [] };
+      }
+
+      // Check for missing fields within each Entity
+      const missingFields = [];
+      if (parsed["entities"].length > 0) {
+        for (const entity of parsed["entities"]) {
+          for (const field of ["name"]) {
+            if (_.isUndefined(entity[field])) {
+              missingFields.push(field);
+            }
+          }
+        }
+      }
+
+      if (missingFields.length > 0) {
+        return {
+          success: false,
+          message: `Entities JSON file contains Entities missing the following required fields: ${missingFields.join(", ")}`,
+          data: [],
+        };
       }
 
       const review: EntityImportReview[] = [];
@@ -525,12 +547,55 @@ export class Data {
       const projectExists = await Projects.exists(project);
 
       for (const entity of parsed.entities as EntityModel[]) {
-        if (!_.isEqual(entity.owner, context.user)) {
+        // Validate existing fields
+        if (_.isUndefined(entity.name)) {
+          return { success: false, message: 'Entity missing required "name" field' };
+        }
+
+        // Add non-essential missing fields
+        if (_.isUndefined(entity.timestamp)) {
+          entity.timestamp = dayjs(Date.now()).toISOString();
+        }
+        if (_.isUndefined(entity.created)) {
+          entity.created = dayjs(Date.now()).toISOString();
+        }
+        if (_.isUndefined(entity.secondaryIdentifier)) {
+          entity.secondaryIdentifier = {
+            value: "",
+            format: "",
+          };
+        }
+        if (_.isUndefined(entity.archived)) {
+          entity.archived = false;
+        }
+        if (_.isUndefined(entity.owner) || !_.isEqual(entity.owner, context.user)) {
           entity.owner = context.user;
         }
+        if (_.isUndefined(entity.description)) {
+          entity.description = "";
+        }
+        if (_.isUndefined(entity.projects)) {
+          entity.projects = [];
+        }
+        if (_.isUndefined(entity.links)) {
+          entity.links = [];
+        }
+        if (_.isUndefined(entity.attachments)) {
+          entity.attachments = [];
+        }
+        if (_.isUndefined(entity.attributes)) {
+          entity.attributes = [];
+        }
+        if (_.isUndefined(entity.history)) {
+          entity.history = [];
+        }
+
+        // Add to specified Project, check that not already in Project
         if (projectExists && !_.includes(entity.projects, project)) {
           entity.projects.push(project);
         }
+
+        // Append specified Attributes
         if (attributes.length > 0) {
           entity.attributes.push(...attributes);
         }
