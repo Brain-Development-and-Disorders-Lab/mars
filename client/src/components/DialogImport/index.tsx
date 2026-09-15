@@ -2,20 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Flex,
-  Button,
-  Dialog,
-  Text,
-  Select,
-  Tag,
-  Portal,
-  createListCollection,
-  Steps,
-  CloseButton,
-  useFileUpload,
-} from "@chakra-ui/react";
-import DialogAlert from "@components/DialogAlert";
+import { Flex, Button, Dialog, Text, Tag, Steps, CloseButton, useFileUpload } from "@chakra-ui/react";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
@@ -24,47 +11,16 @@ import EntityDetailsStep from "@components/DialogImport/steps/EntityDetailsStep"
 import EntityMappingStep from "@components/DialogImport/steps/EntityMappingStep";
 import EntityReviewStep from "@components/DialogImport/steps/EntityReviewStep";
 import AttributeReviewStep from "@components/DialogImport/steps/AttributeReviewStep";
-import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 
 // Custom and existing types
-import {
-  AttributeModel,
-  AttributeImportReview,
-  ColumnInfo,
-  IGenericItem,
-  EntityImportReview,
-  DialogImportProps,
-  IColumnMapping,
-  EntityModel,
-  IResponseMessage,
-  ResponseData,
-} from "@types";
+import { ColumnInfo, DialogImportProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
 
-// GraphQL
-import { useLazyQuery, useMutation } from "@apollo/client/react";
-import {
-  PREPARE_ENTITY_CSV,
-  GET_MAPPING_DATA,
-  REVIEW_ENTITY_CSV,
-  GET_COUNTER_VALUES,
-  SUGGEST_COLUMN_MAPPING,
-  IMPORT_ENTITY_CSV,
-  REVIEW_ENTITY_JSON,
-  IMPORT_ENTITY_JSON,
-  REVIEW_ATTRIBUTE_JSON,
-  IMPORT_ATTRIBUTE_JSON,
-} from "@components/DialogImport/queries";
-
 // Utility functions and libraries
-import { removeTypename, isValidValues, getValueTypeIconProps, isSpreadsheetFile } from "@lib/util";
+import { isValidValues, getValueTypeIconProps, isSpreadsheetFile } from "@lib/util";
 import _ from "lodash";
-import dayjs from "dayjs";
-
-// Authentication
-import { auth } from "@lib/auth";
 
 // Events
 import { usePostHog } from "posthog-js/react";
@@ -78,15 +34,13 @@ import {
   STYLES,
 } from "@variables";
 
-// Hooks
-import { usePermissions } from "@hooks/usePermissions";
+// Import flow hooks
+import { useEntityImport } from "@components/DialogImport/useEntityImport";
+import { useAttributeImport } from "@components/DialogImport/useAttributeImport";
 
 const DialogImport = (props: DialogImportProps) => {
   // Posthog
   const posthog = usePostHog();
-
-  // Permissions
-  const { globalPermissions } = usePermissions();
 
   // Operation and button states
   const [importLoading, setImportLoading] = useState(false);
@@ -125,12 +79,6 @@ const DialogImport = (props: DialogImportProps) => {
     setImportTypeSelected(true);
   };
 
-  // State management to generate and present different pages
-  const [entityInterfacePage, setEntityInterfacePage] = useState(
-    "upload" as "upload" | "details" | "mapping" | "review",
-  );
-  const [attributeInterfacePage, setAttributeInterfacePage] = useState("upload" as "upload" | "review");
-
   // Used to generated numerical steps and a progress bar
   // Entity steps
   const entitySteps = [
@@ -139,610 +87,62 @@ const DialogImport = (props: DialogImportProps) => {
     { title: "Apply Attributes" },
     { title: "Review" },
   ];
-  const [entityStep, setEntityStep] = useState(0);
 
   // Attribute steps
   const attributeSteps = [{ title: "Upload File" }, { title: "Review" }];
-  const [attributeStep, setAttributeStep] = useState(0);
 
-  // Spreadsheet column state
-  const [columns, setColumns] = useState([] as ColumnInfo[]);
-  const [columnsCollection, setColumnsCollection] = useState(
-    createListCollection<ColumnInfo>({
-      items: [] as ColumnInfo[],
-      itemToValue: (item) => item.name,
-      itemToString: (item) => item.name,
-    }),
-  );
+  const entityImport = useEntityImport({ open: props.open, fileUpload, fileType, setContinueDisabled });
+  const attributeImport = useAttributeImport({ fileUpload, setContinueDisabled });
 
-  // AI column mapping suggestions
-  const [suggestions, setSuggestions] = useState<{ name: string | null; description: string | null } | null>(null);
-  const [isSuggesting, setIsSuggesting] = useState(false);
-
-  // Projects
-  const [projectsCollection, setProjectsCollection] = useState(
-    createListCollection({
-      items: [] as IGenericItem[],
-      itemToValue: (item: IGenericItem) => item._id,
-      itemToString: (item: IGenericItem) => item.name,
-    }),
-  );
-
-  // Attributes available for Attribute creation
-  const [attributes, setAttributes] = useState<AttributeModel[]>([]);
-
-  // Controls the "Add Attribute" dialog on the mapping step
-  const [addAttributeOpen, setAddAttributeOpen] = useState(false);
-
-  // Fields to be assigned to columns
-  const [namePrefixField, setNamePrefixField] = useState("");
-  const [nameField, setNameField] = useState<ColumnInfo | undefined>(undefined);
-  const [nameUseCounter, setNameUseCounter] = useState(false);
-  const [counter, setCounter] = useState("");
-  const [descriptionField, setDescriptionField] = useState<ColumnInfo | undefined>(undefined);
-  const [ownerField, setOwnerField] = useState("");
-  const [projectField, setProjectField] = useState("");
-  const [attributesField, setAttributesField] = useState([] as AttributeModel[]);
-  const [identifierField, setIdentifierField] = useState<ColumnInfo | undefined>(undefined);
-  const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
-
-  // Review state
-  const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
-  const [reviewAttributes, setReviewAttributes] = useState([] as AttributeImportReview[]);
-
-  // Confirmation dialog shown when the user clicks Finish and warnings are present
-  const [confirmWarningsOpen, setConfirmWarningsOpen] = useState(false);
-
-  // Authentication and user
-  const { data: session, error: sessionErrorState } = auth.useSession();
-
+  // Effect to manipulate 'Continue' button state for 'upload' page
   useEffect(() => {
-    if (!props.open) return;
+    const onUploadPage =
+      importType === undefined ||
+      (importType === "entities" && entityImport.entityImportPage === "upload") ||
+      (importType === "attribute" && attributeImport.attributeImportPage === "upload");
 
-    if (sessionErrorState || !session) {
-      toaster.create({
-        title: "Error",
-        description: "Session expired, please login again",
-        type: "error",
-        duration: 4000,
-        closable: true,
-      });
-      return;
-    }
+    if (!onUploadPage) return;
+    setContinueDisabled(!(fileName !== "" && importTypeSelected));
+    setIsTypeSelectDisabled(fileName !== "");
+  }, [fileName, importTypeSelected, importType, entityImport.entityImportPage, attributeImport.attributeImportPage]);
 
-    setOwnerField(session.user.id);
-  }, [props.open, session, sessionErrorState]);
-
-  // Apollo hooks
-  const [prepareEntityCSV, { error: prepareEntityCSVError }] = useMutation<{
-    prepareEntityCSV: ColumnInfo[];
-  }>(PREPARE_ENTITY_CSV);
-  const [getMappingData, { error: mappingDataError }] = useLazyQuery<{
-    projects: IGenericItem[];
-    attributes: AttributeModel[];
-  }>(GET_MAPPING_DATA);
-  const [reviewEntityCSV, { error: reviewEntityCSVError }] = useMutation<{
-    reviewEntityCSV: ResponseData<EntityImportReview[]>;
-  }>(REVIEW_ENTITY_CSV);
-  const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
-    nextCounterValues: ResponseData<string[]>;
-  }>(GET_COUNTER_VALUES);
-  const [runSuggestColumnMapping] = useLazyQuery<{
-    suggestColumnMapping: { name: string | null; description: string | null };
-  }>(SUGGEST_COLUMN_MAPPING, { fetchPolicy: "network-only" });
-  const [importEntityCSV, { error: importEntityCSVError }] = useMutation(IMPORT_ENTITY_CSV);
-  const [reviewEntityJSON, { error: reviewEntityJSONError }] = useMutation<{
-    reviewEntityJSON: ResponseData<EntityImportReview[]>;
-  }>(REVIEW_ENTITY_JSON);
-  const [importEntityJSON, { error: importEntityJSONError }] = useMutation<{
-    importEntityJSON: IResponseMessage;
-  }>(IMPORT_ENTITY_JSON);
-  const [reviewAttributeJSON, { error: reviewAttributeJSONError }] = useMutation<{
-    reviewAttributeJSON: ResponseData<AttributeImportReview[]>;
-  }>(REVIEW_ATTRIBUTE_JSON);
-  const [importAttributeJSON, { error: importAttributeJSONError }] = useMutation<{
-    importAttributeJSON: IResponseMessage;
-  }>(IMPORT_ATTRIBUTE_JSON);
-
-  // Effect to manipulate 'Continue' button state for 'upload' page, also re-disabling it
-  // if the file is removed after being accepted
-  useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "upload")) {
-      setContinueDisabled(!(fileName !== "" && importTypeSelected));
-    }
-  }, [fileName, importTypeSelected]);
-
-  // Effect to manipulate 'Continue' button state when mapping fields from a spreadsheet file
-  useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && nameField !== undefined && isSpreadsheetFile(fileType)) {
-      setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "details") && counter !== "" && nameUseCounter) {
-      setContinueDisabled(false);
-    }
-  }, [nameField, counter]);
-
-  // Effect to manipulate 'Continue' button state when importing JSON file
-  useEffect(() => {
-    if (_.isEqual(entityInterfacePage, "details") && fileType === JSON_MIME_TYPE) {
-      setContinueDisabled(false);
-    }
-  }, [entityInterfacePage]);
-
-  // Effect to disable 'Continue' on the mapping page when any attribute is incomplete
-  useEffect(() => {
-    if (!_.isEqual(entityInterfacePage, "mapping")) return;
-    const allValid =
-      attributesField.length === 0 ||
-      attributesField.every((attr) => attr.name !== "" && attr.description !== "" && isValidValues(attr.values));
-    setContinueDisabled(!allValid);
-  }, [entityInterfacePage, attributesField]);
-
-  const parseJSONFile = async (file: File): Promise<{ entities: EntityModel[] }> => {
-    // Attempt to parse the JSON file
-    setImportLoading(true);
-    const data = await file.text();
-    setImportLoading(false);
-
-    try {
-      const parsed = JSON.parse(data as string);
-      return parsed;
-    } catch {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Could not parse file contents",
-        duration: 4000,
-        closable: true,
-      });
-      return {} as { entities: EntityModel[] };
-    }
-  };
-
-  const validJSONFile = (parsed: { entities: EntityModel[] }): boolean => {
-    if (parsed.entities === undefined) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: 'File does not contain top-level "entities" key',
-        duration: 4000,
-        closable: true,
-      });
-      return false;
-    }
-
-    // Check that it contains `EntityModel` instances
-    if (parsed.entities.length === 0) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "File does not contain any Entity data",
-        duration: 4000,
-        closable: true,
-      });
-      return false;
-    }
-
-    // File contents are valid
-    return true;
-  };
-
-  /** Returns true if `columnName` is already assigned to a field or an Attribute value. */
-  const columnSelected = (columnName: string) => {
-    if (_.includes([nameField?.name, descriptionField?.name, identifierField?.name], columnName)) return true;
-
-    for (const attribute of attributesField) {
-      for (const value of attribute.values) {
-        if (_.includes(value.data, columnName)) return true;
-      }
-    }
-
-    return false;
-  };
-
-  /** Parses and validates the uploaded file. Populates `columns` for spreadsheet files. */
-  const setupImport = async (): Promise<boolean> => {
-    setContinueDisabled(true);
-
-    if (fileType === JSON_MIME_TYPE) {
-      // Handle JSON data separately
-      setImportLoading(true);
-      const data = await parseJSONFile(fileUpload.acceptedFiles[0]);
-      setImportLoading(false);
-
-      // Validate the JSON data
-      return validJSONFile(data);
-    } else if (isSpreadsheetFile(fileType)) {
-      // Mutation query with CSV or XLSX file
-      setImportLoading(true);
-      const response = await prepareEntityCSV({
-        variables: {
-          file: fileUpload.acceptedFiles[0],
-        },
-      });
-      setImportLoading(false);
-
-      if (prepareEntityCSVError || !response.data) {
-        toaster.create({
-          title: "CSV Import Error",
-          type: "error",
-          description: "Error while preparing file",
-          duration: 4000,
-          closable: true,
-        });
-        return false;
-      }
-
-      if (response.data.prepareEntityCSV.length > 0) {
-        // Strip Excel placeholder columns for genuinely empty cells
-        const filteredColumnSet = response.data.prepareEntityCSV.filter(
-          (col: ColumnInfo) => !_.startsWith(col.name, "__EMPTY"),
-        );
-        setColumns(filteredColumnSet);
-        setColumnsCollection(
-          createListCollection<ColumnInfo>({
-            items: filteredColumnSet,
-            itemToValue: (item) => item.name,
-            itemToString: (item) => item.name,
-          }),
-        );
-        return true;
-      } else {
-        toaster.create({
-          title: "CSV Import Error",
-          type: "error",
-          description: "File is empty",
-          duration: 4000,
-          closable: true,
-        });
-        return false;
-      }
-    }
-
-    // No issues with file import
-    return true;
-  };
-
-  /** Fetches Projects and Attributes to populate the mapping step dropdowns */
-  const setupMapping = async (): Promise<boolean> => {
-    setImportLoading(true);
-    const response = await getMappingData();
-    setImportLoading(false);
-
-    if (response.data?.attributes) {
-      // Attributes containing "Entity" or "Select"-type Values can't be mapped to CSV columns
-      const supportedAttributes = response.data.attributes.filter((a: AttributeModel) =>
-        a.values.every((v) => !["entity", "select"].includes(v.type)),
-      );
-      setAttributes(supportedAttributes);
-    }
-    if (response.data?.projects) {
-      setProjectsCollection(
-        createListCollection({
-          items: response.data.projects,
-          itemToValue: (item: IGenericItem) => item._id,
-          itemToString: (item: IGenericItem) => item.name,
-        }),
-      );
-    }
-
-    if (mappingDataError) {
-      toaster.create({
-        title: "Import Error",
-        type: "error",
-        description: "Could not retrieve data for mapping columns",
-        duration: 4000,
-        closable: true,
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  /** Runs the server-side review for a JSON entity import and populates `reviewEntities`. */
-  const setupReviewEntityJSON = async () => {
-    setImportLoading(true);
-    const response = await reviewEntityJSON({
-      variables: {
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (response.data && response.data.reviewEntityJSON.data) {
-      setReviewEntities(response.data.reviewEntityJSON.data);
-    }
-
-    if (reviewEntityJSONError) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Error while reviewing JSON file",
-        duration: 4000,
-        closable: true,
-      });
-    }
-  };
-
-  /** Builds the column mapping object from current form state. */
-  const buildColumnMapping = (): IColumnMapping => ({
-    namePrefix: namePrefixField,
-    name: nameField?.name,
-    secondaryIdentifier: {
-      value: identifierField?.name,
-      format: identifierFormat[0] || "",
-    },
-    description: descriptionField?.name,
-    created: dayjs(Date.now()).toISOString(),
-    owner: ownerField,
-    project: projectField,
-    attributes: removeTypename(attributesField),
-  });
-
-  /** Runs the server-side review for a CSV/XLSX entity import, splicing in counter values when applicable. */
-  const setupReviewEntityCSV = async () => {
-    const columnMapping = buildColumnMapping();
-
-    setImportLoading(true);
-    const reviewResponse = await reviewEntityCSV({
-      variables: {
-        columnMapping: removeTypename(columnMapping),
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (reviewResponse.data && reviewResponse.data.reviewEntityCSV.data) {
-      setReviewEntities(reviewResponse.data.reviewEntityCSV.data);
-    }
-
-    // Retrieve and splice in counter values if being used for names
-    if (nameUseCounter && reviewResponse.data?.reviewEntityCSV?.data) {
-      const reviewData = reviewResponse.data.reviewEntityCSV.data;
-      const counterResponse = await getCounterValues({
-        variables: {
-          _id: counter,
-          count: reviewData.length,
-        },
-      });
-
-      const counterValues = counterResponse.data?.nextCounterValues?.data;
-      if (counterValues && counterValues.length > 0) {
-        const counterValuesSpliced = reviewData.map((entity: EntityImportReview, index: number) => {
-          return {
-            ...entity,
-            name: counterValues[index],
-          };
-        });
-        setReviewEntities(counterValuesSpliced);
-      }
-
-      if (counterValuesError || !counterValues || counterValues.length === 0) {
-        toaster.create({
-          title: "CSV Import Error",
-          type: "error",
-          description: "Error while retrieving counter values",
-          duration: 4000,
-          closable: true,
-        });
-      }
-    }
-
-    if (reviewEntityCSVError) {
-      toaster.create({
-        title: "CSV Import Error",
-        type: "error",
-        description: "Error while generating Entities for review",
-        duration: 4000,
-        closable: true,
-      });
-    }
-  };
-
-  /** Runs the server-side review for a JSON Attribute import and populates `reviewAttributes`. */
-  const setupReviewAttributeJSON = async () => {
-    setImportLoading(true);
-    const response = await reviewAttributeJSON({
-      variables: {
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (response.data && response.data.reviewAttributeJSON.data) {
-      setReviewAttributes(response.data.reviewAttributeJSON.data);
-    }
-
-    if (reviewAttributeJSONError) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Error while reviewing JSON file",
-        duration: 4000,
-        closable: true,
-      });
-    }
-  };
-
-  /** Executes the final JSON entity import and resets state on success. */
-  const finishImportEntityJSON = async () => {
-    setImportLoading(true);
-    const response = await importEntityJSON({
-      variables: {
-        file: fileUpload.acceptedFiles[0],
-        project: projectField,
-        attributes: removeTypename(attributesField),
-      },
-    });
-    setImportLoading(false);
-
-    if (importEntityJSONError) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Error while importing JSON file",
-        duration: 4000,
-        closable: true,
-      });
-    }
-
-    if (response.data?.importEntityJSON?.success === true) {
-      // Close the `DialogImport` UI
-      resetState();
-      navigate(0);
-    }
-  };
-
-  /** Executes the final CSV/XLSX entity import and resets state on success. */
-  const finishImportEntityCSV = async () => {
-    const columnMapping = buildColumnMapping();
-    const options = { counters: nameUseCounter ? [{ field: "name", _id: counter }] : [] };
-
-    setImportLoading(true);
-    await importEntityCSV({
-      variables: {
-        columnMapping: removeTypename(columnMapping),
-        options: removeTypename(options),
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (importEntityCSVError) {
-      toaster.create({
-        title: "CSV Import Error",
-        type: "error",
-        description: "Error while importing CSV file",
-        duration: 4000,
-        closable: true,
-      });
-    } else {
-      resetState();
-      navigate(0);
-    }
-  };
-
-  /** Executes the final JSON Attribute import and resets state on success. */
-  const finishImportAttributeJSON = async () => {
-    setImportLoading(true);
-    await importAttributeJSON({
-      variables: {
-        file: fileUpload.acceptedFiles[0],
-      },
-    });
-    setImportLoading(false);
-
-    if (importAttributeJSONError) {
-      toaster.create({
-        title: "JSON Import Error",
-        type: "error",
-        description: "Error while importing JSON file",
-        duration: 4000,
-        closable: true,
-      });
-    } else {
-      resetState();
-      navigate(0);
-    }
-  };
-
-  // Fetch AI column mapping suggestions when columns become available
-  useEffect(() => {
-    if (!globalPermissions.features.ai || columns.length === 0 || !isSpreadsheetFile(fileType)) return;
-
-    const fetchSuggestions = async () => {
-      setIsSuggesting(true);
-      try {
-        const result = await runSuggestColumnMapping({ variables: { columns: columns.map((c) => c.name) } });
-        if (result.data?.suggestColumnMapping) {
-          setSuggestions(result.data.suggestColumnMapping);
-        }
-      } finally {
-        setIsSuggesting(false);
-      }
-    };
-
-    fetchSuggestions();
-  }, [columns]);
-
-  /** Renders a column-picker `Select` bound to a `ColumnInfo` value, showing the inferred type icon. */
-  const getSelectComponent = (
-    key: string,
-    currentValue: ColumnInfo | undefined,
-    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
-  ) => {
-    const triggerIcon = getValueTypeIconProps(currentValue?.inferredType);
-    return (
-      <Select.Root
-        key={key}
-        size={SELECT_SIZE}
-        rounded={SELECT_ROUNDED}
-        bg={SELECT_BG}
-        collection={columnsCollection}
-        value={currentValue ? [currentValue.name] : []}
-        onValueChange={(details) => onValueChange(details.items[0])}
-      >
-        <Select.HiddenSelect />
-        <Select.Control>
-          <Select.Trigger data-testid={`import-column-select-trigger-${key}`} rounded={"md"}>
-            <Flex direction={"row"} gap={"2"} align={"center"}>
-              {currentValue ? (
-                <Icon name={triggerIcon.name} size={"xs"} color={triggerIcon.color} />
-              ) : (
-                <Icon name={"grid"} size={"xs"} color={"text.faint"} />
-              )}
-              <Text fontSize={"xs"}>{currentValue?.name || "Select Column"}</Text>
-            </Flex>
-          </Select.Trigger>
-          <Select.IndicatorGroup>
-            <Select.Indicator />
-          </Select.IndicatorGroup>
-        </Select.Control>
-        <Portal>
-          <Select.Positioner>
-            <Select.Content>
-              {columnsCollection.items?.map((column: ColumnInfo) => {
-                const iconProps = getValueTypeIconProps(column.inferredType);
-                return (
-                  <Select.Item item={column} key={column.name}>
-                    <Flex direction={"row"} gap={"2"} align={"center"}>
-                      <Icon name={iconProps.name} size={"xs"} color={iconProps.color} />
-                      {column.name}
-                    </Flex>
-                    <Select.ItemIndicator />
-                  </Select.Item>
-                );
-              }) || []}
-            </Select.Content>
-          </Select.Positioner>
-        </Portal>
-      </Select.Root>
-    );
-  };
-
-  /** Steps back one page in the entity import flow, re-enabling the type selector when returning to upload. */
+  /**
+   * Steps back one page in the entity import flow, re-enabling the type selector when returning to upload
+   */
   const onBackClick = () => {
-    if (_.isEqual(entityInterfacePage, "details")) {
-      setEntityStep(0);
-      setEntityInterfacePage("upload");
+    if (_.isEqual(entityImport.entityImportPage, "details")) {
+      // Entity: Details -> Upload
+      entityImport.setEntityStep(0);
+      entityImport.setEntityImportPage("upload");
       setIsTypeSelectDisabled(false);
       setContinueDisabled(false);
-    } else if (_.isEqual(entityInterfacePage, "mapping")) {
-      setEntityStep(1);
-      setEntityInterfacePage("details");
-    } else if (_.isEqual(entityInterfacePage, "review")) {
-      setEntityStep(2);
-      setEntityInterfacePage("mapping");
+    } else if (_.isEqual(entityImport.entityImportPage, "mapping")) {
+      // Entity: Mapping -> Details
+      entityImport.setEntityStep(1);
+      entityImport.setEntityImportPage("details");
+    } else if (_.isEqual(entityImport.entityImportPage, "review")) {
+      // Entity: Review -> Mapping
+      entityImport.setEntityStep(2);
+      entityImport.setEntityImportPage("mapping");
+    } else if (_.isEqual(attributeImport.attributeImportPage, "review")) {
+      // Attribute: Review -> Upload
+      attributeImport.setAttributeStep(0);
+      attributeImport.setAttributeImportPage("upload");
+      setIsTypeSelectDisabled(false);
+      setContinueDisabled(false);
     }
   };
 
-  /** Advances the import flow one step, running any required setup or validation before proceeding. */
-  const onContinueClick = async () => {
+  /**
+   * Advances the import flow one step, running any required setup or validation before proceeding
+   * @return {Promise<void>}
+   */
+  const onContinueClick = async (): Promise<void> => {
     // Disable changing the type of import unless import canceled
     setIsTypeSelectDisabled(true);
 
     if (_.isEqual(importType, "entities")) {
-      if (_.isEqual(entityInterfacePage, "upload")) {
+      if (_.isEqual(entityImport.entityImportPage, "upload")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "entities",
@@ -752,16 +152,15 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run setup for import and mapping
         setImportLoading(true);
-        const importResult = await setupImport();
-        const mappingResult = await setupMapping();
+        const setupResult = await entityImport.setupEntityUploadStep();
         setImportLoading(false);
 
-        if (importResult && mappingResult) {
+        if (setupResult) {
           // Proceed to the next page if both setup steps completed successfully
-          setEntityStep(1);
-          setEntityInterfacePage("details");
+          entityImport.setEntityStep(1);
+          entityImport.setEntityImportPage("details");
         }
-      } else if (_.isEqual(entityInterfacePage, "details")) {
+      } else if (_.isEqual(entityImport.entityImportPage, "details")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "entities",
@@ -770,11 +169,11 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Proceed to the next page
-        setEntityStep(2);
-        setEntityInterfacePage("mapping");
-      } else if (_.isEqual(entityInterfacePage, "mapping")) {
+        entityImport.setEntityStep(2);
+        entityImport.setEntityImportPage("mapping");
+      } else if (_.isEqual(entityImport.entityImportPage, "mapping")) {
         // Validate all attributes are complete before proceeding
-        const incompleteAttribute = attributesField.find(
+        const incompleteAttribute = entityImport.attributesField.find(
           (attr) => attr.name === "" || attr.description === "" || !isValidValues(attr.values),
         );
         if (incompleteAttribute) {
@@ -796,21 +195,32 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Run the review setup function depending on file type
+        setImportLoading(true);
+        let setupEntityReviewResult = false;
         if (fileType === JSON_MIME_TYPE) {
-          await setupReviewEntityJSON();
+          setupEntityReviewResult = await entityImport.setupEntityReviewJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await setupReviewEntityCSV();
+          setupEntityReviewResult = await entityImport.setupEntityReviewSpreadsheet();
         }
+        setImportLoading(false);
 
-        // Proceed to the next page
-        setEntityStep(3);
-        setEntityInterfacePage("review");
-      } else if (_.isEqual(entityInterfacePage, "review")) {
-        // If any rows have validation warnings, require explicit confirmation before importing
+        if (setupEntityReviewResult) {
+          // Proceed to the next page
+          entityImport.setEntityStep(3);
+          entityImport.setEntityImportPage("review");
+        }
+      } else if (_.isEqual(entityImport.entityImportPage, "review")) {
+        // Data validation warnings must be corrected in the file before the import can proceed
         const hasWarnings =
-          isSpreadsheetFile(fileType) && reviewEntities.some((e) => e.warnings && e.warnings.length > 0);
+          isSpreadsheetFile(fileType) && entityImport.reviewEntities.some((e) => e.warnings && e.warnings.length > 0);
         if (hasWarnings) {
-          setConfirmWarningsOpen(true);
+          toaster.create({
+            title: "Cannot Import",
+            type: "error",
+            description: "Some rows contain data validation warnings. Go back and correct the file, then try again.",
+            duration: 4000,
+            closable: true,
+          });
           return;
         }
 
@@ -821,15 +231,22 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run the final import function depending on file type
         setImportLoading(true);
+        let finishResult = false;
         if (fileType === JSON_MIME_TYPE) {
-          await finishImportEntityJSON();
+          finishResult = await entityImport.finishEntityImportJSON();
         } else if (isSpreadsheetFile(fileType)) {
-          await finishImportEntityCSV();
+          finishResult = await entityImport.finishEntityImportSpreadsheet();
         }
         setImportLoading(false);
+
+        if (finishResult) {
+          props.setOpen(false);
+          resetState();
+          navigate(0);
+        }
       }
     } else if (_.isEqual(importType, "attribute")) {
-      if (_.isEqual(attributeInterfacePage, "upload")) {
+      if (_.isEqual(attributeImport.attributeImportPage, "upload")) {
         // Capture event
         posthog.capture("client.import.continue", {
           importType: "attribute",
@@ -838,12 +255,16 @@ const DialogImport = (props: DialogImportProps) => {
         });
 
         // Run the review setup function for Attribute JSON files
-        await setupReviewAttributeJSON();
+        setImportLoading(true);
+        const importResult = await attributeImport.setupAttributeReviewJSON();
+        setImportLoading(false);
 
-        // Proceed to the next page
-        setAttributeStep(1);
-        setAttributeInterfacePage("review");
-      } else if (_.isEqual(attributeInterfacePage, "review")) {
+        if (importResult) {
+          // Proceed to the next page if the setup step completed successfully
+          attributeImport.setAttributeStep(1);
+          attributeImport.setAttributeImportPage("review");
+        }
+      } else if (_.isEqual(attributeImport.attributeImportPage, "review")) {
         // Capture event
         posthog.capture("client.import.finish", {
           importType: "attribute",
@@ -851,21 +272,25 @@ const DialogImport = (props: DialogImportProps) => {
 
         // Run the final import function for Attribute JSON files
         setImportLoading(true);
-        await finishImportAttributeJSON();
+        const finishResult = await attributeImport.finishAttributeImportJSON();
         setImportLoading(false);
+
+        if (finishResult) {
+          props.setOpen(false);
+          resetState();
+          navigate(0);
+        }
       }
     }
   };
 
+  /**
+   * Reset the UI state
+   */
   const resetState = () => {
     // Reset UI state
     setImportType(undefined);
     setImportTypeSelected(false);
-
-    setEntityStep(0);
-    setEntityInterfacePage("upload");
-    setAttributeStep(0);
-    setAttributeInterfacePage("upload");
 
     setContinueDisabled(true);
     setImportLoading(false);
@@ -875,45 +300,18 @@ const DialogImport = (props: DialogImportProps) => {
     setFileType("");
     setFileName("");
 
-    // Reset import and mapping state
-    setColumns([]);
-    setColumnsCollection(
-      createListCollection<ColumnInfo>({
-        items: [] as ColumnInfo[],
-        itemToValue: (item) => item.name,
-        itemToString: (item) => item.name,
-      }),
-    );
-    setSuggestions(null);
-    setIsSuggesting(false);
-    setNameField(undefined);
-    setNameUseCounter(false);
-    setCounter("");
-    setDescriptionField(undefined);
-    setProjectField("");
-    setIdentifierField(undefined);
-    setIdentifierFormat([]);
-    setProjectsCollection(
-      createListCollection({
-        items: [] as IGenericItem[],
-        itemToValue: (item: IGenericItem) => item._id,
-        itemToString: (item: IGenericItem) => item.name,
-      }),
-    );
-    setAttributes([]);
-    setAddAttributeOpen(false);
-    setAttributesField([]);
-    setReviewEntities([]);
-    setReviewAttributes([]);
-    setConfirmWarningsOpen(false);
+    // Reset per-flow state
+    entityImport.reset();
+    attributeImport.reset();
   };
 
+  /**
+   * Perform state cleanup when the UI is closed
+   */
   const handleOnClose = () => {
-    resetState();
     props.setOpen(false);
+    resetState();
   };
-
-  const warningCount = reviewEntities.filter((entity) => entity.warnings && entity.warnings.length > 0).length;
 
   return (
     <Dialog.Root
@@ -923,38 +321,6 @@ const DialogImport = (props: DialogImportProps) => {
       scrollBehavior={"inside"}
       onEscapeKeyDown={handleOnClose}
     >
-      <DialogAlert
-        open={confirmWarningsOpen}
-        setOpen={setConfirmWarningsOpen}
-        header={"Import with Warnings"}
-        leftButtonLabel={"Cancel"}
-        leftButtonColor={"red"}
-        leftButtonAction={() => setConfirmWarningsOpen(false)}
-        rightButtonLabel={"Import Anyway"}
-        rightButtonColor={"green"}
-        rightButtonAction={async () => {
-          setConfirmWarningsOpen(false);
-          posthog.capture("client.import.finish", { importType: "entities" });
-          setImportLoading(true);
-          if (fileType === JSON_MIME_TYPE) {
-            await finishImportEntityJSON();
-          } else if (isSpreadsheetFile(fileType)) {
-            await finishImportEntityCSV();
-          }
-          setImportLoading(false);
-        }}
-      >
-        <Flex direction={"column"} gap={"2"}>
-          <Text fontSize={"xs"}>
-            <Text as={"span"} fontWeight={"semibold"}>
-              {warningCount} {warningCount === 1 ? "row has" : "rows have"}
-            </Text>{" "}
-            data validation warnings. Blank or default values will be substituted for any unresolvable data.
-          </Text>
-          <Text fontSize={"xs"}>Do you want to continue with the import?</Text>
-        </Flex>
-      </DialogAlert>
-
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -973,9 +339,9 @@ const DialogImport = (props: DialogImportProps) => {
             {/* Stepper progress indicators */}
             {_.isEqual(importType, "entities") && (
               <Steps.Root
-                step={entityStep}
-                colorPalette={"blue"}
-                onStepChange={(event) => setEntityStep(event.step)}
+                step={entityImport.entityStep}
+                colorPalette={"entity"}
+                onStepChange={(event) => entityImport.setEntityStep(event.step)}
                 count={entitySteps.length}
                 p={"1"}
                 size={"sm"}
@@ -996,9 +362,9 @@ const DialogImport = (props: DialogImportProps) => {
 
             {(_.isEqual(importType, "attribute") || _.isUndefined(importType)) && (
               <Steps.Root
-                step={attributeStep}
-                colorPalette={"blue"}
-                onStepChange={(event) => setAttributeStep(event.step)}
+                step={attributeImport.attributeStep}
+                colorPalette={_.isUndefined(importType) ? "gray" : "attribute"}
+                onStepChange={(event) => attributeImport.setAttributeStep(event.step)}
                 count={attributeSteps.length}
                 p={"1"}
                 size={"sm"}
@@ -1018,7 +384,7 @@ const DialogImport = (props: DialogImportProps) => {
             )}
 
             {/* Select import type, and upload a file */}
-            {entityStep === 0 && attributeStep === 0 && (
+            {entityImport.entityStep === 0 && attributeImport.attributeStep === 0 && (
               <UploadStep
                 importType={importType}
                 isTypeSelectDisabled={isTypeSelectDisabled}
@@ -1027,8 +393,8 @@ const DialogImport = (props: DialogImportProps) => {
               />
             )}
 
-            {/* Display filename and list of columns if a CSV file after upload */}
-            {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+            {/* Display filename and list of columns if a spreadsheet file uploaded */}
+            {_.isEqual(importType, "entities") && !_.isEqual(entityImport.entityImportPage, "upload") && (
               <Flex
                 w={"100%"}
                 justify={"left"}
@@ -1057,16 +423,20 @@ const DialogImport = (props: DialogImportProps) => {
                       Columns:
                     </Text>
                     <FieldTagList
-                      items={columns}
+                      items={entityImport.columns}
                       max={MAX_DISPLAYED_COLUMNS}
                       getKey={(column) => column.name}
-                      renderTag={(column) => {
+                      renderTag={(column: ColumnInfo) => {
                         const iconProps = getValueTypeIconProps(column.inferredType);
-                        const used = columnSelected(column.name);
+                        const assigned = entityImport.columnIsAssigned(column.name);
                         return (
-                          <Tag.Root bg={used ? "green.100" : "white"} colorPalette={used ? "green" : "gray"}>
+                          <Tag.Root bg={assigned ? "green.100" : "white"} colorPalette={assigned ? "green" : "gray"}>
                             <Tag.StartElement>
-                              <Icon name={iconProps.name} size={"xs"} color={used ? "green.600" : iconProps.color} />
+                              <Icon
+                                name={iconProps.name}
+                                size={"xs"}
+                                color={assigned ? "green.600" : iconProps.color}
+                              />
                             </Tag.StartElement>
                             <Tag.Label fontSize={"xs"}>{column.name}</Tag.Label>
                           </Tag.Root>
@@ -1080,58 +450,58 @@ const DialogImport = (props: DialogImportProps) => {
 
             {/* Entity Steps */}
             {/* Entity Step 1: Simple mapping, details */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && (
+            {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "details") && (
               <EntityDetailsStep
                 fileType={fileType}
-                columns={columns}
-                namePrefixField={namePrefixField}
-                onNamePrefixFieldChange={setNamePrefixField}
-                nameField={nameField}
-                onNameFieldChange={setNameField}
-                nameUseCounter={nameUseCounter}
-                onNameUseCounterChange={setNameUseCounter}
-                counter={counter}
-                onCounterChange={setCounter}
+                columns={entityImport.columns}
+                namePrefixField={entityImport.namePrefixField}
+                onNamePrefixFieldChange={entityImport.setNamePrefixField}
+                nameField={entityImport.nameField}
+                onNameFieldChange={entityImport.setNameField}
+                nameUseCounter={entityImport.nameUseCounter}
+                onNameUseCounterChange={entityImport.setNameUseCounter}
+                counter={entityImport.counter}
+                onCounterChange={entityImport.setCounter}
                 onContinueDisabledChange={setContinueDisabled}
-                suggestions={suggestions}
-                isSuggesting={isSuggesting}
-                descriptionField={descriptionField}
-                onDescriptionFieldChange={setDescriptionField}
-                identifierField={identifierField}
-                onIdentifierFieldChange={setIdentifierField}
-                identifierFormat={identifierFormat}
-                onIdentifierFormatChange={setIdentifierFormat}
-                projectField={projectField}
-                onProjectFieldChange={setProjectField}
-                projectsCollection={projectsCollection}
-                ownerField={ownerField}
-                getSelectComponent={getSelectComponent}
+                suggestions={entityImport.suggestions}
+                isSuggesting={entityImport.isSuggesting}
+                descriptionField={entityImport.descriptionField}
+                onDescriptionFieldChange={entityImport.setDescriptionField}
+                identifierField={entityImport.identifierField}
+                onIdentifierFieldChange={entityImport.setIdentifierField}
+                identifierFormat={entityImport.identifierFormat}
+                onIdentifierFormatChange={entityImport.setIdentifierFormat}
+                projectField={entityImport.projectField}
+                onProjectFieldChange={entityImport.setProjectField}
+                projectsCollection={entityImport.projectsCollection}
+                ownerField={entityImport.ownerField}
+                getSelectComponent={entityImport.getSelectComponent}
               />
             )}
 
             {/* Entity Step 2: Advanced mapping */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && (
+            {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "mapping") && (
               <EntityMappingStep
-                attributesField={attributesField}
-                onAttributesFieldChange={setAttributesField}
-                addAttributeOpen={addAttributeOpen}
-                onAddAttributeOpenChange={setAddAttributeOpen}
-                ownerField={ownerField}
-                attributes={attributes}
+                attributesField={entityImport.attributesField}
+                onAttributesFieldChange={entityImport.setAttributesField}
+                addAttributeOpen={entityImport.addAttributeOpen}
+                onAddAttributeOpenChange={entityImport.setAddAttributeOpen}
+                ownerField={entityImport.ownerField}
+                attributes={entityImport.attributes}
                 fileType={fileType}
-                columns={columns}
+                columns={entityImport.columns}
               />
             )}
 
             {/* Entity Step 3: Review */}
-            {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && (
-              <EntityReviewStep reviewEntities={reviewEntities} />
+            {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "review") && (
+              <EntityReviewStep reviewEntities={entityImport.reviewEntities} />
             )}
 
             {/* Attribute Steps */}
             {/* Attribute Step 1: Review */}
-            {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && (
-              <AttributeReviewStep reviewAttributes={reviewAttributes} />
+            {_.isEqual(importType, "attribute") && _.isEqual(attributeImport.attributeImportPage, "review") && (
+              <AttributeReviewStep reviewAttributes={attributeImport.reviewAttributes} />
             )}
           </Dialog.Body>
 
@@ -1157,7 +527,10 @@ const DialogImport = (props: DialogImportProps) => {
                   Cancel
                   <Icon name="cross" size={"xs"} />
                 </Button>
-                {_.isEqual(importType, "entities") && !_.isEqual(entityInterfacePage, "upload") && (
+                {/* "Back" button, shown for either import type once past the upload page */}
+                {((_.isEqual(importType, "entities") && !_.isEqual(entityImport.entityImportPage, "upload")) ||
+                  (_.isEqual(importType, "attribute") &&
+                    !_.isEqual(attributeImport.attributeImportPage, "upload"))) && (
                   <Button
                     size={"xs"}
                     rounded={"md"}
@@ -1178,7 +551,8 @@ const DialogImport = (props: DialogImportProps) => {
                   size={"xs"}
                   rounded={"md"}
                   colorPalette={
-                    _.isEqual(attributeInterfacePage, "review") || _.isEqual(entityInterfacePage, "review")
+                    _.isEqual(attributeImport.attributeImportPage, "review") ||
+                    _.isEqual(entityImport.entityImportPage, "review")
                       ? "green"
                       : "blue"
                   }
@@ -1189,21 +563,28 @@ const DialogImport = (props: DialogImportProps) => {
                   loadingText={"Processing"}
                 >
                   {/* Default button text */}
-                  {entityStep === 0 && attributeStep === 0 && "Continue"}
+                  {entityImport.entityStep === 0 && attributeImport.attributeStep === 0 && "Continue"}
 
                   {/* Entities import type */}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "details") && "Continue"}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "mapping") && "Continue"}
-                  {_.isEqual(importType, "entities") && _.isEqual(entityInterfacePage, "review") && "Finish"}
+                  {_.isEqual(importType, "entities") &&
+                    _.isEqual(entityImport.entityImportPage, "details") &&
+                    "Continue"}
+                  {_.isEqual(importType, "entities") &&
+                    _.isEqual(entityImport.entityImportPage, "mapping") &&
+                    "Continue"}
+                  {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "review") && "Finish"}
 
                   {/* Attribute import type */}
-                  {_.isEqual(importType, "attribute") && _.isEqual(attributeInterfacePage, "review") && "Finish"}
+                  {_.isEqual(importType, "attribute") &&
+                    _.isEqual(attributeImport.attributeImportPage, "review") &&
+                    "Finish"}
 
                   {/* Icon */}
-                  {_.includes(["upload", "details", "mapping"], entityInterfacePage) ? (
-                    <Icon name={"c_right"} size={"xs"} />
-                  ) : (
+                  {_.isEqual(entityImport.entityImportPage, "review") ||
+                  _.isEqual(attributeImport.attributeImportPage, "review") ? (
                     <Icon name={"check"} size={"xs"} />
+                  ) : (
+                    <Icon name={"c_right"} size={"xs"} />
                   )}
                 </Button>
               </Flex>

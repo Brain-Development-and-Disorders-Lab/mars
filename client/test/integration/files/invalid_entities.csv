@@ -1,0 +1,3 @@
+Name,Description,Notes
+Valid Entity Row,A row with a valid name,Optional notes column
+,Missing name row,This row is missing its Name value

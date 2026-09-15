@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
 
 // GraphQL documents hoisted to module scope so they are not recreated on each render
-export const PREPARE_ENTITY_CSV = gql`
-  mutation PrepareEntityCSV($file: [Upload]!) {
-    prepareEntityCSV(file: $file) {
+export const PREPARE_ENTITY_SPREADSHEET = gql`
+  mutation PrepareEntitySpreadsheet($file: [Upload]!) {
+    prepareEntitySpreadsheet(file: $file) {
       name
       inferredType
     }
@@ -31,9 +31,9 @@ export const GET_MAPPING_DATA = gql`
   }
 `;
 
-export const REVIEW_ENTITY_CSV = gql`
-  mutation ReviewEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!) {
-    reviewEntityCSV(columnMapping: $columnMapping, file: $file) {
+export const REVIEW_ENTITY_SPREADSHEET = gql`
+  mutation ReviewEntitySpreadsheet($columnMapping: ColumnMappingInput, $file: [Upload]!) {
+    reviewEntitySpreadsheet(columnMapping: $columnMapping, file: $file) {
       success
       message
       data {
@@ -64,9 +64,9 @@ export const SUGGEST_COLUMN_MAPPING = gql`
   }
 `;
 
-export const IMPORT_ENTITY_CSV = gql`
-  mutation ImportEntityCSV($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
-    importEntityCSV(columnMapping: $columnMapping, file: $file, options: $options) {
+export const IMPORT_ENTITY_SPREADSHEET = gql`
+  mutation ImportEntitySpreadsheet($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
+    importEntitySpreadsheet(columnMapping: $columnMapping, file: $file, options: $options) {
       success
       message
     }

@@ -307,7 +307,7 @@ const App = () => {
                 icon={"download"}
                 title={"Multi-Format Export"}
                 description={
-                  "Export metadata as CSV or JSON from individual Entities, hand-picked selections, or entire Projects at any time."
+                  "Export metadata as spreadsheets or JSON from individual Entities, hand-picked selections, or entire Projects at any time."
                 }
               />
             </Flex>

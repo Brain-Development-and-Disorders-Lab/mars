@@ -70,6 +70,12 @@ export class Attributes {
       timestamp: dayjs(Date.now()).toISOString(),
       ...attribute,
     };
+
+    // Ensure that the `archived` property is always specified
+    if (_.isUndefined(joinedAttribute.archived)) {
+      joinedAttribute.archived = false;
+    }
+
     logger.debug({ attributeId: joinedAttribute._id, name: joinedAttribute.name }, "Attribute");
 
     const response = await getDatabase().collection<AttributeModel>(ATTRIBUTES_COLLECTION).insertOne(joinedAttribute);

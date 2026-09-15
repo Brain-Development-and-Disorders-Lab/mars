@@ -1,28 +1,33 @@
 // Custom types
 import {
   AttributeModel,
+  ColumnInfo,
   Context,
+  EntityMappingResult,
   EntityModel,
   IEntity,
   IFile,
   IValue,
   IValueType,
   IResponseMessage,
+  ParsedJSONFile,
   ResponseData,
   EntityImportReview,
   AttributeImportReview,
   IColumnMapping,
   IRow,
-  CSVImportOptions,
+  SpreadsheetImportOptions,
 } from "@types";
 
 // Utility functions and libraries
 import * as fs from "fs";
+import { buffer } from "node:stream/consumers";
 import XLSX from "xlsx";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 import { getAttachments } from "@connectors/database";
 import _ from "lodash";
+import { nanoid } from "nanoid";
 
 // Models
 import { Activity } from "@models/Activity";
@@ -33,6 +38,15 @@ import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
 
 export class Data {
+  /** Accepted MIME types for spreadsheet imports */
+  private static readonly SPREADSHEET_MIME_TYPES = [
+    "text/csv",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ];
+
+  /** Required top-level fields for an Attribute JSON import */
+  private static readonly ATTRIBUTE_JSON_REQUIRED_FIELDS = ["name", "description", "values"];
+
   /**
    * Generate a file to be downloaded from the `/static` endpoint
    * @param _id File identifier in GridFS storage
@@ -104,32 +118,20 @@ export class Data {
   };
 
   /**
-   * Concatenates all chunks from a readable stream into a single Buffer.
-   * @param stream ReadableStream instance with file contents
-   * @return {Promise<Buffer>}
-   */
-  private static bufferHelper = async (stream: fs.ReadStream): Promise<Buffer> =>
-    new Promise((resolve) => {
-      const buffers: Uint8Array[] = [];
-      stream.on("data", (data: Uint8Array) => buffers.push(data));
-      stream.on("end", () => resolve(Buffer.concat(buffers)));
-    });
-
-  /**
-   * Reads the first sheet of a spreadsheet file (CSV or XLSX) into parsed row objects.
+   * Reads the first sheet of a spreadsheet file (CSV or XLSX) into parsed row objects
    * @param {IFile} file File descriptor from the upload stream
    * @return {Promise<IRow[]>} Parsed rows, or an empty array if the workbook has no sheets
    */
   private static parseSpreadsheet = async (file: IFile): Promise<IRow[]> => {
     const { createReadStream } = await file;
-    const output = await Data.bufferHelper(createReadStream());
+    const output = await buffer(createReadStream());
     const workbook = XLSX.read(output, { cellDates: true });
     if (workbook.SheetNames.length === 0) return [];
     return XLSX.utils.sheet_to_json<IRow>(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
   };
 
   /**
-   * Creates an Activity record and links it to the given Workspace.
+   * Creates an Activity record and links it to the given Workspace
    * @param {string} workspace Workspace identifier
    * @param {"create" | "update" | "delete" | "archived"} type Activity type
    * @param {string} actor User identifier performing the action
@@ -154,8 +156,8 @@ export class Data {
   };
 
   /**
-   * Validates that a raw cell value is compatible with the expected IValueType.
-   * Empty values are permitted and do not produce a warning.
+   * Validates that a raw cell value is compatible with the expected IValueType, empty values are permitted
+   * and do not produce a warning.
    * @param {string} raw Raw cell value from the spreadsheet row
    * @param {IValueType} type Expected value type
    * @return {boolean}
@@ -180,23 +182,20 @@ export class Data {
   };
 
   /**
-   * Maps a parsed spreadsheet into Entity and per-row warning pairs using the provided column mapping.
-   * Each value's `source` field controls data resolution: `"column"` reads from the row,
-   * `"value"` uses the literal data field directly.
+   * Maps a parsed spreadsheet into Entity and per-row warning pairs using the provided column mapping
    * @param {IColumnMapping} columnMapping Mapping of Entity fields to column names or fixed values
    * @param {IRow[]} sheet Parsed spreadsheet rows
-   * @return {{ entity: IEntity; warnings: string[] }[]}
+   * @return {EntityMappingResult[]}
    */
-  private static columnMappingHelper = (
-    columnMapping: IColumnMapping,
-    sheet: IRow[],
-  ): { entity: IEntity; warnings: string[] }[] => {
+  private static columnMappingHelper = (columnMapping: IColumnMapping, sheet: IRow[]): EntityMappingResult[] => {
     return sheet.map((row, rowIndex) => {
       const rowWarnings: string[] = [];
 
       // Check the Attributes for warnings
+      // Each Attribute instance gets a unique `_id` per Entity, matching how the UI derives one
+      // (`${baseAttributeId}-${nanoid}`) when a template Attribute is attached to an Entity
       const attributes: AttributeModel[] = columnMapping.attributes.map((attribute: AttributeModel) => ({
-        _id: attribute._id,
+        _id: `${attribute._id}-${nanoid(6)}`,
         name: attribute.name,
         owner: attribute.owner,
         timestamp: attribute.timestamp,
@@ -235,20 +234,21 @@ export class Data {
       }));
 
       // Check the Entity name for warnings
-      if (row[columnMapping.name] === "" || _.isUndefined(row[columnMapping.name])) {
+      const nameColumn = columnMapping.name ?? "";
+      if (row[nameColumn] === "" || _.isUndefined(row[nameColumn])) {
         rowWarnings.push("Entity has missing / invalid name");
       }
 
       const entity: IEntity = {
         archived: false,
-        name: `${columnMapping.namePrefix}${row[columnMapping.name]}`,
+        name: `${columnMapping.namePrefix}${row[nameColumn]}`,
         secondaryIdentifier: {
-          value: row[columnMapping.secondaryIdentifier?.value] || "",
+          value: row[columnMapping.secondaryIdentifier?.value ?? ""] || "",
           format: columnMapping.secondaryIdentifier?.format || "",
         },
         owner: columnMapping.owner,
         created: dayjs(Date.now()).toISOString(),
-        description: row[columnMapping.description] || "",
+        description: row[columnMapping.description ?? ""] || "",
         projects: [],
         links: [],
         attributes,
@@ -266,12 +266,6 @@ export class Data {
 
   /** Extracts a human-readable message string from an unknown caught value. */
   private static errorMessage = (error: unknown): string => (error instanceof Error ? error.message : "Unknown error");
-
-  /** Accepted MIME types for spreadsheet imports */
-  private static readonly SPREADSHEET_MIME_TYPES = [
-    "text/csv",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  ];
 
   /**
    * Infers the most specific IValueType for a column by sampling its non-empty values.
@@ -308,11 +302,11 @@ export class Data {
 
   /**
    * Prepares a spreadsheet file (CSV or XLSX) for import by extracting column names and
-   * inferring the data type of each column from its contents.
+   * inferring the data type of each column from its contents
    * @param {IFile[]} file File object
-   * @return {Promise<{ name: string; inferredType: IValueType }[]>} Column descriptors
+   * @return {Promise<ColumnInfo[]>} Column descriptors
    */
-  static prepareEntityCSV = async (file: IFile[]): Promise<{ name: string; inferredType: IValueType }[]> => {
+  static prepareEntitySpreadsheet = async (file: IFile[]): Promise<ColumnInfo[]> => {
     const { mimetype } = await file[0];
     if (!Data.SPREADSHEET_MIME_TYPES.includes(mimetype)) return [];
 
@@ -329,13 +323,13 @@ export class Data {
   };
 
   /**
-   * Reviews a spreadsheet file and returns a list of Entity operations that will be performed on import.
-   * Includes per-row type validation warnings for column-mapped values.
+   * Reviews a spreadsheet file and returns a list of Entity operations that will be performed on import, includes
+   * per-row type validation warnings for column-mapped values
    * @param {IColumnMapping} columnMapping Mapping of Entity fields to column names or fixed values
    * @param {IFile[]} file Spreadsheet file (CSV or XLSX)
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
-  static reviewEntityCSV = async (
+  static reviewEntitySpreadsheet = async (
     columnMapping: IColumnMapping,
     file: IFile[],
   ): Promise<ResponseData<EntityImportReview[]>> => {
@@ -365,17 +359,17 @@ export class Data {
   };
 
   /**
-   * Maps columns to Entity fields using the provided mapping, then persists each imported Entity.
+   * Maps columns to Entity fields using the provided mapping, then persists each imported Entity
    * @param {IColumnMapping} columnMapping Mapping of Entity fields to column names or fixed values
    * @param {IFile[]} file Spreadsheet file (CSV or XLSX)
-   * @param {CSVImportOptions} options Additional import options such as counter configuration
+   * @param {SpreadsheetImportOptions} options Additional import options such as counter configuration
    * @param {Context} context Request context containing user and Workspace identifiers
    * @return {Promise<IResponseMessage>}
    */
-  static importEntityCSV = async (
+  static importEntitySpreadsheet = async (
     columnMapping: IColumnMapping,
     file: IFile[],
-    options: CSVImportOptions,
+    options: SpreadsheetImportOptions,
     context: Context,
   ): Promise<IResponseMessage> => {
     try {
@@ -385,6 +379,14 @@ export class Data {
       }
 
       const results = Data.columnMappingHelper(columnMapping, parsedSheet);
+
+      const rowsWithWarnings = results.filter(({ warnings }) => warnings.length > 0).length;
+      if (rowsWithWarnings > 0) {
+        return {
+          success: false,
+          message: `Cannot import: ${rowsWithWarnings} row${rowsWithWarnings === 1 ? "" : "s"} failed validation. Please correct the file and try again.`,
+        };
+      }
 
       for (const { entity } of results) {
         if (options.counters.length > 0) {
@@ -416,81 +418,122 @@ export class Data {
   };
 
   /**
-   * Reviews an Entity JSON file and returns a list of operations that will be made on import.
+   * Reads and JSON-parses an uploaded file's contents
+   * @param {IFile} file JSON file for import
+   * @return {Promise<ParsedJSONFile>}
+   */
+  private static parseJSONFile = async (file: IFile): Promise<ParsedJSONFile> => {
+    const { createReadStream, mimetype } = await file;
+    if (!_.isEqual(mimetype, "application/json")) {
+      return { error: "Invalid JSON file" };
+    }
+
+    try {
+      const output = await buffer(createReadStream());
+      return { parsed: JSON.parse(output.toString()) };
+    } catch (error: unknown) {
+      return { error: `Failed to parse JSON file: ${Data.errorMessage(error)}` };
+    }
+  };
+
+  /**
+   * Validates the shape of a parsed Entity JSON file
+   * @param {IRow} parsed Parsed JSON file contents
+   * @return {string | null} An error message, or `null` if valid
+   */
+  private static validateEntityJSON = (parsed: IRow): string | null => {
+    if (_.isUndefined(parsed["entities"])) {
+      return 'JSON file does not contain "entities" field';
+    }
+    if (!Array.isArray(parsed["entities"])) {
+      return '"entities" field must be an array of Entities';
+    }
+    if (parsed["entities"].length === 0) {
+      return "JSON file does not contain any Entities";
+    }
+
+    const missingFields = new Set<string>();
+    for (const entity of parsed["entities"]) {
+      for (const field of ["name"]) {
+        if (_.isUndefined(entity[field])) {
+          missingFields.add(field);
+        }
+      }
+    }
+
+    if (missingFields.size > 0) {
+      return `Entities JSON file contains Entities missing the following required fields: ${Array.from(missingFields).join(", ")}`;
+    }
+
+    return null;
+  };
+
+  /**
+   * Validates the shape of a parsed Attribute JSON file
+   * @param {IRow} parsed Parsed JSON file contents
+   * @return {string | null} An error message, or `null` if valid
+   */
+  private static validateAttributeJSON = (parsed: IRow): string | null => {
+    const missingFields = Data.ATTRIBUTE_JSON_REQUIRED_FIELDS.filter((field) => _.isUndefined(parsed[field]));
+    if (missingFields.length > 0) {
+      return `Attribute JSON file is missing the following required fields: ${missingFields.join(", ")}`;
+    }
+    return null;
+  };
+
+  /**
+   * Reviews an Entity JSON file and returns a list of operations that will be made on import
    * @param {IFile[]} file JSON file for import
    * @return {Promise<ResponseData<EntityImportReview[]>>}
    */
   static reviewEntityJSON = async (file: IFile[]): Promise<ResponseData<EntityImportReview[]>> => {
-    const { createReadStream, mimetype } = await file[0];
-    if (!_.isEqual(mimetype, "application/json")) {
-      return { success: false, message: "Invalid JSON file", data: [] };
+    const parseResult = await Data.parseJSONFile(file[0]);
+    if ("error" in parseResult) {
+      return { success: false, message: parseResult.error, data: [] };
     }
 
-    try {
-      const output = await Data.bufferHelper(createReadStream());
-      const parsed = JSON.parse(output.toString());
-
-      if (_.isUndefined(parsed["entities"])) {
-        return { success: false, message: 'JSON file does not contain "entities" field', data: [] };
-      }
-
-      const review: EntityImportReview[] = [];
-      for (const entity of parsed["entities"]) {
-        const exists = await Entities.exists(entity._id);
-        review.push({ name: entity.name, state: exists ? "update" : "create" });
-      }
-
-      return { success: true, message: "Collated list of Entities from JSON file to review", data: review };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        message: `Failed to parse JSON file: ${Data.errorMessage(error)}`,
-        data: [],
-      };
+    const { parsed } = parseResult;
+    const validationError = Data.validateEntityJSON(parsed);
+    if (validationError) {
+      return { success: false, message: validationError, data: [] };
     }
+
+    const review: EntityImportReview[] = [];
+    for (const entity of parsed["entities"]) {
+      const exists = !_.isUndefined(entity._id) && (await Entities.exists(entity._id));
+      review.push({ name: entity.name, state: exists ? "update" : "create" });
+    }
+
+    return { success: true, message: "Collated list of Entities from JSON file to review", data: review };
   };
 
   /**
-   * Reviews an Attribute JSON file and returns a list of operations that will be made on import.
+   * Reviews an Attribute JSON file and returns a list of operations that will be made on import
    * @param {IFile[]} file JSON file for import
    * @return {Promise<ResponseData<AttributeImportReview[]>>}
    */
   static reviewAttributeJSON = async (file: IFile[]): Promise<ResponseData<AttributeImportReview[]>> => {
-    const { createReadStream, mimetype } = await file[0];
-    if (!_.isEqual(mimetype, "application/json")) {
-      return { success: false, message: "Invalid JSON file", data: [] };
+    const parseResult = await Data.parseJSONFile(file[0]);
+    if ("error" in parseResult) {
+      return { success: false, message: parseResult.error, data: [] };
     }
 
-    try {
-      const output = await Data.bufferHelper(createReadStream());
-      const parsed = JSON.parse(output.toString());
-
-      if (
-        _.isUndefined(parsed["name"]) ||
-        _.isUndefined(parsed["description"]) ||
-        _.isUndefined(parsed["archived"]) ||
-        _.isUndefined(parsed["values"])
-      ) {
-        return { success: false, message: "Attribute JSON file is missing required fields", data: [] };
-      }
-
-      const exists = !_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id));
-      return {
-        success: true,
-        message: "Collated list of Attributes from JSON file to review",
-        data: [{ name: parsed.name, state: exists ? "update" : "create" }],
-      };
-    } catch (error: unknown) {
-      return {
-        success: false,
-        message: `Failed to parse JSON file: ${Data.errorMessage(error)}`,
-        data: [],
-      };
+    const { parsed } = parseResult;
+    const validationError = Data.validateAttributeJSON(parsed);
+    if (validationError) {
+      return { success: false, message: validationError, data: [] };
     }
+
+    const exists = !_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id));
+    return {
+      success: true,
+      message: "Collated list of Attributes from JSON file to review",
+      data: [{ name: parsed.name, state: exists ? "update" : "create" }],
+    };
   };
 
   /**
-   * Imports an Entity JSON file, creating or updating each Entity as required.
+   * Imports an Entity JSON file, creating or updating each Entity as required
    * @param {IFile[]} file JSON file for import
    * @param project Project identifier to add Entities to, if any
    * @param {AttributeModel[]} attributes Attributes to add to each imported Entity
@@ -503,33 +546,50 @@ export class Data {
     attributes: AttributeModel[],
     context: Context,
   ): Promise<IResponseMessage> => {
-    const { createReadStream, mimetype } = await file[0];
-    if (!_.isEqual(mimetype, "application/json")) {
-      return { success: false, message: "Invalid JSON file" };
+    const parseResult = await Data.parseJSONFile(file[0]);
+    if ("error" in parseResult) {
+      return { success: false, message: parseResult.error };
+    }
+
+    const { parsed } = parseResult;
+    const validationError = Data.validateEntityJSON(parsed);
+    if (validationError) {
+      return { success: false, message: validationError };
     }
 
     try {
-      const output = await Data.bufferHelper(createReadStream());
-      const parsed = JSON.parse(output.toString());
-
-      if (_.isUndefined(parsed["entities"])) {
-        return { success: false, message: 'JSON file does not contain "entities" field' };
-      }
-
       const projectExists = await Projects.exists(project);
 
-      for (const entity of parsed.entities as EntityModel[]) {
-        if (!_.isEqual(entity.owner, context.user)) {
-          entity.owner = context.user;
-        }
+      for (const rawEntity of parsed["entities"] as EntityModel[]) {
+        const entity: EntityModel = {
+          ...rawEntity,
+          archived: rawEntity.archived ?? false,
+          created: rawEntity.created ?? dayjs(Date.now()).toISOString(),
+          timestamp: rawEntity.timestamp ?? dayjs(Date.now()).toISOString(),
+          description: rawEntity.description ?? "",
+          projects: rawEntity.projects ?? [],
+          links: rawEntity.links ?? [],
+          attachments: rawEntity.attachments ?? [],
+          history: rawEntity.history ?? [],
+          secondaryIdentifier: rawEntity.secondaryIdentifier ?? { value: "", format: "" },
+          attributes: rawEntity.attributes ?? [],
+          // The importing party always takes ownership of imported content
+          owner: context.user,
+        };
+
+        // Add to specified Project, check that not already in Project
         if (projectExists && !_.includes(entity.projects, project)) {
           entity.projects.push(project);
         }
+
+        // Append specified Attributes, each with a unique per-Entity instance `_id`
         if (attributes.length > 0) {
-          entity.attributes.push(...attributes);
+          entity.attributes.push(
+            ...attributes.map((attribute) => ({ ...attribute, _id: `${attribute._id}-${nanoid(6)}` })),
+          );
         }
 
-        const entityExists = await Entities.exists(entity._id);
+        const entityExists = !_.isUndefined(entity._id) && (await Entities.exists(entity._id));
         if (entityExists) {
           const result = await Entities.update(entity);
           if (!result.success) {
@@ -565,32 +625,26 @@ export class Data {
   };
 
   /**
-   * Imports an Attribute JSON file, creating or updating the Attribute as required.
+   * Imports an Attribute JSON file, creating or updating the Attribute as required
    * @param {IFile[]} file JSON file for import
    * @param context Request context containing user and Workspace identifier
    * @return {Promise<IResponseMessage>}
    */
   static importAttributeJSON = async (file: IFile[], context: Context): Promise<IResponseMessage> => {
-    const { createReadStream, mimetype } = await file[0];
-    if (!_.isEqual(mimetype, "application/json")) {
-      return { success: false, message: "Invalid JSON file" };
+    const parseResult = await Data.parseJSONFile(file[0]);
+    if ("error" in parseResult) {
+      return { success: false, message: parseResult.error };
+    }
+
+    const { parsed } = parseResult;
+    const validationError = Data.validateAttributeJSON(parsed);
+    if (validationError) {
+      return { success: false, message: validationError };
     }
 
     try {
-      const output = await Data.bufferHelper(createReadStream());
-      const parsed = JSON.parse(output.toString());
-
-      if (
-        _.isUndefined(parsed["name"]) ||
-        _.isUndefined(parsed["description"]) ||
-        _.isUndefined(parsed["archived"]) ||
-        _.isUndefined(parsed["values"])
-      ) {
-        return { success: false, message: "Attribute JSON file is missing required fields" };
-      }
-
       if (!_.isUndefined(parsed["_id"]) && (await Attributes.exists(parsed._id))) {
-        const result = await Attributes.update(parsed);
+        const result = await Attributes.update(parsed as AttributeModel);
         if (!result.success) {
           return { success: false, message: `Error updating Attribute: "${parsed.name}"` };
         }
@@ -600,7 +654,7 @@ export class Data {
           name: parsed.name,
         });
       } else {
-        const result = await Attributes.create(parsed);
+        const result = await Attributes.create(parsed as AttributeModel);
         if (!result.success) {
           return { success: false, message: `Error creating new Attribute: "${parsed.name}"` };
         }

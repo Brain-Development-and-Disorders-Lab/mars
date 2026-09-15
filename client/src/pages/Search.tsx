@@ -441,7 +441,7 @@ const Search = () => {
   const searchResultActions: DataTableAction[] = useMemo(
     () => [
       {
-        label: (count) => `Export selection as CSV (${count})`,
+        label: (count) => `Export selection as spreadsheet (${count})`,
         icon: "download",
         action: async (table, rows) => {
           const toExport: string[] = [];

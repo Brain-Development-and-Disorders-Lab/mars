@@ -1,0 +1,11 @@
+{
+  "archived": false,
+  "values": [
+    {
+      "_id": "value-001",
+      "name": "Example Value",
+      "type": "text",
+      "data": "Example data"
+    }
+  ]
+}

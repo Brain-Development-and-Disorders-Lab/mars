@@ -14,19 +14,15 @@ import { Workspaces } from "@models/Workspaces";
 // Audit logging
 import { audit } from "@lib/audit";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 export const ProjectsResolvers = {
   Query: {
     // Retrieve all Projects
     projects: async (_parent: IResolverParent, args: { limit: 100; archived: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -63,14 +59,7 @@ export const ProjectsResolvers = {
     // Retrieve one Project by _id
     project: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -107,14 +96,7 @@ export const ProjectsResolvers = {
     // Retrieve all Entities within a single Project
     projectEntities: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);

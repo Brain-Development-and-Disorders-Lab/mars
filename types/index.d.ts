@@ -1,5 +1,5 @@
 // Import external types
-import { ListCollection } from "@chakra-ui/react";
+import { ListCollection, UseFileUploadReturn } from "@chakra-ui/react";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
@@ -188,7 +188,7 @@ export type CompareAttributeFieldDiffProps = {
   setUseOriginal: (v: boolean) => void;
 };
 
-// Column descriptor returned by prepareEntityCSV
+// Column descriptor returned by prepareEntitySpreadsheet
 export type ColumnInfo = {
   name: string;
   inferredType: IValueType;
@@ -702,12 +702,35 @@ export type AttributeImportReview = {
   state: "create" | "update";
 };
 
-// Column mappings for Entity imports
+// A single parsed spreadsheet row
 export type IRow = Record<string, any>;
-export type IColumnMapping = Record<string, any>;
 
-// Import options for CSV files
-export type CSVImportOptions = {
+// Maps Entity fields to spreadsheet column names (or fixed values) for a spreadsheet import
+export type IColumnMapping = {
+  namePrefix: string;
+  name?: string;
+  secondaryIdentifier?: {
+    value?: string; // Column name providing the secondary identifier value
+    format: string;
+  };
+  description?: string;
+  created: string;
+  owner: string;
+  project: string;
+  attributes: AttributeModel[];
+};
+
+// Entity built from a spreadsheet row, paired with any data validation warnings for that row
+export type EntityMappingResult = {
+  entity: IEntity;
+  warnings: string[];
+};
+
+// Result of parsing an uploaded JSON file: either the parsed contents, or an error message
+export type ParsedJSONFile = { parsed: IRow } | { error: string };
+
+// Import options for spreadsheet files
+export type SpreadsheetImportOptions = {
   counters: { field: string; _id: string }[];
 };
 
@@ -969,12 +992,58 @@ export type DialogImportProps = {
 // `SampleFile` type representing a downloadable example file
 export type SampleFile = { label: string; filename: string; mimeType: string; content: string };
 
+// AI-suggested column mapping for the Entity name/description fields
+export type ColumnMappingSuggestion = {
+  name: string | null;
+  description: string | null;
+};
+
+// `useEntityImport` hook parameters
+export type UseEntityImportParams = {
+  open: boolean;
+  fileUpload: UseFileUploadReturn;
+  fileType: string;
+  setContinueDisabled: (value: boolean) => void;
+};
+
+// `useAttributeImport` hook parameters
+export type UseAttributeImportParams = {
+  fileUpload: UseFileUploadReturn;
+  setContinueDisabled: (value: boolean) => void;
+};
+
+// Minimal shape of a mutation response checked by `reportMutationResult`
+export type MutationResult = {
+  success: boolean;
+  message: string;
+};
+
+// A row shared by both the Entity and Attribute import review tables; `warnings` only applies to Entities
+export type DialogImportReviewTableRow = {
+  name: string;
+  state: "create" | "update";
+  warnings?: string[];
+};
+
+// `DialogImportReviewTable` props
+export type DialogImportReviewTableProps = {
+  items: DialogImportReviewTableRow[];
+  icon: IconNames;
+  iconColor: string;
+  bg: string;
+  borderColor: string;
+  nameHeader: string;
+  singular: string;
+  plural: string;
+  showWarnings?: boolean;
+};
+
 // `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {
   importType: "entities" | "attribute" | undefined;
   isTypeSelectDisabled: boolean;
   onSelectImportType: (type: "entities" | "attribute") => void;
-  fileUpload: any; // `useFileUpload()` return value
+  fileUpload: UseFileUploadReturn;
 };
 
 // `EntityDetailsStep` props, the `DialogImport` step used to configure name/description/project/owner fields
@@ -990,7 +1059,7 @@ export type EntityDetailsStepProps = {
   counter: string;
   onCounterChange: React.Dispatch<React.SetStateAction<string>>;
   onContinueDisabledChange: (value: boolean) => void;
-  suggestions: { name: string | null; description: string | null } | null;
+  suggestions: ColumnMappingSuggestion | null;
   isSuggesting: boolean;
   descriptionField: ColumnInfo | undefined;
   onDescriptionFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;

@@ -2,7 +2,6 @@
 import {
   AttributeModel,
   Context,
-  CSVImportOptions,
   EntityImportReview,
   AttributeImportReview,
   IColumnMapping,
@@ -10,6 +9,7 @@ import {
   IResolverParent,
   IResponseMessage,
   ResponseData,
+  SpreadsheetImportOptions,
   ColumnInfo,
 } from "@types";
 
@@ -21,19 +21,15 @@ import _ from "lodash";
 import { Data } from "@models/Data";
 import { Workspaces } from "@models/Workspaces";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 export const DataResolvers = {
   Query: {
     // Retrieve the URL for a file to be downloaded by client
     downloadFile: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<string> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Verify the requested attachment belongs to an Entity within the Workspace
       const entities = await Workspaces.getEntities(context.workspace);
@@ -66,77 +62,49 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Data.uploadAttachment(args.target, args.file);
     },
 
-    // Prepare a CSV file, returning the collection of column names (if present)
-    prepareEntityCSV: async (
+    // Prepare a spreadsheet file, returning the collection of column names (if present)
+    prepareEntitySpreadsheet: async (
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
     ): Promise<ColumnInfo[]> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
-      return await Data.prepareEntityCSV(args.file);
+      return await Data.prepareEntitySpreadsheet(args.file);
     },
 
-    // Review a CSV file, return collection of Entity names and their updates
-    reviewEntityCSV: async (
+    // Review a spreadsheet file, return collection of Entity names and their updates
+    reviewEntitySpreadsheet: async (
       _parent: IResolverParent,
-      args: { columnMapping: Record<string, string>; file: IFile[] },
+      args: { columnMapping: IColumnMapping; file: IFile[] },
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
-      return await Data.reviewEntityCSV(args.columnMapping, args.file);
+      return await Data.reviewEntitySpreadsheet(args.columnMapping, args.file);
     },
 
-    // Map CSV file columns to Entity fields
-    importEntityCSV: async (
+    // Map spreadsheet file columns to Entity fields
+    importEntitySpreadsheet: async (
       _parent: IResolverParent,
       args: {
         columnMapping: IColumnMapping;
         file: IFile[];
-        options: CSVImportOptions;
+        options: SpreadsheetImportOptions;
       },
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
-      return await Data.importEntityCSV(args.columnMapping, args.file, args.options, context);
+      return await Data.importEntitySpreadsheet(args.columnMapping, args.file, args.options, context);
     },
 
     // Review a JSON file, return collection of Entity names and their updates
@@ -146,14 +114,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Data.reviewEntityJSON(args.file);
     },
@@ -165,14 +126,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Data.importEntityJSON(args.file, args.project, args.attributes, context);
     },
@@ -184,14 +138,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<AttributeImportReview[]>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Data.reviewAttributeJSON(args.file);
     },
@@ -203,14 +150,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Data.importAttributeJSON(args.file, context);
     },

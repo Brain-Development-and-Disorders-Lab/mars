@@ -705,7 +705,7 @@ const DialogExport = (props: DialogExportProps) => {
                         Entities
                       </Text>
                       <Tooltip
-                        content={"Entities cannot be included when exporting to CSV"}
+                        content={"Entities cannot be included when exporting to spreadsheet formats"}
                         disabled={format === "json"}
                         showArrow
                       >
