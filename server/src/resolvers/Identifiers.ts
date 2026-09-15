@@ -8,6 +8,9 @@ import { Context, IdentifierFormatModel, IResolverParent } from "@types";
 import { Identifiers } from "@models/Identifiers";
 import { Workspaces } from "@models/Workspaces";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 // Utilities
 import _ from "lodash";
 
@@ -15,14 +18,7 @@ export const IdentifiersResolvers = {
   Query: {
     identifierFormat: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Identifier Format to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -56,14 +52,7 @@ export const IdentifiersResolvers = {
     },
     identifierFormats: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Identifier Format to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -85,14 +74,7 @@ export const IdentifiersResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Apply create operation
       return await Identifiers.create(args.format);

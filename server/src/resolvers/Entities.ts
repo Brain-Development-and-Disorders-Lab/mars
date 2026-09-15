@@ -11,6 +11,9 @@ import { Workspaces } from "@models/Workspaces";
 // Audit logging
 import { audit } from "@lib/audit";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 export const EntitiesResolvers = {
   Value: {
     // Normalize legacy `Value.data` documents imported directly into MongoDB as extended
@@ -49,14 +52,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -112,14 +108,7 @@ export const EntitiesResolvers = {
     // Retrieve one Entity by _id
     entity: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<EntityModel> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -157,14 +146,7 @@ export const EntitiesResolvers = {
     // Check if Entity exists by name
     entityNameExists: async (_parent: IResolverParent, args: { name: string }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       return await Entities.existByName(args.name);
     },
@@ -176,14 +158,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -230,14 +205,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -280,14 +248,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -320,14 +281,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<EntityMetrics> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -368,14 +322,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -418,14 +365,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Apply create operation
       const result = await Entities.create(args.entity);
@@ -465,14 +405,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -535,14 +468,7 @@ export const EntitiesResolvers = {
     // Archive an Entity
     archiveEntity: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -614,14 +540,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {

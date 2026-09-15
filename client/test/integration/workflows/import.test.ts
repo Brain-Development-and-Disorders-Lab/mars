@@ -36,7 +36,7 @@ test.describe("Import", () => {
       await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       // Upload spreadsheet file
-      const spreadsheetPath = path.resolve(process.cwd(), "test/integration/export_entities.csv");
+      const spreadsheetPath = path.resolve(process.cwd(), "test/integration/files/export_entities.csv");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(spreadsheetPath);
 
@@ -73,7 +73,7 @@ test.describe("Import", () => {
       await page.click('[data-testid="import-type-select-trigger-entities"]');
 
       // Upload JSON file
-      const jsonPath = path.resolve(process.cwd(), "test/integration/export_entities.json");
+      const jsonPath = path.resolve(process.cwd(), "test/integration/files/export_entities.json");
       const fileInput = page.locator('input[type="file"]').first();
       await fileInput.setInputFiles(jsonPath);
 
@@ -99,6 +99,61 @@ test.describe("Import", () => {
       // Verify import success
       await page.click("#navEntitiesButtonDesktop");
       await expect(page.locator("text=(JSON)")).toBeVisible();
+    });
+
+    test('should show an error for an Entity JSON file missing the "entities" field', async ({ page }) => {
+      await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
+
+      const jsonPath = path.resolve(process.cwd(), "test/integration/files/invalid_entities.json");
+      const fileInput = page.locator('input[type="file"]').first();
+      await fileInput.setInputFiles(jsonPath);
+
+      await clickButtonWhenEnabled(page, "#importContinueButton");
+
+      await expect(
+        page.locator(".chakra-toast__root").filter({ hasText: 'does not contain top-level "entities" key' }),
+      ).toBeVisible();
+    });
+
+    test("should show an error for an Attribute JSON file missing required fields", async ({ page }) => {
+      await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
+      await page.click('[data-testid="import-type-select-trigger-attribute"]');
+
+      const jsonPath = path.resolve(process.cwd(), "test/integration/files/invalid_attribute.json");
+      const fileInput = page.locator('input[type="file"]').first();
+      await fileInput.setInputFiles(jsonPath);
+
+      await clickButtonWhenEnabled(page, "#importContinueButton");
+
+      await expect(
+        page.locator(".chakra-toast__root").filter({ hasText: "missing the following required fields" }),
+      ).toBeVisible();
+    });
+
+    test("should block finishing a spreadsheet import when a row has data validation warnings", async ({ page }) => {
+      await clickButtonWhenEnabled(page, "#navImportButtonDesktop");
+      await page.click('[data-testid="import-type-select-trigger-entities"]');
+
+      const spreadsheetPath = path.resolve(process.cwd(), "test/integration/files/invalid_entities.csv");
+      const fileInput = page.locator('input[type="file"]').first();
+      await fileInput.setInputFiles(spreadsheetPath);
+
+      await clickButtonWhenEnabled(page, "#importContinueButton");
+      await page.waitForLoadState("networkidle");
+
+      await selectMenuOption(page, '[data-testid="import-column-select-trigger-name"]', "Name");
+
+      // Continue through remaining steps to the review page
+      await clickButtonWhenEnabled(page, "#importContinueButton"); // Attributes page
+      await clickButtonWhenEnabled(page, "#importContinueButton"); // Review page
+      await page.waitForLoadState("networkidle");
+
+      // The row missing a Name value should be flagged with a warning
+      await expect(page.locator("text=missing / invalid name")).toBeVisible();
+
+      // The Finish button must stay disabled while warnings are present
+      await expect(page.locator("#importContinueButton")).toBeDisabled();
     });
   });
 });

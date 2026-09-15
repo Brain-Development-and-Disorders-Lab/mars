@@ -129,44 +129,46 @@ export class Counters {
     };
   };
 
+  /**
+   * Increments a Counter's current value and returns the newly generated value
+   * @param _id Unique identifier of the Counter instance
+   */
   static incrementValue = async (_id: string): Promise<ResponseData<string>> => {
-    const counter = await Counters.getCounter(_id);
+    const collection = getDatabase().collection<CounterModel>(COUNTERS_COLLECTION);
 
-    // Cover the case of no Counter found
-    if (_.isNull(counter)) {
-      return {
-        success: false,
-        message: "Counter does not exist",
-        data: "Invalid",
-      };
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const counter = await Counters.getCounter(_id);
+
+      // Cover the case of no Counter found
+      if (_.isNull(counter)) {
+        return {
+          success: false,
+          message: "Counter does not exist",
+          data: "Invalid",
+        };
+      }
+
+      const nextValue = counter.current + counter.increment;
+      const response = await collection.updateOne(
+        { _id: _id, current: counter.current },
+        { $set: { current: nextValue } },
+      );
+
+      if (response.modifiedCount === 1) {
+        const generated = counter.format.replace("{}", nextValue.toString());
+        return {
+          success: true,
+          message: `Generated next value for Counter "${counter.name}"`,
+          data: generated,
+        };
+      }
+      // `current` changed since it was read (a concurrent increment won), retry with the latest value
     }
 
-    // Generate update object
-    const update: { $set: ICounter } = {
-      $set: {
-        workspace: counter.workspace,
-        name: counter.name,
-        current: counter.current,
-        increment: counter.increment,
-        format: counter.format,
-        created: counter.created,
-      },
-    };
-
-    // Increment the Counter value and update
-    update.$set.current = counter.current + counter.increment;
-
-    // Update the stored Counter value
-    const response = await getDatabase().collection<CounterModel>(COUNTERS_COLLECTION).updateOne({ _id: _id }, update);
-    const successStatus = response.modifiedCount === 1;
-
-    // Generate the Counter value
-    const generated = counter.format.replace("{}", update.$set.current.toString());
-
     return {
-      success: successStatus,
-      message: successStatus ? `Generated next value for Counter "${counter.name}"` : "Unable to generate next value",
-      data: successStatus ? generated : "Invalid",
+      success: false,
+      message: "Unable to generate next value",
+      data: "Invalid",
     };
   };
 }

@@ -11,19 +11,15 @@ import { GraphQLError } from "graphql/index";
 // Posthog
 import { PostHogClient } from "@lib/posthog";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 export const ActivityResolvers = {
   Query: {
     // Retrieve all Activity
     activity: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Retrieve the Workspace to determine which Entities to return
       const workspace = await Workspaces.getOne(context.workspace);
@@ -47,14 +43,7 @@ export const ActivityResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const hasAccess = await Workspaces.checkAccess(context.user, context.workspace);
-      if (!hasAccess) {
-        throw new GraphQLError("User does not have access to this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context);
 
       // Apply the create operation
       const result = await Activity.create(args.activity);
