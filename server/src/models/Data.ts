@@ -74,8 +74,9 @@ export class Data {
     return await Data.generateFile(_id, result[0].filename);
   };
 
-  static uploadAttachment = async (target: string, file: IFile): Promise<ResponseData<string>> => {
+  static uploadAttachment = async (target: string, file: IFile, name?: string): Promise<ResponseData<string>> => {
     const { createReadStream, filename, mimetype } = await file;
+    const attachmentName = _.trim(name) || filename;
 
     const bucket = getAttachments();
     const stream: fs.ReadStream = createReadStream();
@@ -98,13 +99,13 @@ export class Data {
             const attachmentId = uploadStream.id.toString();
             const addResult = await Entities.addAttachment(target, {
               _id: attachmentId,
-              name: filename,
+              name: attachmentName,
             });
 
             if (!addResult.success) {
               resolve({ success: false, message: addResult.message, data: "" });
             } else {
-              resolve({ success: true, message: `Uploaded file "${filename}"`, data: attachmentId });
+              resolve({ success: true, message: `Uploaded file "${attachmentName}"`, data: attachmentId });
             }
           } catch (error: unknown) {
             reject({

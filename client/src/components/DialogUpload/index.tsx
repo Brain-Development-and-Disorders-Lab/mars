@@ -2,14 +2,27 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, Dialog, CloseButton, Fieldset, Flex, Text, FileUpload, Tag, useFileUpload } from "@chakra-ui/react";
+import {
+  Button,
+  Dialog,
+  CloseButton,
+  Field,
+  Fieldset,
+  Flex,
+  Input,
+  InputGroup,
+  Text,
+  FileUpload,
+  Tag,
+  useFileUpload,
+} from "@chakra-ui/react";
 import Error from "@components/Error";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import FileUploadList from "@components/UploadList";
 
 // Utility functions and libraries
-import { getFileExtension } from "@lib/util";
+import { getFileExtension, splitFileName } from "@lib/util";
 import _ from "lodash";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
@@ -21,18 +34,23 @@ import { DialogUploadProps, ResponseData } from "@types";
 import { ACCEPTED_ATTACHMENTS, STYLES } from "@variables";
 
 const DialogUpload = (props: DialogUploadProps) => {
+  // Attachment name, defaulting to the file name without its extension
+  const [name, setName] = useState<string>("");
+
   const fileUpload = useFileUpload({
     maxFiles: 1,
     maxFileSize: 10 * 1024 * 1024,
     accept: ACCEPTED_ATTACHMENTS,
+    onFileAccept: (details) => setName(splitFileName(details.files[0].name).base),
   });
+  const extension = splitFileName(fileUpload.acceptedFiles[0]?.name ?? "").extension;
 
   const [isLoaded, setIsLoaded] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
 
   const UPLOAD_ATTACHMENT = gql`
-    mutation UploadAttachment($target: String!, $file: Upload!) {
-      uploadAttachment(target: $target, file: $file) {
+    mutation UploadAttachment($target: String!, $file: Upload!, $name: String) {
+      uploadAttachment(target: $target, file: $file, name: $name) {
         success
         message
         data
@@ -51,6 +69,7 @@ const DialogUpload = (props: DialogUploadProps) => {
         variables: {
           target: props.target,
           file: fileUpload.acceptedFiles[0],
+          name: `${_.trim(name)}${extension}`,
         },
       });
 
@@ -175,6 +194,30 @@ const DialogUpload = (props: DialogUploadProps) => {
                           </FileUpload.Dropzone>
                           <FileUploadList />
                         </FileUpload.RootProvider>
+                        {fileUpload.acceptedFiles.length > 0 && (
+                          <Field.Root required>
+                            <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
+                              Name
+                              <Field.RequiredIndicator />
+                            </Field.Label>
+                            <InputGroup
+                              endElement={
+                                <Text fontSize={"xs"} color={"text.subtle"}>
+                                  {extension}
+                                </Text>
+                              }
+                            >
+                              <Input
+                                bg={"white"}
+                                size={"xs"}
+                                rounded={"md"}
+                                placeholder={"Name"}
+                                value={name}
+                                onChange={(event) => setName(event.target.value)}
+                              />
+                            </InputGroup>
+                          </Field.Root>
+                        )}
                       </Fieldset.Content>
                     </Fieldset.Root>
                   </Flex>
@@ -200,7 +243,7 @@ const DialogUpload = (props: DialogUploadProps) => {
                     rounded={"md"}
                     colorPalette={"green"}
                     variant={"solid"}
-                    disabled={fileUpload.acceptedFiles.length === 0 || loading}
+                    disabled={fileUpload.acceptedFiles.length === 0 || _.isEmpty(_.trim(name)) || loading}
                     onClick={() => performUpload()}
                     loading={loading}
                   >

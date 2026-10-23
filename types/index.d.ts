@@ -441,6 +441,12 @@ export type IGenericItem = {
   name: string;
 };
 
+// File name split into its base name and extension
+export type FileName = {
+  base: string;
+  extension: string;
+};
+
 // Utility type used for `Select` component options
 export type ISelectOption = {
   label: string;
@@ -684,6 +690,7 @@ export type EntityAttachmentsTableProps = {
   workspace?: string;
   isPublic?: boolean;
   onDownload: (id: string, name: string) => void;
+  onRename?: (id: string, name: string) => void;
   onRemove?: (id: string) => void;
   onRemoveMany?: (ids: string[]) => void;
   onUploadClick?: () => void;
@@ -981,6 +988,12 @@ export type DialogPreviewProps = {
   trigger?: React.ReactNode;
   workspace?: string;
   isPublic?: boolean;
+  onRename?: (id: string, name: string) => void;
+};
+
+// `PreviewContent` props, used within `DialogPreview`
+export type PreviewContentProps = Pick<DialogPreviewProps, "attachment" | "workspace" | "isPublic"> & {
+  nameField?: React.ReactNode;
 };
 
 // `DialogImport` props

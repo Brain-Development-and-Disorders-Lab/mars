@@ -871,6 +871,15 @@ const Entity = () => {
     );
   };
 
+  // Rename an Attachment in the Entity state
+  const renameAttachment = (id: string, name: string) => {
+    setEntityAttachments(
+      entityAttachments.map((attachment) => {
+        return attachment._id === id ? { ...attachment, name: name } : attachment;
+      }),
+    );
+  };
+
   // Remove Attributes from the Entity state
   const removeAttribute = (id: string) => {
     setEntityAttributes(
@@ -1259,6 +1268,7 @@ const Entity = () => {
               attachments={displayEntityAttachments}
               editing={editing && !previewVersion}
               onDownload={getDownload}
+              onRename={renameAttachment}
               onRemove={removeAttachment}
               onRemoveMany={removeAttachments}
               onUploadClick={() => setUploadOpen(true)}

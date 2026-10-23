@@ -58,13 +58,13 @@ export const DataResolvers = {
     // Upload a file to be attached to Entity with ID `target`
     uploadAttachment: async (
       _parent: IResolverParent,
-      args: { target: string; file: IFile },
+      args: { target: string; file: IFile; name?: string },
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace
       await assertWorkspaceAccess(context);
 
-      return await Data.uploadAttachment(args.target, args.file);
+      return await Data.uploadAttachment(args.target, args.file, args.name);
     },
 
     // Prepare a spreadsheet file, returning the collection of column names (if present)

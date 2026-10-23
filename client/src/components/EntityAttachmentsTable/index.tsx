@@ -26,6 +26,7 @@ const EntityAttachmentsTable = ({
   workspace,
   isPublic,
   onDownload,
+  onRename,
   onRemove,
   onRemoveMany,
   onUploadClick,
@@ -51,6 +52,7 @@ const EntityAttachmentsTable = ({
                 }}
                 workspace={workspace}
                 isPublic={isPublic}
+                onRename={editing ? onRename : undefined}
               />
               {editing && onRemove ? (
                 <IconButton
