@@ -224,10 +224,9 @@ const Linky = (props: LinkyProps) => {
   const linkyData = getLinkyData();
 
   // Labels, falling back when the ID is missing or the item is inaccessible
-  let displayName = `Invalid ${TYPE_LABEL[props.type]}`;
+  let displayName = props.fallback || `Invalid ${TYPE_LABEL[props.type]}`;
   let tooltipLabel = `${TYPE_LABEL[props.type]} (ID: ${props.id}) is either inaccessible or does not exist.`;
   if (!hasId) {
-    displayName = props.fallback || displayName;
     tooltipLabel = displayName;
   } else if (linkyData) {
     displayName = linkyData.name;
