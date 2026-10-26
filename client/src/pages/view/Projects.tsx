@@ -8,7 +8,7 @@ import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
+import { CellCreatedField, CellDescriptionField, CellOwnerField } from "@components/DataTable/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -221,7 +221,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -244,7 +244,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("created", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -253,7 +253,7 @@ const Projects = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <CellOwnerField value={info.getValue()} />,
       header: "Owner",
     }),
   ];

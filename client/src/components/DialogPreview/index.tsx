@@ -560,7 +560,7 @@ const DialogPreview = (props: DialogPreviewProps) => {
   };
 
   const nameField = props.onRename && (
-    <Flex direction={"row"} gap={"1"} align={"center"} flex={"1"} mr={"2"}>
+    <Flex direction={"row"} gap={"2"} align={"center"} flex={"1"} mr={"2"}>
       <InputGroup
         endElement={
           <Text fontSize={"xs"} color={"text.subtle"}>

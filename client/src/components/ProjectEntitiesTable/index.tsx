@@ -4,7 +4,7 @@ import React from "react";
 // Existing and custom components
 import { Button, EmptyState, Flex, SkeletonText, Text } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { AttributeTag, EmptyTag } from "@components/TagField";
+import { TagAttribute, TagEmpty } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
@@ -81,7 +81,7 @@ const ProjectEntitiesTable = ({
           return <SkeletonText noOfLines={1} />;
         }
         if (_.isEqual(description, "")) {
-          return <EmptyTag label={"Description"} />;
+          return <TagEmpty label={"Description"} />;
         }
         return (
           <Flex>
@@ -109,7 +109,7 @@ const ProjectEntitiesTable = ({
             max={2}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
-            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+            renderTag={(attribute) => <TagAttribute attribute={attribute} />}
           />
         );
       },

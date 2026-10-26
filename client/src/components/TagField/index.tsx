@@ -6,7 +6,7 @@ import { Tag } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
 // Existing and custom types
-import { AttributeTagProps, EmptyTagProps, ValueTagProps } from "@types";
+import { TagAttributeProps, TagEmptyProps, TagValueProps } from "@types";
 
 // Utility functions and libraries
 import { getValueTypeIconProps } from "@lib/util";
@@ -15,14 +15,14 @@ import { getValueTypeIconProps } from "@lib/util";
 import { STYLES } from "@variables";
 
 // A single missing field, rendered as "No {label}"
-export const EmptyTag = (props: EmptyTagProps) => (
+export const TagEmpty = (props: TagEmptyProps) => (
   <Tag.Root colorPalette={"orange"} size={props.size}>
     <Tag.Label fontSize={"xs"}>{`No ${props.label}`}</Tag.Label>
   </Tag.Root>
 );
 
 // A single Value, colored and iconed by its data type
-export const ValueTag = (props: ValueTagProps) => {
+export const TagValue = (props: TagValueProps) => {
   const { name, color } = getValueTypeIconProps(props.value.type);
 
   return (
@@ -36,7 +36,7 @@ export const ValueTag = (props: ValueTagProps) => {
 };
 
 // A single Attribute
-export const AttributeTag = (props: AttributeTagProps) => (
+export const TagAttribute = (props: TagAttributeProps) => (
   <Tag.Root colorPalette={"attribute"} size={props.size}>
     <Tag.StartElement>
       <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />

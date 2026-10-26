@@ -5,7 +5,7 @@ import { Flex, Heading, Text, Stat, Button, Tag, Switch, IconButton } from "@cha
 import { Content } from "@components/Container";
 import TagActor from "@components/TagActor";
 import DataTable, { ColumnMeta } from "@components/DataTable";
-import { EmptyTag } from "@components/TagField";
+import { TagEmpty } from "@components/TagField";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
@@ -271,7 +271,7 @@ const Admin = () => {
             </Tooltip>
           );
         } else {
-          return <EmptyTag label={"Description"} size={"sm"} />;
+          return <TagEmpty label={"Description"} size={"sm"} />;
         }
       },
       header: "Description",

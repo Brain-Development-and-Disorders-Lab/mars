@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import { Flex, Text } from "@chakra-ui/react";
 
 // Custom components
-import { EmptyTag } from "@components/TagField";
+import { TagEmpty } from "@components/TagField";
 
 // Existing and custom types
 import { FieldTagListProps } from "@types";
@@ -12,7 +12,7 @@ const FieldTagList = (props: FieldTagListProps) => {
   if (props.items.length === 0) {
     return props.emptyLabel ? (
       <Flex>
-        <EmptyTag label={props.emptyLabel} />
+        <TagEmpty label={props.emptyLabel} />
       </Flex>
     ) : null;
   }

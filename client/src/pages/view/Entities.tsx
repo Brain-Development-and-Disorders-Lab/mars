@@ -5,11 +5,11 @@ import React, { useEffect, useState } from "react";
 import { Box, Flex, Text, Button, Spacer, Tag, EmptyState } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DialogExport from "@components/DialogExport";
-import { AttributeTag } from "@components/TagField";
+import { TagAttribute } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
+import { CellCreatedField, CellDescriptionField, CellOwnerField } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import DataTable from "@components/DataTable";
 import DataTableFilters from "@components/DataTable/DataTableFilters";
@@ -240,7 +240,7 @@ const Entities = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -254,7 +254,7 @@ const Entities = () => {
           max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
-          renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+          renderTag={(attribute) => <TagAttribute attribute={attribute} />}
         />
       ),
       header: "Attributes",
@@ -279,7 +279,7 @@ const Entities = () => {
       },
     }),
     columnHelper.accessor("created", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -288,7 +288,7 @@ const Entities = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <CellOwnerField value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),

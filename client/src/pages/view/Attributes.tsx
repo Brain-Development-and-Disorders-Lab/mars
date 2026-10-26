@@ -6,11 +6,11 @@ import { Button, EmptyState, Flex, Spacer, Text } from "@chakra-ui/react";
 import DataTable from "@components/DataTable";
 import DataTableFilters from "@components/DataTable/DataTableFilters";
 import { Content } from "@components/Container";
-import { ValueTag } from "@components/TagField";
+import { TagValue } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
+import { CellCreatedField, CellDescriptionField, CellOwnerField } from "@components/DataTable/DataTableCell";
 import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -227,7 +227,7 @@ const Attributes = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -241,7 +241,7 @@ const Attributes = () => {
           max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
-          renderTag={(value) => <ValueTag value={value} />}
+          renderTag={(value) => <TagValue value={value} />}
         />
       ),
       header: "Values",
@@ -250,7 +250,7 @@ const Attributes = () => {
       },
     }),
     columnHelper.accessor("timestamp", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -259,7 +259,7 @@ const Attributes = () => {
       },
     }),
     columnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <CellOwnerField value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),

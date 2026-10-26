@@ -29,6 +29,7 @@ import {
 import Icon from "@components/Icon";
 import { DataTablePaginationNav, DataTablePageSizeSelect } from "@components/DataTable/DataTablePagination";
 import DataTableColumnSelect from "@components/DataTable/DataTableColumnSelect";
+import CellGeneric from "@components/DataTable/DataTableCell";
 
 // Custom types
 import { DataTableProps } from "@types";
@@ -285,6 +286,12 @@ const customSortingFn = (
   return 0;
 };
 
+// Identify rows by their `_id`, or their value for string rows, falling back to the row index
+const getRowId = (row: RowData, index: number): string => {
+  if (_.isString(row)) return row;
+  return _.get(row, "_id") || String(index);
+};
+
 const DataTable = (props: DataTableProps) => {
   const { isBreakpointActive } = useBreakpoint();
   const [pageLength, setPageLength] = useState<string[]>([props.pageSize?.toString() || "20"]);
@@ -373,9 +380,7 @@ const DataTable = (props: DataTableProps) => {
 
   useEffect(() => {
     if (props.onSelectedRowsChange && !_.isEqual(prevSelectedRowsRef.current, selectedRows)) {
-      const rowSet = Object.keys(selectedRows)
-        .map((idx) => props.data[parseInt(idx)])
-        .filter(Boolean);
+      const rowSet = props.data.filter((row, index) => selectedRows[getRowId(row, index)]);
       props.onSelectedRowsChange(rowSet);
       prevSelectedRowsRef.current = selectedRows;
     }
@@ -526,6 +531,7 @@ const DataTable = (props: DataTableProps) => {
   const table = useReactTable({
     data: props.data,
     columns,
+    getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: isServerSidePagination && props.onSortChange ? undefined : getSortedRowModel(),
     getPaginationRowModel: isServerSidePagination ? undefined : getPaginationRowModel(),
@@ -1006,7 +1012,7 @@ const DataTable = (props: DataTableProps) => {
                             bg={isSelected ? "table.selectedRow" : "transparent"}
                             flexShrink={0}
                           >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            <CellGeneric cell={cell} />
                           </Box>
                         );
                       })}

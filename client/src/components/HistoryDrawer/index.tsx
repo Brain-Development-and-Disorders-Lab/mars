@@ -18,7 +18,7 @@ import {
   Timeline,
 } from "@chakra-ui/react";
 import TagActor from "@components/TagActor";
-import { AttributeTag, EmptyTag, ValueTag } from "@components/TagField";
+import { TagAttribute, TagEmpty, TagValue } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -81,7 +81,7 @@ const HistoryDetails = (props: {
             max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
-            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+            renderTag={(attribute) => <TagAttribute attribute={attribute} />}
           />
         </Flex>
 
@@ -162,7 +162,7 @@ const HistoryDetails = (props: {
         max={2}
         emptyLabel={"Values"}
         getKey={(value) => value._id}
-        renderTag={(value) => <ValueTag value={value} />}
+        renderTag={(value) => <TagValue value={value} />}
       />
     </Flex>
   );
@@ -453,7 +453,7 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                                       <Text fontSize={"xs"}>{version.description}</Text>
                                     ) : (
                                       <Flex>
-                                        <EmptyTag label={"Description"} size={"sm"} />
+                                        <TagEmpty label={"Description"} size={"sm"} />
                                       </Flex>
                                     )}
                                   </Flex>

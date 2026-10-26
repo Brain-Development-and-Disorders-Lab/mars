@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
 import DialogAddAttribute from "@components/DialogAddAttribute";
-import { EmptyTag, ValueTag } from "@components/TagField";
+import { TagEmpty, TagValue } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import { Information } from "@components/Label";
 import DialogViewAttribute from "@components/DialogViewAttribute";
@@ -108,7 +108,7 @@ const EntityMappingStep = ({
     attributeColumnHelper.accessor("description", {
       cell: (info) => {
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-          return <EmptyTag label={"Description"} />;
+          return <TagEmpty label={"Description"} />;
         }
         return (
           <Flex>
@@ -127,7 +127,7 @@ const EntityMappingStep = ({
           max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
-          renderTag={(value) => <ValueTag value={value} />}
+          renderTag={(value) => <TagValue value={value} />}
         />
       ),
       header: "Values",
