@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Button, EmptyState, Flex, Tag, Text } from "@chakra-ui/react";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
-import { AttributeTag, ValueTag } from "@components/TagField";
+import { CellCreatedField, CellDescriptionField, CellOwnerField } from "@components/DataTable/DataTableCell";
+import { TagAttribute, TagValue } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
@@ -204,12 +204,12 @@ export const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
+      cell: (info) => <CellOwnerField value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("timestamp", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -218,7 +218,7 @@ export const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -232,7 +232,7 @@ export const Dashboard = () => {
           max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
-          renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+          renderTag={(attribute) => <TagAttribute attribute={attribute} />}
         />
       ),
       header: "Attributes",
@@ -278,12 +278,12 @@ export const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
+      cell: (info) => <CellOwnerField value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("created", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -292,7 +292,7 @@ export const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -352,12 +352,12 @@ export const Dashboard = () => {
       },
     }),
     attributeTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} workspace={id} isPublic />,
+      cell: (info) => <CellOwnerField value={info.getValue()} workspace={id} isPublic />,
       header: "Owner",
       enableHiding: true,
     }),
     attributeTableColumnHelper.accessor("timestamp", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -366,7 +366,7 @@ export const Dashboard = () => {
       },
     }),
     attributeTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -380,7 +380,7 @@ export const Dashboard = () => {
           max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
-          renderTag={(value) => <ValueTag value={value} />}
+          renderTag={(value) => <TagValue value={value} />}
         />
       ),
       header: "Values",

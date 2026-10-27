@@ -1,5 +1,6 @@
 // Import external types
 import { ListCollection, UseFileUploadReturn } from "@chakra-ui/react";
+import { Cell, RowData } from "@tanstack/react-table";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
 
@@ -14,7 +15,7 @@ export namespace State.Entity {
 
   type Links = Start & {
     projects: string[];
-    links: ILinks[];
+    links: ILink[];
   };
 
   type Attributes = Links & {
@@ -69,7 +70,7 @@ export type AttributeUsage = {
   modifications: ("name" | "description" | "values")[];
 };
 
-// `AttributeBreadcrumb` props, the breadcrumb trail and name tag shared by the Attribute detail page
+// `AttributeBreadcrumb` component props, the breadcrumb trail and name tag
 export type AttributeBreadcrumbProps = {
   loading: boolean;
   workspaceName: string;
@@ -79,7 +80,7 @@ export type AttributeBreadcrumbProps = {
   name: string;
 };
 
-// `AttributeOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Attribute detail page
+// `AttributeOverviewCard` component props, Attribute Name/Owner/Timestamp/Visibility/Description fields
 export type AttributeOverviewCardProps = {
   name: string;
   onNameChange?: (value: string) => void;
@@ -94,7 +95,7 @@ export type AttributeOverviewCardProps = {
   isPublic?: boolean;
 };
 
-// `AttributeUsageTable` props, the Entities using an Attribute, shared by the Attribute detail page
+// `AttributeUsageTable` component props, Entities using an Attribute
 export type AttributeUsageTableProps = {
   attributeUsage: AttributeUsage[];
   onViewEntity: (entityId: string) => void;
@@ -188,7 +189,7 @@ export type CompareAttributeFieldDiffProps = {
   setUseOriginal: (v: boolean) => void;
 };
 
-// Column descriptor returned by prepareEntitySpreadsheet
+// `ColumnInfo` type, the Column descriptor returned by `prepareEntitySpreadsheet`
 export type ColumnInfo = {
   name: string;
   inferredType: IValueType;
@@ -250,7 +251,7 @@ export type Collaborator = {
   permissions: UserWorkspacePermissions; // Workspace-scoped permissions
 };
 
-// "Collaborators" component props
+// `Collaborators` component props
 export type CollaboratorsProps = {
   editing: boolean;
   currentUser: string;
@@ -259,7 +260,7 @@ export type CollaboratorsProps = {
   setCollaborators: (value: React.SetStateAction<Collaborator[]>) => void;
 };
 
-// "Linky" component props
+// `Linky` component props
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects" | "workspaces";
   id: string;
@@ -282,7 +283,7 @@ export type LinkyData = {
   items: { _id: string; name: string; type?: IValueType }[];
 };
 
-// "Actor" component props
+// `TagActor` component props
 export type TagActorProps = {
   identifier: string;
   fallback: string;
@@ -294,7 +295,7 @@ export type TagActorProps = {
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
-// "Visibility" component props
+// `TagVisibility` component props
 export type TagVisibilityProps = {
   isPublic: boolean;
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
@@ -302,38 +303,40 @@ export type TagVisibilityProps = {
   isInherited?: boolean; // Specify if this visibility is inherited
 };
 
-// "Timestamp" component props
+// `TagTimestamp` component props
 export type TagTimestampProps = {
   timestamp: string;
   description?: string;
 };
 
-// "TagField" component props, a single field value (Empty, Value, or Attribute) rendered as a colored Tag
-export type EmptyTagProps = {
+// `TagEmpty` component props
+export type TagEmptyProps = {
   label: string; // Noun describing the missing content, rendered as "No {label}"
   size?: "sm" | "md";
 };
 
-export type ValueTagProps = {
+// `TagValue` component props
+export type TagValueProps = {
   value: IValue;
   size?: "sm" | "md";
 };
 
-export type AttributeTagProps = {
+// `TagAttribute` component props
+export type TagAttributeProps = {
   attribute: IGenericItem;
   size?: "sm" | "md";
 };
 
-// "FieldTagList" component props, renders up to `max` `TagField`s followed by an "and N more" summary
+// `FieldTagList` component props, renders up to `max` `TagField`s followed by an "and N more" summary
 export type FieldTagListProps = {
   items: any[];
   max: number;
   getKey: (item: any) => string;
   renderTag: (item: any) => React.ReactNode;
-  emptyLabel?: string; // When set, an `EmptyTag` is shown in place of an empty list
+  emptyLabel?: string; // When set, an `TagEmpty` is shown in place of an empty list
 };
 
-// "PageHeader" component props, the icon, title, and Workspace subtitle shown atop list pages
+// `PageHeader` component props, the icon, title, and Workspace subtitle shown atop list pages
 export type PageHeaderProps = {
   icon: IconNames;
   iconColor?: string;
@@ -342,18 +345,25 @@ export type PageHeaderProps = {
   loading: boolean;
 };
 
-// "TableCell" component props, shared `DataTable` cell renderers repeated across list pages
-export type CreatedCellProps = {
+// `CellGeneric` component props
+export type CellGenericProps = {
+  cell: Cell<RowData, unknown>;
+};
+
+// `CellCreatedField` component props, shared `DataTable` cell renderers repeated across list pages
+export type CellCreatedFieldProps = {
   value: string;
 };
 
-export type OwnerCellProps = {
+// `CellOwnerField` component props
+export type CellOwnerFieldProps = {
   value: string;
   workspace?: string; // Override the active Workspace, used on unauthenticated public pages
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
 
-export type DescriptionCellProps = {
+// `CellDescriptionField` component props
+export type CellDescriptionFieldProps = {
   value: string | null | undefined;
   maxLength?: number;
 };
@@ -389,7 +399,7 @@ export type ProjectHistory = {
   entities: string[];
 };
 
-// `ProjectBreadcrumb` props, the breadcrumb trail and name tag shared by the Project detail page
+// `ProjectBreadcrumb` component props, Project breadcrumb trail and name tag
 export type ProjectBreadcrumbProps = {
   loading: boolean;
   workspaceName: string;
@@ -399,7 +409,7 @@ export type ProjectBreadcrumbProps = {
   name: string;
 };
 
-// `ProjectOverviewCard` props, the Name/Owner/Timestamp/Visibility/Description fields shared by the Project detail page
+// `ProjectOverviewCard` component props, Project Name/Owner/Timestamp/Visibility/Description fields
 export type ProjectOverviewCardProps = {
   name: string;
   onNameChange?: (value: string) => void;
@@ -414,14 +424,14 @@ export type ProjectOverviewCardProps = {
   isPublic?: boolean;
 };
 
-// Row shape for the `ProjectEntitiesTable`; description and attributes are undefined until fetched
+// `ProjectEntityTableRow`, row shape for the `ProjectEntitiesTable`
 export type ProjectEntityTableRow = {
   _id: string;
   description?: string;
   attributes?: AttributeModel[];
 };
 
-// `ProjectEntitiesTable` props, the Entities within a Project, shared by the Project detail page
+// `ProjectEntitiesTable` component props, the Entities within a Project, shared by the Project detail page
 export type ProjectEntitiesTableProps = {
   entities: ProjectEntityTableRow[];
   entityCount: number;
@@ -441,6 +451,12 @@ export type IGenericItem = {
   name: string;
 };
 
+// Utility type to represent a file name split into its base name and extension
+export type FileName = {
+  base: string;
+  extension: string;
+};
+
 // Utility type used for `Select` component options
 export type ISelectOption = {
   label: string;
@@ -457,14 +473,6 @@ export type ILink = {
   target: IGenericItem;
 };
 
-export type LinksProps = {
-  links: ILink[];
-  setLinks: (value: React.SetStateAction<ILink[]>) => void;
-  viewOnly?: boolean;
-  sourceName?: string;
-  sourceId?: string;
-};
-
 // Utility type to specify the props of `DialogAddLinks`
 export type DialogAddLinksProps = {
   open: boolean;
@@ -475,6 +483,16 @@ export type DialogAddLinksProps = {
   onAdd: (links: ILink[]) => void;
 };
 
+// `Links` component props
+export type LinksProps = {
+  links: ILink[];
+  setLinks: (value: React.SetStateAction<ILink[]>) => void;
+  viewOnly?: boolean;
+  sourceName?: string;
+  sourceId?: string;
+};
+
+// `DialogAddAttribute` component props
 export type DialogAddAttributeProps = {
   open: boolean;
   onClose: () => void;
@@ -484,8 +502,7 @@ export type DialogAddAttributeProps = {
   entityDescription: string;
   permittedDataValues?: ColumnInfo[];
   onAdd: (attribute: AttributeModel) => void;
-  /** Optional, shown only when the user is creating from scratch */
-  onSaveAsAttribute?: (attribute: IAttribute) => Promise<void>;
+  onSaveAsAttribute?: (attribute: IAttribute) => Promise<void>; // Shown only when the user is creating from scratch
 };
 
 // Workspace types
@@ -578,7 +595,7 @@ export type EntityHistory = {
   attachments: IGenericItem[];
 };
 
-// `EntityBreadcrumb` props, the breadcrumb trail and name tag shared by the Entity detail page
+// `EntityBreadcrumb` component props, the breadcrumb trail and name tag shared by the Entity detail page
 export type EntityBreadcrumbProps = {
   loading: boolean;
   workspaceName: string;
@@ -588,7 +605,7 @@ export type EntityBreadcrumbProps = {
   name: string;
 };
 
-// `EntityOverviewCard` props, the Name/Secondary Identifier/Owner/Timestamp/Visibility/Description fields shared by the Entity detail page
+// `EntityOverviewCard` component props, Entity Name/Secondary Identifier/Owner/Timestamp/Visibility/Description fields
 export type EntityOverviewCardProps = {
   name: string;
   onNameChange?: (value: string) => void;
@@ -623,7 +640,7 @@ export type EntityOverviewCardProps = {
   isPublic?: boolean;
 };
 
-// `EntityAttributesTable` props, the Attributes on an Entity, shared by the Entity detail page
+// `EntityAttributesTable` component props, the Attributes on an Entity
 export type EntityAttributesTableProps = {
   attributes: AttributeModel[];
   availableAttributes: AttributeModel[];
@@ -636,7 +653,7 @@ export type EntityAttributesTableProps = {
   isPublic?: boolean;
 };
 
-// `EntityAttributeNameCell` props, the "Name" column cell within `EntityAttributesTable`
+// `EntityAttributeNameCell` component props, the "Name" column cell within `EntityAttributesTable`
 export type EntityAttributeNameCellProps = {
   attribute: AttributeModel;
   availableAttributes: AttributeModel[];
@@ -648,7 +665,7 @@ export type EntityAttributeNameCellProps = {
   isPublic?: boolean;
 };
 
-// `CreateEntityAttributesTable` props, the Entity creation flow's attributes table
+// `CreateEntityAttributesTable` component props, the Entity creation flow's attributes table
 export type CreateEntityAttributesTableProps = {
   attributes: AttributeModel[];
   availableAttributes: AttributeModel[];
@@ -657,7 +674,7 @@ export type CreateEntityAttributesTableProps = {
   onAddClick: () => void;
 };
 
-// `CreateEntityAttributeNameCell` props, the "Name" column cell within `CreateEntityAttributesTable`
+// `CreateEntityAttributeNameCell` component props, the "Name" column cell within `CreateEntityAttributesTable`
 export type CreateEntityAttributeNameCellProps = {
   attribute: AttributeModel;
   availableAttributes: AttributeModel[];
@@ -665,7 +682,7 @@ export type CreateEntityAttributeNameCellProps = {
   onRemove: (id: string) => void;
 };
 
-// `EntityProjectsTable` props, the Projects an Entity belongs to, shared by the Entity detail page
+// `EntityProjectsTable` component props, the Projects an Entity belongs to
 export type EntityProjectsTableProps = {
   projects: string[];
   editing: boolean;
@@ -677,13 +694,14 @@ export type EntityProjectsTableProps = {
   onAddClick?: () => void;
 };
 
-// `EntityAttachmentsTable` props, the files attached to an Entity, shared by the Entity detail page
+// `EntityAttachmentsTable` component props, the files attached to an Entity
 export type EntityAttachmentsTableProps = {
   attachments: IGenericItem[];
   editing: boolean;
   workspace?: string;
   isPublic?: boolean;
   onDownload: (id: string, name: string) => void;
+  onRename?: (id: string, name: string) => void;
   onRemove?: (id: string) => void;
   onRemoveMany?: (ids: string[]) => void;
   onUploadClick?: () => void;
@@ -777,13 +795,14 @@ export type IdentifierFormatModel = IIdentifierFormat & {
   _id: string;
 };
 
+// `DialogCreateIdentifier` component props
 export type DialogCreateIdentifierFormatProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (_id: string) => void;
 };
 
-// "SelectIdentifierFormat" component props
+// `SelectIdentifierFormat` component props
 export type SelectIdentifierFormatProps = {
   format: string[];
   setFormat: (value: React.SetStateAction<string[]>) => void;
@@ -861,7 +880,7 @@ export type DialogAlertProps = {
   rightButtonAction?: () => void;
 };
 
-// DataTable component
+// `DataTable` component
 export type DataTableProps = {
   columns: any[];
   visibleColumns: Record<string, boolean>;
@@ -893,6 +912,7 @@ export type DataTableProps = {
   sortState?: { field: string; direction: "asc" | "desc" } | null; // Current sort state (for syncing with server-side sorting)
 };
 
+// `DataTableAction` component props
 export type DataTableAction = {
   label: string | ((selectedCount: number) => string); // Action label, or a function receiving the selected row count
   icon: IconNames; // Icon
@@ -901,7 +921,7 @@ export type DataTableAction = {
   alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-// `DataTablePaginationNav` props
+// `DataTablePaginationNav` component props
 export type DataTablePaginationNavProps = {
   table: any;
 };
@@ -909,7 +929,7 @@ export type DataTablePaginationNavProps = {
 // Item shape backing the `DataTablePageSizeSelect` collection
 export type DataTablePageSizeOption = { label: string; value: string };
 
-// `DataTablePageSizeSelect` props
+// `DataTablePageSizeSelect` component props
 export type DataTablePageSizeSelectProps = {
   table: any;
   pageLength: string[];
@@ -918,9 +938,9 @@ export type DataTablePageSizeSelectProps = {
 };
 
 // Item shape backing the `DataTableColumnSelect` collection
-export type DataTableColumnOption = { label: string; value: string; disabled: boolean };
+export type DataTableColumnOption = DataTablePageSizeOption & { disabled: boolean };
 
-// `DataTableColumnSelect` props
+// `DataTableColumnSelect` component props
 export type DataTableColumnSelectProps = {
   columnNamesCollection: ListCollection<DataTableColumnOption>;
   visibleColumnsForSelect: string[];
@@ -928,7 +948,7 @@ export type DataTableColumnSelectProps = {
   updateColumnVisibility: (toggleableColumns: string[]) => void;
 };
 
-// `DataTableFilters` props
+// `DataTableFiltersCount` component props
 export type DataTableFiltersCountProps =
   | {
       mode: "range";
@@ -946,6 +966,7 @@ export type DataTableFiltersCountProps =
       onChange: (ranges: string[]) => void;
     };
 
+// `DataTableFilters` component props
 export type DataTableFiltersProps = {
   entityLabel: string;
   filtersOpen: boolean;
@@ -975,15 +996,21 @@ export type DataTableFiltersProps = {
   onReset: () => void;
 };
 
-// `DialogPreview` props
+// `DialogPreview` component props
 export type DialogPreviewProps = {
   attachment: IGenericItem;
   trigger?: React.ReactNode;
   workspace?: string;
   isPublic?: boolean;
+  onRename?: (id: string, name: string) => void;
 };
 
-// `DialogImport` props
+// `PreviewContent` component props, used within `DialogPreview`
+export type PreviewContentProps = Pick<DialogPreviewProps, "attachment" | "workspace" | "isPublic"> & {
+  nameField?: React.ReactNode;
+};
+
+// `DialogImport` component props
 export type DialogImportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -1025,7 +1052,7 @@ export type DialogImportReviewTableRow = {
   warnings?: string[];
 };
 
-// `DialogImportReviewTable` props
+// `DialogImportReviewTable` component props
 export type DialogImportReviewTableProps = {
   items: DialogImportReviewTableRow[];
   icon: IconNames;
@@ -1038,7 +1065,7 @@ export type DialogImportReviewTableProps = {
   showWarnings?: boolean;
 };
 
-// `UploadStep` props, the `DialogImport` step used to select the import type and upload a file
+// `UploadStep` component props, the `DialogImport` step used to select the import type and upload a file
 export type UploadStepProps = {
   importType: "entities" | "attribute" | undefined;
   isTypeSelectDisabled: boolean;
@@ -1046,7 +1073,7 @@ export type UploadStepProps = {
   fileUpload: UseFileUploadReturn;
 };
 
-// `EntityDetailsStep` props, the `DialogImport` step used to configure name/description/project/owner fields
+// `EntityDetailsStep` component props, the `DialogImport` step used to configure name/description/project/owner fields
 export type EntityDetailsStepProps = {
   fileType: string;
   columns: ColumnInfo[];
@@ -1078,7 +1105,7 @@ export type EntityDetailsStepProps = {
   ) => React.ReactElement;
 };
 
-// `EntityMappingStep` props, the `DialogImport` step used to add Attributes applied to all imported Entities
+// `EntityMappingStep` component props, the `DialogImport` step used to add Attributes applied to all imported Entities
 export type EntityMappingStepProps = {
   attributesField: AttributeModel[];
   onAttributesFieldChange: (value: AttributeModel[]) => void;
@@ -1090,7 +1117,7 @@ export type EntityMappingStepProps = {
   columns: ColumnInfo[];
 };
 
-// `AttributeNameCell` props, the "Name" column cell within `EntityMappingStep`'s attribute table
+// `AttributeNameCell` component props, the "Name" column cell within `EntityMappingStep`'s attribute table
 export type AttributeNameCellProps = {
   attribute: AttributeModel;
   fileType: string;
@@ -1099,17 +1126,17 @@ export type AttributeNameCellProps = {
   onUpdate: (updated: AttributeModel) => void;
 };
 
-// `EntityReviewStep` props, the final `DialogImport` review step for an Entity import
+// `EntityReviewStep` component props, the final `DialogImport` review step for an Entity import
 export type EntityReviewStepProps = {
   reviewEntities: EntityImportReview[];
 };
 
-// `AttributeReviewStep` props, the final `DialogImport` review step for a Attribute import
+// `AttributeReviewStep` component props, the final `DialogImport` review step for a Attribute import
 export type AttributeReviewStepProps = {
   reviewAttributes: AttributeImportReview[];
 };
 
-// `DialogExport` props
+// `DialogExport` component props
 export type DialogExportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
@@ -1120,19 +1147,19 @@ export type DialogExportProps = {
   ids?: string[];
 };
 
-// `DialogScan` props
+// `DialogScan` component props
 export type DialogScanProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `DialogReport` props
+// `DialogReport` component props
 export type DialogReportProps = {
   open: boolean;
   setOpen: (value: React.SetStateAction<boolean>) => void;
 };
 
-// `DialogUnsavedChanges` props
+// `DialogUnsavedChanges` component props
 export type DialogUnsavedChangesProps = {
   blocker: Blocker;
   cancelBlockerRef: React.MutableRefObject<null>;
@@ -1140,7 +1167,7 @@ export type DialogUnsavedChangesProps = {
   callback: () => void;
 };
 
-// `DialogUpload` props
+// `DialogUpload` component props
 export type DialogUploadProps = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -1150,7 +1177,7 @@ export type DialogUploadProps = {
   onUploadSuccess?: () => void;
 };
 
-// `Scanner` props
+// `Scanner` component props
 export type ScannerProps = Html5QrcodeCameraScanConfig & {
   fps: number;
   verbose: boolean;
@@ -1256,7 +1283,7 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
-// SearchQuery types
+// `SearchQuery` types
 export type SearchCombinator = "and" | "or";
 export type SearchField = "name" | "description" | "projects" | "links" | "attributes";
 
@@ -1278,7 +1305,7 @@ export interface SearchQuery {
   rules: SearchRule[];
 }
 
-// SearchQueryBuilder props
+// `SearchQueryBuilder` component props
 export interface SearchQueryBuilderProps {
   query: SearchQuery;
   onQueryChange: (query: SearchQuery) => void;
@@ -1287,7 +1314,7 @@ export interface SearchQueryBuilderProps {
   onClear: () => void;
 }
 
-// SearchRuleSelect props
+// `SearchRuleSelect` component props
 export type SearchRuleSelectProps = {
   value: string;
   collection: ListCollection<string>;
@@ -1297,7 +1324,7 @@ export type SearchRuleSelectProps = {
   testId?: string;
 };
 
-// SelectSearch props
+// `SelectSearch` component props
 export type SelectSearchProps = {
   id?: string;
   value: IGenericItem;
@@ -1309,14 +1336,14 @@ export type SelectSearchProps = {
   isEmbedded?: boolean;
 };
 
-// SelectMultiEntity props
+// `SelectMultiEntity` component props
 export type SelectMultiEntityProps = {
   projectEntities: string[];
   selectedEntities: IGenericItem[];
   setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
 };
 
-// `DialogSave` props
+// `DialogSave` component props
 export type DialogSaveProps = {
   open: boolean;
   onOpenChange: (details: { open: boolean }) => void;
@@ -1330,7 +1357,7 @@ export type DialogSaveProps = {
   isPublic?: boolean;
 };
 
-// "HistoryDrawer" component props, a version history Drawer shared by Entity, Project, and Attribute detail pages
+// `HistoryDrawer` component props, a version history Drawer shared by Entity, Project, and Attribute detail pages
 export type HistoryDrawerProps = {
   type: "entity" | "project" | "attribute";
   open: boolean;
@@ -1371,7 +1398,7 @@ export type IFile = Promise<{
 // Generic GraphQL resolver parent type (for unused parents)
 export type IResolverParent = Record<string, any>;
 
-// Context passed through the request headers, includes the ORCID (user) of the user
+// Context passed through the request headers, includes the ORCID of the user
 export type Context = {
   user: string;
   workspace: string;
@@ -1420,7 +1447,7 @@ export type UserModel = IUser & {
   _id: string;
 };
 
-// User Workspace permissions structure
+// `UserWorkspacePermissions` permissions structure
 export type UserWorkspacePermissions = {
   administration: {
     edit: boolean;
@@ -1443,7 +1470,7 @@ export type UserWorkspacePermissions = {
   };
 };
 
-// User global permissions structure
+// `UserGlobalPermissions` permissions structure
 export type UserGlobalPermissions = {
   features: {
     import: boolean;
@@ -1461,7 +1488,7 @@ export type UserCollatedPermissions = {
   global: UserGlobalPermissions;
 };
 
-// Permissions Dialog props
+// `DialogPermisions` component props
 export type DialogPermissionsProps = {
   open: boolean;
   setOpen: (open: boolean) => void;

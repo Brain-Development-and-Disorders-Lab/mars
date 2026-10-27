@@ -6,12 +6,12 @@ import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import { AttributeTag } from "@components/TagField";
+import { TagAttribute } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import TagActor from "@components/TagActor";
 import Linky from "@components/Linky";
 import PageHeader from "@components/PageHeader";
-import { CreatedCell, DescriptionCell, OwnerCell } from "@components/DataTable/DataTableCell";
+import { CellCreatedField, CellDescriptionField, CellOwnerField } from "@components/DataTable/DataTableCell";
 import WalkthroughBeacon from "@components/WalkthroughBeacon";
 import WalkthroughTooltip from "@components/WalkthroughTooltip";
 import Tooltip from "@components/Tooltip";
@@ -283,12 +283,12 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <CellOwnerField value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     entityTableColumnHelper.accessor("timestamp", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -297,7 +297,7 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -311,7 +311,7 @@ const Dashboard = () => {
           max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
-          renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+          renderTag={(attribute) => <TagAttribute attribute={attribute} />}
         />
       ),
       header: "Attributes",
@@ -358,12 +358,12 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("owner", {
-      cell: (info) => <OwnerCell value={info.getValue()} />,
+      cell: (info) => <CellOwnerField value={info.getValue()} />,
       header: "Owner",
       enableHiding: true,
     }),
     projectTableColumnHelper.accessor("created", {
-      cell: (info) => <CreatedCell value={info.getValue()} />,
+      cell: (info) => <CellCreatedField value={info.getValue()} />,
       header: "Created",
       enableHiding: true,
       meta: {
@@ -372,7 +372,7 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => <DescriptionCell value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
       header: "Description",
       enableHiding: true,
       meta: {

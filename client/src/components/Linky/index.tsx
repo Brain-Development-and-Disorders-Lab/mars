@@ -1,9 +1,9 @@
 // React
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // Existing and custom components
 import { Button, Flex, HoverCard, Portal, Separator, Skeleton, Tag, Text } from "@chakra-ui/react";
-import { EmptyTag } from "@components/TagField";
+import { TagEmpty } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
@@ -92,16 +92,16 @@ const truncateLabel = (label: string, truncate: LinkyProps["truncate"]): string 
 const Linky = (props: LinkyProps) => {
   const navigate = useNavigate();
 
-  // Component state
-  const [linkLabel, setLinkLabel] = useState("Loading...");
-  const [tooltipLabel, setTooltipLabel] = useState("Default");
-  const [showArchived, setShowArchived] = useState(false);
-  const [showDeleted, setShowDeleted] = useState(false);
-
   // Navigator state
   const [showNavigator, setShowNavigator] = useState(false);
-  const [navigatorDescription, setNavigatorDescription] = useState("");
-  const [navigatorItems, setNavigatorItems] = useState<{ _id: string; name: string; type?: IValueType }[]>([]);
+
+  // Query context is shared across all types, routing to the public Workspace endpoint if required
+  const hasId = !_.isEmpty(_.trim(props.id));
+  const queryOptions = (type: LinkyType) => ({
+    variables: { _id: props.id },
+    skip: !hasId || props.type !== type,
+    context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined,
+  });
 
   // GraphQL operations
   const GET_ENTITY = gql`
@@ -118,9 +118,9 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getEntity, { loading: loadingEntity }] = useLazyQuery<{
+  const entityQuery = useQuery<{
     entity: IGenericItem & { archived: boolean; description: string; attributes: { _id: string; name: string }[] };
-  }>(GET_ENTITY);
+  }>(GET_ENTITY, queryOptions("entities"));
 
   const GET_PROJECT = gql`
     query GetProject($_id: String) {
@@ -137,10 +137,10 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getProject, { loading: loadingProject }] = useLazyQuery<{
+  const projectQuery = useQuery<{
     project: IGenericItem & { archived: boolean; description: string; entities: string[] };
     projectEntities: { _id: string; name: string }[];
-  }>(GET_PROJECT);
+  }>(GET_PROJECT, queryOptions("projects"));
 
   const GET_ATTRIBUTE = gql`
     query GetAttribute($_id: String) {
@@ -157,13 +157,13 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getAttribute, { loading: loadingAttribute }] = useLazyQuery<{
+  const attributeQuery = useQuery<{
     attribute: IGenericItem & {
       archived: boolean;
       description: string;
       values: { _id: string; name: string; type: IValueType }[];
     };
-  }>(GET_ATTRIBUTE);
+  }>(GET_ATTRIBUTE, queryOptions("attributes"));
 
   const GET_WORKSPACE = gql`
     query GetWorkspace($_id: String) {
@@ -174,92 +174,72 @@ const Linky = (props: LinkyProps) => {
       }
     }
   `;
-  const [getWorkspace, { loading: loadingWorkspace }] = useLazyQuery<{
+  const workspaceQuery = useQuery<{
     workspace: IGenericItem & { description: string };
-  }>(GET_WORKSPACE);
+  }>(GET_WORKSPACE, queryOptions("workspaces"));
 
-  // Query context is shared across all types, routing to the public Workspace endpoint if required
-  const queryContext = props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace || "") } : undefined;
-
-  // Fetches and normalizes data for each Linky type, returning `null` if the item is inaccessible
-  const fetchers: Record<LinkyType, () => Promise<LinkyData | null>> = {
-    entities: async () => {
-      const { data, error } = await getEntity({ variables: { _id: props.id }, context: queryContext });
-      if (error || !data) return null;
-      return {
-        name: data.entity.name,
-        archived: data.entity.archived,
-        description: data.entity.description,
-        items: data.entity.attributes,
-      };
-    },
-    projects: async () => {
-      const { data, error } = await getProject({ variables: { _id: props.id }, context: queryContext });
-      if (error || !data) return null;
-      return {
-        name: data.project.name,
-        archived: data.project.archived,
-        description: data.project.description,
-        items: data.projectEntities,
-      };
-    },
-    attributes: async () => {
-      const { data, error } = await getAttribute({ variables: { _id: props.id }, context: queryContext });
-      if (error || !data) return null;
-      return {
-        name: data.attribute.name,
-        archived: data.attribute.archived,
-        description: data.attribute.description,
-        items: data.attribute.values,
-      };
-    },
-    workspaces: async () => {
-      const { data, error } = await getWorkspace({ variables: { _id: props.id }, context: queryContext });
-      if (error || !data) return null;
-      return { name: data.workspace.name, archived: false, description: data.workspace.description, items: [] };
-    },
+  const queries = {
+    entities: entityQuery,
+    projects: projectQuery,
+    attributes: attributeQuery,
+    workspaces: workspaceQuery,
   };
+  const isLoading = queries[props.type].loading;
 
-  /**
-   * Utility function to retrieve data of link target
-   */
-  const getLinkyData = async () => {
-    const fallbackName = props.fallback || `Invalid ${TYPE_LABEL[props.type]}`;
-
-    if (!props.id || props.id.trim() === "") {
-      setTooltipLabel(fallbackName);
-      setShowDeleted(true);
-      setLinkLabel(truncateLabel(fallbackName, props.truncate));
-      return;
+  // Normalizes the data for each Linky type, `null` if the item is inaccessible
+  const getLinkyData = (): LinkyData | null => {
+    if (props.type === "entities" && entityQuery.data) {
+      const { entity } = entityQuery.data;
+      return {
+        name: entity.name,
+        archived: entity.archived,
+        description: entity.description,
+        items: entity.attributes,
+      };
     }
-
-    const notFoundTooltip = `${TYPE_LABEL[props.type]} (ID: ${props.id}) is either inaccessible or does not exist.`;
-
-    // On a GraphQL-level error the fallback is ignored, but a thrown error keeps it, matching prior behaviour
-    let name = fallbackName;
-    try {
-      const result = await fetchers[props.type]();
-      if (result) {
-        name = result.name;
-        setTooltipLabel(name);
-        setShowArchived(result.archived);
-        setNavigatorDescription(result.description);
-        setNavigatorItems(result.items);
-      } else {
-        name = `Invalid ${TYPE_LABEL[props.type]}`;
-        setShowDeleted(true);
-        setTooltipLabel(notFoundTooltip);
-      }
-    } catch {
-      setShowDeleted(true);
-      setTooltipLabel(notFoundTooltip);
+    if (props.type === "projects" && projectQuery.data) {
+      const { project, projectEntities } = projectQuery.data;
+      return {
+        name: project.name,
+        archived: project.archived,
+        description: project.description,
+        items: projectEntities,
+      };
     }
-
-    setLinkLabel(truncateLabel(name, props.truncate));
+    if (props.type === "attributes" && attributeQuery.data) {
+      const { attribute } = attributeQuery.data;
+      return {
+        name: attribute.name,
+        archived: attribute.archived,
+        description: attribute.description,
+        items: attribute.values,
+      };
+    }
+    if (props.type === "workspaces" && workspaceQuery.data) {
+      const { workspace } = workspaceQuery.data;
+      return { name: workspace.name, archived: false, description: workspace.description, items: [] };
+    }
+    return null;
   };
+  const linkyData = getLinkyData();
+
+  // Labels, falling back when the ID is missing or the item is inaccessible
+  let displayName = props.fallback || `Invalid ${TYPE_LABEL[props.type]}`;
+  let tooltipLabel = `${TYPE_LABEL[props.type]} (ID: ${props.id}) is either inaccessible or does not exist.`;
+  if (!hasId) {
+    tooltipLabel = displayName;
+  } else if (linkyData) {
+    displayName = linkyData.name;
+    tooltipLabel = linkyData.name;
+  }
+  const linkLabel = truncateLabel(displayName, props.truncate);
+  const showDeleted = _.isNull(linkyData);
+  const showArchived = linkyData?.archived ?? false;
+  const navigatorDescription = linkyData?.description ?? "";
+  const navigatorItems = linkyData?.items ?? [];
 
   const onClickHandler = () => {
-    if (!showDeleted && !loadingEntity && !loadingProject && !loadingAttribute && !loadingWorkspace) {
+    if (!showDeleted && !isLoading) {
       if (props.isPublic && props.type !== "workspaces") {
         navigate(`/public/${props.workspace}/${props.type}/${props.id}`);
       } else {
@@ -268,11 +248,6 @@ const Linky = (props: LinkyProps) => {
     }
   };
 
-  useEffect(() => {
-    getLinkyData();
-  }, [props.id]);
-
-  const isLoading = loadingAttribute || loadingEntity || loadingProject;
   const { icon, badgeBg, badgeBorder, iconColor } = TYPE_STYLE[props.type];
   const navigatorLabel = NAVIGATOR_LABEL[props.type];
 
@@ -415,7 +390,7 @@ const Linky = (props: LinkyProps) => {
                   </Text>
                   <Flex>
                     {_.isUndefined(navigatorDescription) || navigatorDescription === "" ? (
-                      <EmptyTag label={"Description"} />
+                      <TagEmpty label={"Description"} />
                     ) : (
                       <Tooltip disabled={navigatorDescription.length < 32} content={navigatorDescription}>
                         <Text fontSize={"xs"}>{_.truncate(navigatorDescription, { length: 32 })}</Text>

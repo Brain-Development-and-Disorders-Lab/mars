@@ -866,7 +866,7 @@ export const typedefs = `#graphql
     archiveAttributes(toArchive: [String], state: Boolean): ResponseMessage
 
     # Data mutations
-    uploadAttachment(target: String, file: Upload!): ResponseDataString
+    uploadAttachment(target: String, file: Upload!, name: String): ResponseDataString
 
     # Data import spreadsheet mutations
     prepareEntitySpreadsheet(file: [Upload]!): [ColumnInfo]

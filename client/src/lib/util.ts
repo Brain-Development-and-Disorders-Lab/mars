@@ -5,6 +5,7 @@ import _ from "lodash";
 import {
   AttributeModel,
   Collaborator,
+  FileName,
   FormattedValueDisplay,
   IAttribute,
   ISelectOption,
@@ -410,6 +411,17 @@ export const getFileExtension = (mimeType: string): string => {
   } else {
     return "UNKNOWN";
   }
+};
+
+/**
+ * Split a file name into its base name and extension (including the leading ".")
+ * @param {string} filename File name
+ * @return {FileName} Base name and extension
+ */
+export const splitFileName = (filename: string): FileName => {
+  const index = filename.lastIndexOf(".");
+  if (index <= 0) return { base: filename, extension: "" };
+  return { base: filename.slice(0, index), extension: filename.slice(index) };
 };
 
 /**

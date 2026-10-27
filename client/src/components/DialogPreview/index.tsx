@@ -1,8 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Flex, IconButton, Image, Spacer, Spinner, Text, Dialog, CloseButton, Button } from "@chakra-ui/react";
+import {
+  Flex,
+  IconButton,
+  Image,
+  Input,
+  InputGroup,
+  Spinner,
+  Text,
+  Dialog,
+  CloseButton,
+  Button,
+} from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
-import { DialogPreviewProps } from "@types";
+import { DialogPreviewProps, PreviewContentProps } from "@types";
 
 // PDF preview
 import { pdfjs, Document, Page } from "react-pdf";
@@ -25,7 +36,7 @@ import { STYLES, STATIC_URL } from "@variables";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { getPublicWorkspaceUrl } from "@lib/util";
+import { getPublicWorkspaceUrl, splitFileName } from "@lib/util";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -370,11 +381,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
 };
 
 /** Manages file URL resolution and preview type detection for a given attachment. */
-const PreviewContent = (props: {
-  attachment: DialogPreviewProps["attachment"];
-  workspace?: DialogPreviewProps["workspace"];
-  isPublic?: DialogPreviewProps["isPublic"];
-}) => {
+const PreviewContent = (props: PreviewContentProps) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
   const [previewType, setPreviewType] = useState<"document" | "image" | "sequence" | null>(null);
@@ -475,8 +482,11 @@ const PreviewContent = (props: {
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             Name:
           </Text>
-          <Text fontSize={"xs"}>{_.truncate(props.attachment.name, { length: 32 })}</Text>
-          <Spacer />
+          {props.nameField ?? (
+            <Text fontSize={"xs"} flex={"1"} minW={"0"} mr={"2"} truncate>
+              {props.attachment.name}
+            </Text>
+          )}
           <Text fontSize={"xs"} fontWeight={"semibold"}>
             Type:
           </Text>
@@ -535,6 +545,52 @@ const PreviewContent = (props: {
 const DialogPreview = (props: DialogPreviewProps) => {
   const [open, setOpen] = useState(false);
 
+  // Attachment name being edited, keeping the original file extension
+  const { base, extension } = splitFileName(props.attachment.name);
+  const [name, setName] = useState(base);
+
+  const onOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    setName(base);
+  };
+
+  const renameAttachment = () => {
+    props.onRename?.(props.attachment._id, `${_.trim(name)}${extension}`);
+    setOpen(false);
+  };
+
+  const nameField = props.onRename && (
+    <Flex direction={"row"} gap={"2"} align={"center"} flex={"1"} mr={"2"}>
+      <InputGroup
+        endElement={
+          <Text fontSize={"xs"} color={"text.subtle"}>
+            {extension}
+          </Text>
+        }
+      >
+        <Input
+          bg={"white"}
+          size={"xs"}
+          rounded={"md"}
+          placeholder={"Name"}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+        />
+      </InputGroup>
+      <Button
+        size={"xs"}
+        rounded={"md"}
+        colorPalette={"green"}
+        variant={"solid"}
+        disabled={_.isEmpty(_.trim(name)) || _.trim(name) === base}
+        onClick={renameAttachment}
+      >
+        Rename
+        <Icon name={"check"} size={"xs"} />
+      </Button>
+    </Flex>
+  );
+
   const defaultTrigger = (
     <IconButton aria-label={"Preview attachment"} variant={"subtle"} size={"2xs"} colorPalette={"gray"}>
       <Icon name={"expand"} size={"xs"} />
@@ -544,7 +600,7 @@ const DialogPreview = (props: DialogPreviewProps) => {
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(event) => setOpen(event.open)}
+      onOpenChange={(event) => onOpenChange(event.open)}
       placement={"center"}
       size={"lg"}
       closeOnEscape
@@ -574,7 +630,12 @@ const DialogPreview = (props: DialogPreviewProps) => {
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} flex={"1"} overflow={"hidden"} minH={0}>
-            <PreviewContent attachment={props.attachment} workspace={props.workspace} isPublic={props.isPublic} />
+            <PreviewContent
+              attachment={props.attachment}
+              workspace={props.workspace}
+              isPublic={props.isPublic}
+              nameField={nameField}
+            />
           </Dialog.Body>
         </Dialog.Content>
       </Dialog.Positioner>

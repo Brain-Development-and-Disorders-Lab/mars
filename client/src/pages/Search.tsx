@@ -19,11 +19,11 @@ import {
 import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import DataTable from "@components/DataTable";
-import { AttributeTag, EmptyTag } from "@components/TagField";
+import { TagAttribute, TagEmpty } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import SearchQueryBuilder from "@components/SearchQueryBuilder";
-import { CreatedCell } from "@components/DataTable/DataTableCell";
+import { CellCreatedField } from "@components/DataTable/DataTableCell";
 import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
@@ -359,7 +359,7 @@ const Search = () => {
       searchResultColumnHelper.accessor("description", {
         cell: (info) => {
           if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
-            return <EmptyTag label={"Description"} />;
+            return <TagEmpty label={"Description"} />;
           }
           return (
             <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
@@ -382,7 +382,7 @@ const Search = () => {
             max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
-            renderTag={(attribute) => <AttributeTag attribute={attribute} />}
+            renderTag={(attribute) => <TagAttribute attribute={attribute} />}
           />
         ),
         header: "Attributes",
@@ -391,7 +391,7 @@ const Search = () => {
         },
       }),
       searchResultColumnHelper.accessor("created", {
-        cell: (info) => <CreatedCell value={info.getValue()} />,
+        cell: (info) => <CellCreatedField value={info.getValue()} />,
         header: "Created",
         meta: {
           minWidth: 120,

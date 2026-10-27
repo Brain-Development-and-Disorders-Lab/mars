@@ -1,5 +1,5 @@
 // React
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Existing and custom components
 import { Button, Flex, Input, Dialog, Text, CloseButton, EmptyState, Textarea } from "@chakra-ui/react";
@@ -27,6 +27,15 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
   const [values, setValues] = useState(props.attribute.values);
   const [compareDialogOpen, setCompareDialogOpen] = useState(false);
   const [compareDefaultApplyAll, setCompareDefaultApplyAll] = useState(false);
+
+  // Reset the working state from the Attribute each time the dialog opens
+  useEffect(() => {
+    if (props.open) {
+      setName(props.attribute.name);
+      setDescription(props.attribute.description);
+      setValues(props.attribute.values);
+    }
+  }, [props.open]);
 
   // Current working state, used to inform `DialogCompareAttribute` state
   const currentAttribute: AttributeModel = {
