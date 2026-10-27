@@ -98,7 +98,9 @@ test.describe("Import", () => {
 
       // Verify import success
       await page.click("#navEntitiesButtonDesktop");
-      await expect(page.locator("text=(JSON)")).toBeVisible();
+      await expect(
+        page.getByTestId("data-table-scroll-container").getByText("Mini Box 1 (JSON)", { exact: true }).first(),
+      ).toBeVisible();
     });
 
     test('should show an error for an Entity JSON file missing the "entities" field', async ({ page }) => {
