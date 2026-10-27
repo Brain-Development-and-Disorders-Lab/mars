@@ -518,6 +518,14 @@ export type IWorkspace = {
   activity: string[];
 };
 
+// Client-supplied fields accepted when creating a Workspace
+export type WorkspaceCreateInput = {
+  name: string;
+  description: string;
+  isPublic?: boolean;
+  collaborators?: Collaborator[];
+};
+
 export type WorkspaceModel = IWorkspace & {
   _id: string;
   timestamp: string;

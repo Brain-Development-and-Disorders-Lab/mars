@@ -337,14 +337,19 @@ export class Workspaces {
    * @return {Promise<boolean>} `true` if the User has access, `false` if not
    */
   static checkAccess = async (user: string, workspace: string): Promise<boolean> => {
-    // Special case where no Workspaces exist for the User, `workspace` will be `""`
+    // No Workspace specified, nothing to grant access to
     if (workspace === "") {
-      return true;
+      return false;
     }
 
     const workspaceResult = await Workspaces.getOne(workspace);
     if (workspaceResult === null) {
       return false;
+    }
+
+    // Unauthenticated requests from the public endpoint can only reach public Workspaces
+    if (user === "") {
+      return workspaceResult.isPublic === true;
     }
 
     return (

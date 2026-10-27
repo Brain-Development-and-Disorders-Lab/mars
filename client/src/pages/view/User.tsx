@@ -130,20 +130,6 @@ const User = () => {
 
   useEffect(() => {
     if (data?.user) {
-      // If the DB has no ORCiD but better-auth has a linked account, sync it
-      if (!data.user.account_orcid) {
-        auth.listAccounts().then(({ data: accounts }) => {
-          const orcidAccount = accounts?.find((a) => a.providerId === "orcid");
-          if (orcidAccount) {
-            updateUser({
-              variables: {
-                user: { _id: user, account_orcid: orcidAccount.accountId },
-              },
-            }).then(() => refetch?.().catch(ignoreAbort));
-          }
-        });
-      }
-
       // Trim the ORCiD URL
       if (data.user.account_orcid !== "") {
         const startOrcid = data.user.account_orcid.lastIndexOf("/");

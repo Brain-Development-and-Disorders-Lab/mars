@@ -2,7 +2,7 @@ import {
   ActivityModel,
   Context,
   EntityModel,
-  IWorkspace,
+  WorkspaceCreateInput,
   ProjectModel,
   IResponseMessage,
   CollaboratorMetrics,
@@ -15,6 +15,7 @@ import { GraphQLError } from "graphql/index";
 
 // Models
 import { Activity } from "@models/Activity";
+import { Admin } from "@models/Admin";
 import { Workspaces } from "@models/Workspaces";
 import { User } from "@models/User";
 
@@ -214,10 +215,30 @@ export const WorkspacesResolvers = {
     // Create a new Workspace
     createWorkspace: async (
       _parent: IResolverParent,
-      args: { workspace: IWorkspace },
+      args: { workspace: WorkspaceCreateInput },
       context: Context,
     ): Promise<ResponseData<string>> => {
-      const result = await Workspaces.create(args.workspace);
+      const permissions = await Admin.getUserGlobalPermissions(context.user);
+      if (!permissions.workspaces.create) {
+        throw new GraphQLError("You do not have permission to create Workspaces", {
+          extensions: {
+            code: "UNAUTHORIZED",
+          },
+        });
+      }
+
+      // Owner and contents are set server-side, only descriptive fields are taken from the client
+      const result = await Workspaces.create({
+        name: args.workspace.name,
+        description: args.workspace.description,
+        isPublic: args.workspace.isPublic ?? false,
+        owner: context.user,
+        collaborators: args.workspace.collaborators ?? [],
+        entities: [],
+        projects: [],
+        attributes: [],
+        activity: [],
+      });
 
       // Capture event
       if (process.env.DISABLE_CAPTURE !== "true") {

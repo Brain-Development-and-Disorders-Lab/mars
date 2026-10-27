@@ -14,8 +14,14 @@ import { User } from "@models/User";
 // Email
 import { sendEmail, emailTemplates } from "./email";
 
+// Utility functions and libraries
+import dayjs from "dayjs";
+
 // Variables
 import { DEFAULT_GLOBAL_PERMISSIONS } from "@models/Admin";
+
+// Email domain assigned to ORCiD signups until their profile is completed
+const ORCID_PLACEHOLDER_DOMAIN = "@orcid.placeholder";
 
 /**
  * Get ORCiD OAuth configuration based on environment
@@ -56,25 +62,12 @@ const getOAuthConfig = () => {
       const family_name =
         typeof response.family_name === "string" && response.family_name !== "null" ? response.family_name : "";
 
-      // Note: Returning ORCiD user, look up their real email so better-auth can match the session correctly
-      const userIdResult = await User.getByOrcid(sub);
-      if (userIdResult.success) {
-        const existingUser = await User.getOne(userIdResult.data);
-        return {
-          account_orcid: sub,
-          email: existingUser?.email,
-          emailVerified: existingUser?.emailVerified || false,
-          name: `${given_name} ${family_name}`.trim(),
-        };
-      }
-
-      // Note: New user or first-time link, better-auth requires an email, so use a placeholder
+      // Returning users are matched by their linked ORCiD account, so the email is only used on signup
+      // better-auth requires an email, so use a placeholder until the profile is completed
       return {
-        account_orcid: sub,
-        email: `${sub.replace(/\//g, "-")}@orcid.placeholder`,
+        email: `${sub.replace(/\//g, "-")}${ORCID_PLACEHOLDER_DOMAIN}`,
         emailVerified: false,
         name: `${given_name} ${family_name}`.trim(),
-        completedProfile: false, // `false` until information provided
       };
     },
   };
@@ -129,6 +122,10 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       allowDifferentEmails: true,
+      // ORCiD never reports a verified email, so it must be trusted for explicit linking from the profile page
+      trustedProviders: ["orcid"],
+      // Only link through the explicit flow, never by matching emails on sign-in
+      disableImplicitLinking: true,
     },
   },
   session: {
@@ -141,6 +138,32 @@ export const auth = betterAuth({
     customRules: {
       // Read-only and polled frequently by the client
       "/get-session": { window: 60, max: 300 },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          // Server-only fields, email signups are complete while ORCiD signups still need profile details
+          return {
+            data: {
+              ...user,
+              lastLogin: dayjs(Date.now()).toISOString(),
+              completedProfile: !user.email.endsWith(ORCID_PLACEHOLDER_DOMAIN),
+            },
+          };
+        },
+      },
+    },
+    account: {
+      create: {
+        after: async (account) => {
+          // Record the ORCiD iD from the verified account on signup and on linking
+          if (account.providerId === "orcid") {
+            await User.setOrcid(account.userId, account.accountId);
+          }
+        },
+      },
     },
   },
   plugins: [
@@ -166,6 +189,7 @@ export const auth = betterAuth({
       },
       lastLogin: {
         type: "string",
+        input: false,
       },
       hasSeenWalkthrough: {
         type: "boolean",
@@ -174,13 +198,17 @@ export const auth = betterAuth({
       api_keys: {
         type: "string",
         defaultValue: "[]",
+        input: false,
       },
       account_orcid: {
         type: "string",
+        defaultValue: "",
+        input: false,
       },
       completedProfile: {
         type: "boolean",
         defaultValue: false,
+        input: false,
       },
       permissions: {
         type: "json",

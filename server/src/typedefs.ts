@@ -218,8 +218,6 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    api_keys: String
-    account_orcid: String
     hasSeenWalkthrough: Boolean
     completedProfile: Boolean
   }
@@ -548,12 +546,7 @@ export const typedefs = `#graphql
     name: String
     description: String
     isPublic: Boolean
-    owner: String
     collaborators: [CollaboratorInput]
-    entities: [String]
-    projects: [String]
-    attributes: [String]
-    activity: [String]
   }
 
   # "WorkspaceUpdateInput" input
