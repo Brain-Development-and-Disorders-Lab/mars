@@ -57,7 +57,7 @@ const CreateWorkspace = () => {
   const cancelBlockerRef = useRef(null);
 
   // Get contexts
-  const { workspace, activateWorkspace } = useWorkspace();
+  const { workspace, activateWorkspace, signOut } = useWorkspace();
 
   // State for Workspace details
   const [name, setName] = useState("");
@@ -296,7 +296,7 @@ const CreateWorkspace = () => {
 
       <Flex p={"1"} gap={"1"} align={"center"} w={"100%"} justify={"space-between"}>
         {workspace === "" && (
-          <Button size={"xs"} colorPalette={"orange"} rounded={"md"} onClick={() => auth.signOut()}>
+          <Button size={"xs"} colorPalette={"orange"} rounded={"md"} onClick={() => signOut()}>
             Log out
             <Icon name={"logout"} size={"xs"} />
           </Button>

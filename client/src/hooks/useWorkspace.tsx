@@ -2,10 +2,10 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 // GraphQL
 import { gql } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
+import { useApolloClient, useLazyQuery } from "@apollo/client/react";
 
 // Custom types
-import { IResponseMessage, WorkspaceModel } from "@types";
+import { IResponseMessage, WorkspaceContextValue, WorkspaceModel } from "@types";
 
 // Utility functions and libraries
 import { ignoreAbort } from "@lib/util";
@@ -15,6 +15,9 @@ import { useStorage } from "@hooks/useStorage";
 
 // Authentication
 import { auth } from "@lib/auth";
+
+// Analytics
+import { usePostHog } from "posthog-js/react";
 
 // Query to retrieve all Workspaces the User has access to
 const GET_WORKSPACES = gql`
@@ -28,17 +31,12 @@ const GET_WORKSPACES = gql`
   }
 `;
 
-type WorkspaceContextValue = {
-  workspace: string;
-  workspaces: WorkspaceModel[];
-  loading: boolean;
-  activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
-  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
-};
 const WorkspaceContext = createContext({} as WorkspaceContextValue);
 
 export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
-  const { storage, updateStorageField } = useStorage();
+  const client = useApolloClient();
+  const posthog = usePostHog();
+  const { storage, updateStorage, updateStorageField } = useStorage();
   const { data: session, isPending: isSessionPending } = auth.useSession();
 
   // Workspace state
@@ -75,6 +73,9 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
     const resolved = accessible.find((w) => w._id === target) ?? accessible[0];
 
     if (!resolved) {
+      // Clear any stored Workspace the User can no longer access
+      updateStorageField("workspace", "");
+      setActiveWorkspace("");
       return {
         success: false,
         message: "No Workspaces exist",
@@ -87,6 +88,23 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       success: true,
       message: "Set active Workspace",
     };
+  };
+
+  /**
+   * Sign out the User and clear all client state belonging to their session
+   * @return {Promise<void>}
+   */
+  const signOut = async (): Promise<void> => {
+    posthog?.capture("client.auth.logout");
+    posthog?.reset();
+
+    // Clear Workspace state before signing out so no request carries a stale Workspace
+    updateStorage({});
+    setActiveWorkspace("");
+    setWorkspaces([]);
+
+    await auth.signOut();
+    await client.clearStore();
   };
 
   // Resolve the active Workspace once the session has loaded and the profile is complete
@@ -105,6 +123,7 @@ export const WorkspaceProvider = (props: { children: React.JSX.Element }) => {
       loading,
       activateWorkspace,
       refreshWorkspaces,
+      signOut,
     }),
     [activeWorkspace, workspaces, loading],
   );

@@ -523,6 +523,15 @@ export type WorkspaceModel = IWorkspace & {
   timestamp: string;
 };
 
+export type WorkspaceContextValue = {
+  workspace: string;
+  workspaces: WorkspaceModel[];
+  loading: boolean;
+  activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
+  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
+  signOut: () => Promise<void>;
+};
+
 // Secondary identifier assigned to an Entity
 export type SecondaryIdentifier = {
   value: string; // Secondary identifier value
@@ -1541,7 +1550,6 @@ export type AdminUser = {
 };
 
 // Types to assist with test frameworks
-// A path on the client where a Workspace permission is enforced
 export type ClientPath = {
   name: string;
   verify: (page: Page, granted: boolean) => Promise<void>;

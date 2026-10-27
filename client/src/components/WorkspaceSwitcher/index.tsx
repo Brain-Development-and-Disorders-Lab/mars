@@ -20,12 +20,8 @@ import { useWorkspace } from "@hooks/useWorkspace";
 // Authentication
 import { auth } from "@lib/auth";
 
-// Analytics
-import { usePostHog } from "posthog-js/react";
-
 const WorkspaceSwitcher = (props: { id?: string }) => {
   const navigate = useNavigate();
-  const posthog = usePostHog();
 
   // Permissions
   const { globalPermissions } = usePermissions();
@@ -34,7 +30,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
   const { open: transitionOpen, onOpen: onTransitionOpen, onClose: onTransitionClose } = useDisclosure();
 
   // Get contexts
-  const { workspace, workspaces, activateWorkspace, refreshWorkspaces } = useWorkspace();
+  const { workspace, workspaces, activateWorkspace, refreshWorkspaces, signOut } = useWorkspace();
 
   // Switcher drop-down visibility state
   const [open, setOpen] = useState(false);
@@ -129,9 +125,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
    * Handle click events within the `Logout` button
    */
   const handleLogoutClick = async () => {
-    posthog.capture("client.auth.logout");
-    posthog.reset();
-    await auth.signOut();
+    await signOut();
     navigate("/login");
   };
 
