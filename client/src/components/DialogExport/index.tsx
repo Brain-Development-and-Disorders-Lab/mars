@@ -10,7 +10,7 @@ import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom and existing types
-import { AttributeModel, DialogExportProps, ILink } from "@types";
+import { AttributeModel, DialogExportProps, ExportFormat, ILink } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -31,7 +31,7 @@ const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadshee
 const FORMAT_OPTIONS: Record<string, string[]> = {
   entity: ["JSON", "CSV", "XLSX"],
   entities: ["JSON", "CSV", "XLSX"],
-  project: ["JSON", "CSV"],
+  project: ["JSON", "CSV", "XLSX"],
   attribute: ["JSON"],
 };
 
@@ -159,7 +159,7 @@ const toggleField = (fields: string[], key: string, checked: boolean): string[] 
 const DialogExport = (props: DialogExportProps) => {
   const { open, setOpen, dataType, id, ids } = props;
 
-  const [format, setFormat] = useState<"json" | "csv" | "xlsx">("json");
+  const [format, setFormat] = useState<ExportFormat>("json");
   const [includeHistory, setIncludeHistory] = useState(false);
   const [includeAttributes, setIncludeAttributes] = useState(true);
   const [exportFields, setExportFields] = useState<string[]>([]);
@@ -715,7 +715,7 @@ const DialogExport = (props: DialogExportProps) => {
                           onCheckedChange={(details) =>
                             setExportFields(toggleField(exportFields, "entities", details.checked as boolean))
                           }
-                          disabled={project.entities.length === 0 || format === "csv"}
+                          disabled={project.entities.length === 0 || format !== "json"}
                         >
                           <Checkbox.HiddenInput />
                           <Checkbox.Control />
