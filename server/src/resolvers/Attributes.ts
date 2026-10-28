@@ -24,24 +24,14 @@ import { GraphQLError } from "graphql/index";
 import { PostHogClient } from "@lib/posthog";
 
 // Access control
-import { assertWorkspaceAccess } from "@lib/access";
+import { assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
 
 export const AttributesResolvers = {
   Query: {
     // Retrieve all Attribute
     attributes: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Filter by ownership and Workspace membership
       const attributes = await Attributes.all();
@@ -53,17 +43,7 @@ export const AttributesResolvers = {
     // Retrieve one Attribute by _id
     attribute: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Check Attribute exists
       const attribute = await Attributes.getOne(args._id);
@@ -93,17 +73,7 @@ export const AttributesResolvers = {
       context: Context,
     ): Promise<AttributeUsage[]> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to confirm it exists
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       return await Attributes.usage(workspace._id, args._id);
     },
@@ -114,15 +84,8 @@ export const AttributesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<AttributeMetrics> => {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const attributes = await Attributes.all();
@@ -151,15 +114,8 @@ export const AttributesResolvers = {
       args: { _id: string; fields?: string[]; includeHistory?: boolean },
       context: Context,
     ): Promise<string> => {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
@@ -185,6 +141,9 @@ export const AttributesResolvers = {
   Mutation: {
     // Create a new Attribute
     createAttribute: async (_parent: IResolverParent, args: { attribute: IAttribute }, context: Context) => {
+      // Verify access to the Workspace
+      await assertWorkspaceAccess(context, "write");
+
       const result = await Attributes.create(args.attribute);
 
       if (result.success) {
@@ -225,15 +184,8 @@ export const AttributesResolvers = {
       args: { attribute: AttributeModel; message?: string },
       context: Context,
     ) => {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const attribute = await Attributes.getOne(args.attribute._id);
       if (_.isNull(attribute)) {
@@ -289,15 +241,8 @@ export const AttributesResolvers = {
 
     // Archive a Attribute
     archiveAttribute: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
@@ -361,6 +306,10 @@ export const AttributesResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
+      // Verify access to the Workspace and that every Attribute belongs to it
+      const workspace = await assertWorkspaceAccess(context, "write");
+      assertInWorkspace(workspace, "attributes", args.toArchive);
+
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {
         const attribute = await Attributes.getOne(_id);

@@ -6,7 +6,6 @@ import { Context, CounterModel, IResolverParent } from "@types";
 
 // Models
 import { Counters } from "@models/Counters";
-import { Workspaces } from "@models/Workspaces";
 
 // Access control
 import { assertWorkspaceAccess } from "@lib/access";
@@ -18,17 +17,7 @@ export const CountersResolvers = {
   Query: {
     counter: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const counter = await Counters.getCounter(args._id);
       if (_.isNull(counter)) {
@@ -52,33 +41,13 @@ export const CountersResolvers = {
     },
     counters: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context, "read");
 
       return await Counters.getCounters(context.workspace);
     },
     currentCounterValue: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const counter = await Counters.getCounter(args._id);
       if (_.isNull(counter)) {
@@ -102,17 +71,7 @@ export const CountersResolvers = {
     },
     nextCounterValue: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const counter = await Counters.getCounter(args._id);
       if (_.isNull(counter)) {
@@ -136,17 +95,7 @@ export const CountersResolvers = {
     },
     nextCounterValues: async (_parent: IResolverParent, args: { _id: string; count: number }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const counter = await Counters.getCounter(args._id);
       if (_.isNull(counter)) {
@@ -172,24 +121,14 @@ export const CountersResolvers = {
   Mutation: {
     createCounter: async (_parent: IResolverParent, args: { counter: CounterModel }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
-      // Apply create operation
-      return await Counters.create(args.counter);
+      // Apply create operation, always within the current Workspace
+      return await Counters.create({ ...args.counter, workspace: context.workspace });
     },
     incrementCounter: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Counter to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const counter = await Counters.getCounter(args._id);
       if (_.isNull(counter)) {

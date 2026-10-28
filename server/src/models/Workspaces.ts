@@ -6,6 +6,7 @@ import {
   IWorkspace,
   ProjectModel,
   IResponseMessage,
+  WorkspaceAccess,
   WorkspaceModel,
   ResponseData,
 } from "@types";
@@ -334,9 +335,10 @@ export class Workspaces {
    * Basic access check function to validate that the User has permission to interact with a Workspace
    * @param user Identifier of the User attempting to interact with the Workspace
    * @param workspace Identifier of the target Workspace
+   * @param access Level of access required, defaults to `read`
    * @return {Promise<boolean>} `true` if the User has access, `false` if not
    */
-  static checkAccess = async (user: string, workspace: string): Promise<boolean> => {
+  static checkAccess = async (user: string, workspace: string, access: WorkspaceAccess = "read"): Promise<boolean> => {
     // No Workspace specified, nothing to grant access to
     if (workspace === "") {
       return false;
@@ -347,15 +349,23 @@ export class Workspaces {
       return false;
     }
 
-    // Unauthenticated requests from the public endpoint can only reach public Workspaces
-    if (user === "") {
-      return workspaceResult.isPublic === true;
-    }
+    return Workspaces.canAccess(user, workspaceResult, access);
+  };
 
-    return (
-      workspaceResult.isPublic === true ||
-      workspaceResult.owner === user ||
-      isCollaborator(user, workspaceResult.collaborators)
-    );
+  /**
+   * Check the level of access a User has to an already retrieved Workspace
+   * @param user Identifier of the User, `""` for unauthenticated requests
+   * @param workspace Target Workspace
+   * @param access Level of access required
+   * @return {boolean} `true` if the User has access, `false` if not
+   */
+  static canAccess = (user: string, workspace: WorkspaceModel, access: WorkspaceAccess): boolean => {
+    const isMember = user !== "" && (workspace.owner === user || isCollaborator(user, workspace.collaborators));
+
+    // Public Workspaces are readable by anyone, but only members can write
+    if (access === "write") {
+      return isMember;
+    }
+    return isMember || workspace.isPublic === true;
   };
 }

@@ -5,9 +5,6 @@ import { Context, IActivity, IResolverParent, IResponseMessage } from "@types";
 import { Activity } from "@models/Activity";
 import { Workspaces } from "@models/Workspaces";
 
-import _ from "lodash";
-import { GraphQLError } from "graphql/index";
-
 // Posthog
 import { PostHogClient } from "@lib/posthog";
 
@@ -19,17 +16,7 @@ export const ActivityResolvers = {
     // Retrieve all Activity
     activity: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       return (await Activity.getMany(workspace.activity)).slice(0, args.limit);
     },
@@ -43,7 +30,7 @@ export const ActivityResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       // Apply the create operation
       const result = await Activity.create(args.activity);

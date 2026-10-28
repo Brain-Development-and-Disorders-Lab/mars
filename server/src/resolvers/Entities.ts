@@ -1,4 +1,13 @@
-import { Context, EntityMetrics, EntityModel, IEntity, IResolverParent, IResponseMessage, ResponseData } from "@types";
+import {
+  Context,
+  EntityMetrics,
+  EntityModel,
+  ExportFormat,
+  IEntity,
+  IResolverParent,
+  IResponseMessage,
+  ResponseData,
+} from "@types";
 import { GraphQLError } from "graphql";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -12,7 +21,7 @@ import { Workspaces } from "@models/Workspaces";
 import { audit } from "@lib/audit";
 
 // Access control
-import { assertWorkspaceAccess } from "@lib/access";
+import { assertEntityReferencesInWorkspace, assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
 
 export const EntitiesResolvers = {
   Value: {
@@ -52,17 +61,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Determine archived filter value
       // If archived is explicitly true, show only archived; false or undefined shows only non-archived
@@ -108,17 +107,7 @@ export const EntitiesResolvers = {
     // Retrieve one Entity by _id
     entity: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<EntityModel> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Check Entity exists
       const entity = await Entities.getOne(args._id);
@@ -146,7 +135,7 @@ export const EntitiesResolvers = {
     // Check if Entity exists by name
     entityNameExists: async (_parent: IResolverParent, args: { name: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "read");
 
       return await Entities.existByName(args.name);
     },
@@ -154,21 +143,11 @@ export const EntitiesResolvers = {
     // Export one Entity by _id
     exportEntity: async (
       _parent: IResolverParent,
-      args: { _id: string; format: "json" | "csv" | "xlsx"; fields?: string[]; includeHistory?: boolean },
+      args: { _id: string; format: ExportFormat; fields?: string[]; includeHistory?: boolean },
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Check Entity exists
       const entity = await Entities.getOne(args._id);
@@ -205,17 +184,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const authorizedEntities = [];
 
@@ -248,17 +217,7 @@ export const EntitiesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const exportResult = await Entities.exportMany(
         workspace.entities,
@@ -281,17 +240,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<EntityMetrics> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Filter by ownership and Workspace membership, then if created in the last 24 hours
       const entities = await Entities.all();
@@ -322,17 +271,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
@@ -364,8 +303,9 @@ export const EntitiesResolvers = {
       args: { entity: IEntity },
       context: Context,
     ): Promise<ResponseData<string>> => {
-      // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      // Verify access to the Workspace and that any referenced Projects or Entities belong to it
+      const workspace = await assertWorkspaceAccess(context, "write");
+      assertEntityReferencesInWorkspace(workspace, args.entity);
 
       // Apply create operation
       const result = await Entities.create(args.entity);
@@ -405,17 +345,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const entity = await Entities.getOne(args.entity._id);
       if (_.isNull(entity)) {
@@ -425,6 +355,9 @@ export const EntitiesResolvers = {
           },
         });
       }
+
+      // Check that any referenced Projects or Entities belong to the Workspace
+      assertEntityReferencesInWorkspace(workspace, args.entity);
 
       if (_.includes(workspace.entities, args.entity._id)) {
         // Apply update operation
@@ -468,17 +401,7 @@ export const EntitiesResolvers = {
     // Archive an Entity
     archiveEntity: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "write");
 
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
@@ -539,8 +462,9 @@ export const EntitiesResolvers = {
       args: { toArchive: string[]; state: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
-      // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      // Verify access to the Workspace and that every Entity belongs to it
+      const workspace = await assertWorkspaceAccess(context, "write");
+      assertInWorkspace(workspace, "entities", args.toArchive);
 
       let archiveCounter = 0;
       for await (const _id of args.toArchive) {

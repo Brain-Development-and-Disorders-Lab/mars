@@ -64,6 +64,9 @@ const app = express();
 // Trust exactly one hop to resolve to the real client address
 app.set("trust proxy", 1);
 
+// Security headers for every response
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // Azure App Service middleware to strip `x-forwarded-for` port
 app.use((req, _res, next) => {
   const xForwardedFor = req.headers["x-forwarded-for"];
@@ -322,8 +325,13 @@ const start = async () => {
       origin: origins,
       credentials: true,
     }),
-    express.static(__dirname + "/public"),
-    helmet(),
+    express.static(__dirname + "/public", {
+      setHeaders: (res) => {
+        res.setHeader("Content-Disposition", "attachment");
+        res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      },
+    }),
   );
 
   // Open the public API endpoint
@@ -333,7 +341,6 @@ const start = async () => {
     express.json(),
     express.urlencoded({ extended: true }),
     APIRouter(),
-    helmet(),
   );
 
   // Unauthenticated public Workspace endpoint, bypasses checkSession
@@ -351,7 +358,6 @@ const start = async () => {
         userRole: "user",
       }),
     }),
-    helmet(),
   );
 
   // Configure Express and GraphQL
@@ -378,7 +384,6 @@ const start = async () => {
         };
       },
     }),
-    helmet(),
   );
 
   // Start the server

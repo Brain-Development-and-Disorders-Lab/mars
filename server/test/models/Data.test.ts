@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 // Data model and types
 import { Data } from "@models/Data";
 import { Entities } from "@models/Entities";
+import { Workspaces } from "@models/Workspaces";
 import { AttributeModel, Context, EntityModel, IColumnMapping, IFile } from "@types";
 
 // Utility functions and libraries
@@ -121,6 +122,22 @@ describe("Data model", () => {
   });
 
   describe("Entity JSON imports", () => {
+    let importContext: Context;
+    beforeEach(async () => {
+      const workspace = await Workspaces.create({
+        name: "Import Workspace",
+        owner: TEST_USER,
+        isPublic: false,
+        description: "",
+        collaborators: [],
+        entities: [],
+        projects: [],
+        attributes: [],
+        activity: [],
+      });
+      importContext = { ...testContext, workspace: workspace.data };
+    });
+
     it('should reject a JSON file missing the "entities" field on review', async () => {
       const file = [mockFile(JSON.stringify({ foo: "bar" }), "application/json", "test.json")];
 
@@ -139,7 +156,7 @@ describe("Data model", () => {
         [mockFile(JSON.stringify(invalidPayload), "application/json", "test.json")],
         "",
         [],
-        testContext,
+        importContext,
       );
 
       expect(importResult.success).toBeFalsy();
@@ -150,7 +167,7 @@ describe("Data model", () => {
       const payload = { entities: [{ name: "Imported Entity One" }, { name: "Imported Entity Two" }] };
       const file = [mockFile(JSON.stringify(payload), "application/json", "test.json")];
 
-      const result = await Data.importEntityJSON(file, "", [], testContext);
+      const result = await Data.importEntityJSON(file, "", [], importContext);
       expect(result.success).toBeTruthy();
 
       const entities = await Entities.all();
@@ -176,7 +193,7 @@ describe("Data model", () => {
         values: [],
       };
 
-      const result = await Data.importEntityJSON(file, "", [extraAttribute], testContext);
+      const result = await Data.importEntityJSON(file, "", [extraAttribute], importContext);
       expect(result.success).toBeTruthy();
 
       const entities = await Entities.all();
@@ -185,6 +202,42 @@ describe("Data model", () => {
     });
 
     it("should update an existing Entity when importing JSON with a matching _id", async () => {
+      const created = await Entities.create({
+        name: "Original Name",
+        created: dayjs(Date.now()).toISOString(),
+        archived: false,
+        owner: TEST_USER,
+        description: "",
+        projects: [],
+        links: [],
+        attributes: [],
+        attachments: [],
+        history: [],
+      });
+      expect(created.success).toBeTruthy();
+      await Workspaces.addEntity(importContext.workspace, created.data);
+
+      const file = [
+        mockFile(
+          JSON.stringify({ entities: [{ _id: created.data, name: "Updated Name" }] }),
+          "application/json",
+          "test.json",
+        ),
+      ];
+
+      const result = await Data.importEntityJSON(file, "", [], importContext);
+      expect(result.success).toBeTruthy();
+
+      const updated: EntityModel | null = await Entities.getOne(created.data);
+      if (!updated) throw new Error("Entity not found after update");
+      expect(updated.name).toEqual("Updated Name");
+
+      // No duplicate Entity should have been created
+      const entities = await Entities.all();
+      expect(entities.length).toBe(1);
+    });
+
+    it("should import an Entity from another Workspace as a new copy, leaving the original unchanged", async () => {
       const created = await Entities.create({
         name: "Original Name",
         created: dayjs(Date.now()).toISOString(),
@@ -207,16 +260,17 @@ describe("Data model", () => {
         ),
       ];
 
-      const result = await Data.importEntityJSON(file, "", [], testContext);
+      const result = await Data.importEntityJSON(file, "", [], importContext);
       expect(result.success).toBeTruthy();
 
-      const updated: EntityModel | null = await Entities.getOne(created.data);
-      if (!updated) throw new Error("Entity not found after update");
-      expect(updated.name).toEqual("Updated Name");
+      const original: EntityModel | null = await Entities.getOne(created.data);
+      if (!original) throw new Error("Original Entity not found after import");
+      expect(original.name).toEqual("Original Name");
 
-      // No duplicate Entity should have been created
-      const entities = await Entities.all();
-      expect(entities.length).toBe(1);
+      // The copy is added to the importing Workspace, not the original
+      const workspace = await Workspaces.getOne(importContext.workspace);
+      expect(workspace?.entities.length).toBe(1);
+      expect(workspace?.entities[0]).not.toEqual(created.data);
     });
   });
 

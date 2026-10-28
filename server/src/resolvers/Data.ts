@@ -22,14 +22,14 @@ import { Data } from "@models/Data";
 import { Workspaces } from "@models/Workspaces";
 
 // Access control
-import { assertWorkspaceAccess } from "@lib/access";
+import { assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
 
 export const DataResolvers = {
   Query: {
     // Retrieve the URL for a file to be downloaded by client
     downloadFile: async (_parent: IResolverParent, args: { _id: string }, context: Context): Promise<string> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "read");
 
       // Verify the requested attachment belongs to an Entity within the Workspace
       const entities = await Workspaces.getEntities(context.workspace);
@@ -61,8 +61,9 @@ export const DataResolvers = {
       args: { target: string; file: IFile; name?: string },
       context: Context,
     ): Promise<ResponseData<string>> => {
-      // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      // Verify access to the Workspace and that the target Entity belongs to it
+      const workspace = await assertWorkspaceAccess(context, "write");
+      assertInWorkspace(workspace, "entities", [args.target]);
 
       return await Data.uploadAttachment(args.target, args.file, args.name);
     },
@@ -74,7 +75,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ColumnInfo[]> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.prepareEntitySpreadsheet(args.file);
     },
@@ -86,7 +87,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<EntityImportReview[]>> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.reviewEntitySpreadsheet(args.columnMapping, args.file);
     },
@@ -102,7 +103,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.importEntitySpreadsheet(args.columnMapping, args.file, args.options, context);
     },
@@ -114,7 +115,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.reviewEntityJSON(args.file);
     },
@@ -126,7 +127,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.importEntityJSON(args.file, args.project, args.attributes, context);
     },
@@ -138,7 +139,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<ResponseData<AttributeImportReview[]>> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.reviewAttributeJSON(args.file);
     },
@@ -150,7 +151,7 @@ export const DataResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "write");
 
       return await Data.importAttributeJSON(args.file, context);
     },

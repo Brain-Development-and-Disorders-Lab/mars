@@ -457,6 +457,12 @@ export type FileName = {
   extension: string;
 };
 
+// File formats supported when exporting Entities and Projects
+export type ExportFormat = "json" | "csv" | "xlsx";
+
+// Spreadsheet subset of `ExportFormat`
+export type SpreadsheetFormat = Exclude<ExportFormat, "json">;
+
 // Utility type used for `Select` component options
 export type ISelectOption = {
   label: string;
@@ -517,6 +523,12 @@ export type IWorkspace = {
   attributes: string[];
   activity: string[];
 };
+
+// Level of access required to interact with a Workspace
+export type WorkspaceAccess = "read" | "write";
+
+// Collections of Workspace contents that can be checked for membership
+export type WorkspaceCollection = "entities" | "projects" | "attributes";
 
 // Client-supplied fields accepted when creating a Workspace
 export type WorkspaceCreateInput = {

@@ -29,6 +29,9 @@ import { PostHogClient } from "@lib/posthog";
 import { isCollaborator } from "@lib/util";
 import dayjs from "dayjs";
 
+// Access control
+import { assertWorkspaceAccess } from "@lib/access";
+
 const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
 export const WorkspacesResolvers = {
@@ -183,14 +186,8 @@ export const WorkspacesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<CollaboratorMetrics> => {
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Filter Activity by Workspace and then timestamps (within last 24 hours)
       const activity = await Activity.all();
