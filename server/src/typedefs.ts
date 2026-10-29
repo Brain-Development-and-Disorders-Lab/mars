@@ -2,8 +2,6 @@
  * GraphQL type definitions
  */
 export const typedefs = `#graphql
-  scalar Date
-  scalar Object
   scalar Upload
 
   # "Item" type containing minimal data shared with many stored records
@@ -20,14 +18,6 @@ export const typedefs = `#graphql
 
   # "APIKey" type
   type APIKey {
-    value: String
-    expires: String
-    scope: String
-    workspaces: [String]
-  }
-
-  # "APIKeyInput" type
-  input APIKeyInput {
     value: String
     expires: String
     scope: String
@@ -59,7 +49,7 @@ export const typedefs = `#graphql
     projects: Int
     attributes: Int
   }
-  
+
   # All "Global" permissions ("features" and "workspaces")
   # "UserGlobalFeaturesPermissions" type
   type UserGlobalFeaturesPermissions {
@@ -68,108 +58,108 @@ export const typedefs = `#graphql
     ai: Boolean
     api: Boolean
   }
-  
-  # "UserGlobalFeaturesPermissionsInput" type
+
+  # "UserGlobalFeaturesPermissionsInput" input
   input UserGlobalFeaturesPermissionsInput {
     import: Boolean
     scan: Boolean
     ai: Boolean
     api: Boolean
   }
-  
+
   # "UserGlobalWorkspacesPermissions" type
   type UserGlobalWorkspacesPermissions {
     create: Boolean
   }
-  
-  # "UserGlobalWorkspacesPermissionsInput" type
+
+  # "UserGlobalWorkspacesPermissionsInput" input
   input UserGlobalWorkspacesPermissionsInput {
     create: Boolean
   }
-  
+
   # "UserGlobalPermissions" type
   type UserGlobalPermissions {
     features: UserGlobalFeaturesPermissions
     workspaces: UserGlobalWorkspacesPermissions
   }
-  
-  # "UserGlobalPermissionsInput" type
+
+  # "UserGlobalPermissionsInput" input
   input UserGlobalPermissionsInput {
     features: UserGlobalFeaturesPermissionsInput
     workspaces: UserGlobalWorkspacesPermissionsInput
   }
-  
+
   # All "Workspace" permissions ("administration", "entities", "projects", "attributes")
   # "UserWorkspaceAdministrationPermissions" type
   type UserWorkspaceAdministrationPermissions {
     edit: Boolean
     invite: Boolean
   }
-  
-  # "UserWorkspaceAdministrationPermissionsInput" type
+
+  # "UserWorkspaceAdministrationPermissionsInput" input
   input UserWorkspaceAdministrationPermissionsInput {
     edit: Boolean
     invite: Boolean
   }
-  
+
   # "UserWorkspaceEntitiesPermissions" type
   type UserWorkspaceEntitiesPermissions {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
-  # "UserWorkspaceEntitiesPermissionsInput" type
+
+  # "UserWorkspaceEntitiesPermissionsInput" input
   input UserWorkspaceEntitiesPermissionsInput {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
+
   # "UserWorkspaceProjectsPermissions" type
   type UserWorkspaceProjectsPermissions {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
-  # "UserWorkspaceProjectsPermissionsInput" type
+
+  # "UserWorkspaceProjectsPermissionsInput" input
   input UserWorkspaceProjectsPermissionsInput {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
+
   # "UserWorkspaceAttributesPermissions" type
   type UserWorkspaceAttributesPermissions {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
-  # "UserWorkspaceAttributesPermissionsInput" type
+
+  # "UserWorkspaceAttributesPermissionsInput" input
   input UserWorkspaceAttributesPermissionsInput {
     create: Boolean
     edit: Boolean
     archive: Boolean
   }
-  
-   # "UserWorkspacePermissions" type
+
+  # "UserWorkspacePermissions" type
   type UserWorkspacePermissions {
     administration: UserWorkspaceAdministrationPermissions
     entities: UserWorkspaceEntitiesPermissions
     projects: UserWorkspaceProjectsPermissions
     attributes: UserWorkspaceAttributesPermissions
   }
-  
-  # "UserWorkspacePermissionsInput" type
+
+  # "UserWorkspacePermissionsInput" input
   input UserWorkspacePermissionsInput {
     administration: UserWorkspaceAdministrationPermissionsInput
     entities: UserWorkspaceEntitiesPermissionsInput
     projects: UserWorkspaceProjectsPermissionsInput
     attributes: UserWorkspaceAttributesPermissionsInput
   }
-  
+
   # Collated permissions
   # "UserCollatedPermissions" type
   type UserCollatedPermissions {
@@ -200,8 +190,8 @@ export const typedefs = `#graphql
     lastLogin: String
   }
 
-  # "UserInput" type
-  input UserInput {
+  # "UserUpdateInput" input
+  input UserUpdateInput {
     _id: String!
     firstName: String
     lastName: String
@@ -229,7 +219,7 @@ export const typedefs = `#graphql
     history: [ProjectHistory]
   }
 
-  # "ProjectHistory" type storing iterations of an Entity
+  # "ProjectHistory" type storing iterations of a Project
   type ProjectHistory {
     author: String
     message: String
@@ -245,7 +235,7 @@ export const typedefs = `#graphql
     entities: [String]
   }
 
-  # "ProjectCreateInput" type
+  # "ProjectCreateInput" input
   input ProjectCreateInput {
     name: String!
     archived: Boolean!
@@ -255,7 +245,7 @@ export const typedefs = `#graphql
     entities: [String]!
   }
 
-  # "ProjectUpdateInput" type
+  # "ProjectUpdateInput" input
   input ProjectUpdateInput {
     _id: String!
     name: String
@@ -321,7 +311,7 @@ export const typedefs = `#graphql
     values: [ValueInput]
   }
 
-  # "AttributeInput" type
+  # "AttributeInput" input
   input AttributeInput {
     _id: String!
     name: String
@@ -332,14 +322,14 @@ export const typedefs = `#graphql
     values: [ValueInput]
   }
 
-  # Representation of an Entity link
+  # "Link" type between two Entities
   type Link {
     source: Item
     target: Item
     type: String
   }
 
-  # Input representation of an Entity link
+  # "LinkInput" input
   input LinkInput {
     source: ItemInput
     target: ItemInput
@@ -375,7 +365,7 @@ export const typedefs = `#graphql
     history: [EntityHistory]
   }
 
-  # "EntityCreateInput" input, includes -"Input" types
+  # "EntityCreateInput" input
   input EntityCreateInput {
     name: String!
     secondaryIdentifier: SecondaryIdentifierInput
@@ -389,7 +379,7 @@ export const typedefs = `#graphql
     attributes: [AttributeInput]!
   }
 
-  # "EntityUpdateInput"
+  # "EntityUpdateInput" input
   input EntityUpdateInput {
     _id: String!
     name: String
@@ -431,17 +421,11 @@ export const typedefs = `#graphql
     inferredType: String
   }
 
-  # "EntityReview" type storing the review state of an Entity to be imported
-  type EntityReview {
+  # "ImportReview" type storing the review state of an Entity or Attribute to be imported
+  type ImportReview {
     name: String
     state: String
     warnings: [String]
-  }
-
-  # "AttributeReview" type storing the review state of an Attribute to be imported
-  type AttributeReview {
-    name: String
-    state: String
   }
 
   # "ActivityTarget" type
@@ -491,31 +475,24 @@ export const typedefs = `#graphql
     attributes: [AttributeInput]
   }
 
-  # "CounterInput" input
-  input CounterInput {
+  # "SpreadsheetImportCounterInput" input assigning a Counter to an imported field
+  input SpreadsheetImportCounterInput {
     field: String
     _id: String
   }
 
-  # "OptionsInput" input
-  input OptionsInput {
-    counters: [CounterInput]
+  # "SpreadsheetImportOptionsInput" input
+  input SpreadsheetImportOptionsInput {
+    counters: [SpreadsheetImportCounterInput]
   }
 
-  # "SpreadsheetImportOptions" input
-  input SpreadsheetImportDataInput {
-    columnMapping: ColumnMappingInput
-    options: OptionsInput
-    file: [Upload]!
-  }
-  
   # "Collaborator" type
   type Collaborator {
     _id: String
     permissions: UserWorkspacePermissions
   }
-  
-  # "CollaboratorInput" type
+
+  # "CollaboratorInput" input
   input CollaboratorInput {
     _id: String
     permissions: UserWorkspacePermissionsInput
@@ -578,25 +555,11 @@ export const typedefs = `#graphql
     data: [String]
   }
 
-  # "ResponseData"-type containing data with type "Auth"
-  type ResponseDataAuth {
+  # "ResponseData"-type containing data with type "[ImportReview]"
+  type ResponseDataImportReview {
     success: Boolean
     message: String
-    data: Auth
-  }
-
-  # "ResponseData"-type containing data with type "Review"
-  type ResponseDataEntityReview {
-    success: Boolean
-    message: String
-    data: [EntityReview]
-  }
-
-  # "ResponseData"-type containing data with type "AttributeReview"
-  type ResponseDataAttributeReview {
-    success: Boolean
-    message: String
-    data: [AttributeReview]
+    data: [ImportReview]
   }
 
   # "ResponseData"-type containing data with type "APIKey"
@@ -606,23 +569,8 @@ export const typedefs = `#graphql
     data: APIKey
   }
 
-  # "Auth" type
-  type Auth {
-    orcid: String
-    name: String
-    token: String
-    workspace: String
-  }
-
-  # "File" type
-  type File {
-    filename: String!
-    mimetype: String!
-    encoding: String!
-  }
-
-  # "EntityMetrics" type
-  type EntityMetrics {
+  # "ContentMetrics" type, total count of Workspace contents and how many were added in the last day
+  type ContentMetrics {
     all: Int
     addedDay: Int
   }
@@ -657,28 +605,10 @@ export const typedefs = `#graphql
     direction: String!
   }
 
-  # "ProjectMetrics" type
-  type ProjectMetrics {
-    all: Int
-    addedDay: Int
-  }
-  
   # "AttributeUsage" type
   type AttributeUsage {
     entity: String!
     modifications: [String]
-  }
-
-  # "AttributeMetrics" type
-  type AttributeMetrics {
-    all: Int
-    addedDay: Int
-  }
-
-  # "CollaboratorMetrics" type
-  type CollaboratorMetrics {
-    all: Int
-    addedDay: Int
   }
 
   # "ColumnMappingSuggestion" type for AI-suggested column mappings
@@ -687,7 +617,7 @@ export const typedefs = `#graphql
     description: String
   }
 
-  # Input type for Attribute suggestion queries
+  # "AttributeSuggestionInput" input for Attribute suggestion queries
   input AttributeSuggestionInput {
     _id: String!
     name: String!
@@ -708,8 +638,8 @@ export const typedefs = `#graphql
     created: String
   }
 
-  # "CounterInput" type
-  input CounterInput {
+  # "CounterCreateInput" input
+  input CounterCreateInput {
     workspace: String
     name: String
     format: String
@@ -717,7 +647,7 @@ export const typedefs = `#graphql
     increment: Int
     created: String
   }
-  
+
   # "IdentifierFormat" type
   type IdentifierFormat {
     _id: String!
@@ -732,8 +662,8 @@ export const typedefs = `#graphql
     uppercaseRequired: Boolean
   }
 
-  # "IdentifierFormatInput" type
-  input IdentifierFormatInput {
+  # "IdentifierFormatCreateInput" input
+  input IdentifierFormatCreateInput {
     workspace: String
     name: String
     created: String
@@ -763,19 +693,19 @@ export const typedefs = `#graphql
     projects(limit: Int, archived: Boolean): [Project]
     project(_id: String): Project
     projectEntities(_id: String): [Entity]
-    projectMetrics: ProjectMetrics
+    projectMetrics: ContentMetrics
 
     # Entity queries
     entities(limit: Int, archived: Boolean, reverse: Boolean, page: Int, pageSize: Int, filter: EntityFilterInput, sort: EntitySortInput): EntitiesResponse
     entity(_id: String): Entity
     entityNameExists(name: String): Boolean
-    entityMetrics: EntityMetrics
+    entityMetrics: ContentMetrics
 
     # Attribute queries
     attributes(limit: Int): [Attribute]
     attribute(_id: String): Attribute
     attributeUsage(_id: String): [AttributeUsage]
-    attributeMetrics: AttributeMetrics
+    attributeMetrics: ContentMetrics
 
     # Activity queries
     activity(limit: Int): [Activity]
@@ -786,7 +716,7 @@ export const typedefs = `#graphql
     workspaceEntities(_id: String, limit: Int): [Entity]
     workspaceProjects(_id: String, limit: Int): [Project]
     workspaceActivity(_id: String, limit: Int): [Activity]
-    collaboratorMetrics(_id: String): CollaboratorMetrics
+    collaboratorMetrics(_id: String): ContentMetrics
 
     # Export queries
     exportEntity(_id: String, format: String, fields: [String], includeHistory: Boolean): String
@@ -796,8 +726,7 @@ export const typedefs = `#graphql
     exportProjectEntities(_id: String, format: String): String
     exportAttribute(_id: String, fields: [String], includeHistory: Boolean): String
 
-    # Authentication queries
-    login(code: String): ResponseDataAuth
+    # API key queries
     generateKey(scope: String, workspaces: [String]): ResponseDataAPIKey
 
     # Data queries
@@ -815,7 +744,7 @@ export const typedefs = `#graphql
     currentCounterValue(_id: String): ResponseDataString
     nextCounterValue(_id: String): ResponseDataString
     nextCounterValues(_id: String, count: Int): ResponseDataStringArray
-    
+
     # Identifier Format queries
     identifierFormat(_id: String): IdentifierFormat
     identifierFormats: [IdentifierFormat]
@@ -829,7 +758,6 @@ export const typedefs = `#graphql
     updateEntity(entity: EntityUpdateInput, message: String): ResponseMessage
     archiveEntity(_id: String, state: Boolean): ResponseMessage
     archiveEntities(toArchive: [String], state: Boolean): ResponseMessage
-    deleteEntity(_id: String): ResponseMessage
 
     # Project mutations
     createProject(project: ProjectCreateInput): ResponseMessage
@@ -847,11 +775,11 @@ export const typedefs = `#graphql
 
     # Admin mutations
     setUserGlobalPermissions(_id: String, permissions: UserGlobalPermissionsInput): ResponseMessage
-    setUserWorkspacePermissions(_id: String, workspace: String permissions: UserWorkspacePermissionsInput): ResponseMessage
+    setUserWorkspacePermissions(_id: String, workspace: String, permissions: UserWorkspacePermissionsInput): ResponseMessage
     setBanStatus(_id: String, banned: Boolean): ResponseMessage
 
     # User mutations
-    updateUser(user: UserInput): ResponseMessage
+    updateUser(user: UserUpdateInput): ResponseMessage
     reportIssue(description: String, path: String, userName: String, userId: String, userEmail: String, consoleErrors: [String]): ResponseMessage
 
     # Attribute mutations
@@ -865,23 +793,23 @@ export const typedefs = `#graphql
 
     # Data import spreadsheet mutations
     prepareEntitySpreadsheet(file: [Upload]!): [ColumnInfo]
-    reviewEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataEntityReview
-    importEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!, options: OptionsInput): ResponseMessage
+    reviewEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!): ResponseDataImportReview
+    importEntitySpreadsheet(columnMapping: ColumnMappingInput, file: [Upload]!, options: SpreadsheetImportOptionsInput): ResponseMessage
 
     # Data import JSON mutations
-    reviewEntityJSON(file: [Upload]!): ResponseDataEntityReview
+    reviewEntityJSON(file: [Upload]!): ResponseDataImportReview
     importEntityJSON(file: [Upload]!, project: String, attributes: [AttributeInput]): ResponseMessage
-    reviewAttributeJSON(file: [Upload]!): ResponseDataAttributeReview
+    reviewAttributeJSON(file: [Upload]!): ResponseDataImportReview
     importAttributeJSON(file: [Upload]!): ResponseMessage
 
     # API mutations
     revokeKey(key: String): ResponseMessage
 
     # Counters mutations
-    createCounter(counter: CounterInput): ResponseDataString
+    createCounter(counter: CounterCreateInput): ResponseDataString
     incrementCounter(_id: String): ResponseDataString
-    
+
     # Identifier Format mutations
-    createIdentifierFormat(format: IdentifierFormatInput): ResponseDataString
+    createIdentifierFormat(format: IdentifierFormatCreateInput): ResponseDataString
   }
 `;

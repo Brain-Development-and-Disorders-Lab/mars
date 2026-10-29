@@ -65,7 +65,11 @@ export const SUGGEST_COLUMN_MAPPING = gql`
 `;
 
 export const IMPORT_ENTITY_SPREADSHEET = gql`
-  mutation ImportEntitySpreadsheet($columnMapping: ColumnMappingInput, $file: [Upload]!, $options: OptionsInput) {
+  mutation ImportEntitySpreadsheet(
+    $columnMapping: ColumnMappingInput
+    $file: [Upload]!
+    $options: SpreadsheetImportOptionsInput
+  ) {
     importEntitySpreadsheet(columnMapping: $columnMapping, file: $file, options: $options) {
       success
       message

@@ -6,7 +6,7 @@ import {
   IAttribute,
   IResolverParent,
   IResponseMessage,
-  AttributeMetrics,
+  ContentMetrics,
 } from "@types";
 
 // Models
@@ -97,7 +97,7 @@ export const AttributesResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<AttributeMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

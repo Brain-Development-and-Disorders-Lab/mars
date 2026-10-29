@@ -10,9 +10,9 @@ import Tooltip from "@components/Tooltip";
 // Existing and custom types
 import {
   AttributeModel,
-  CompareAttributeDialogCollapsibleProps,
+  DialogCompareAttributeCollapsibleProps,
   DialogCompareAttributeProps,
-  CompareAttributeFieldDiffProps,
+  DialogCompareAttributeFieldDiffProps,
   IValue,
 } from "@types";
 
@@ -223,7 +223,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
    * @param props Component props
    * @return
    */
-  const CompareAttributeDialogCollapsible = (props: CompareAttributeDialogCollapsibleProps) => (
+  const DialogCompareAttributeCollapsible = (props: DialogCompareAttributeCollapsibleProps) => (
     <Collapsible.Root
       open={expandedSections.has(props.sectionKey)}
       onOpenChange={() => toggleSection(props.sectionKey)}
@@ -258,7 +258,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
    * @param props Component props
    * @return
    */
-  const CompareAttributeFieldDiff = (props: CompareAttributeFieldDiffProps) => (
+  const DialogCompareAttributeFieldDiff = (props: DialogCompareAttributeFieldDiffProps) => (
     <Flex
       direction={"column"}
       gap={"1"}
@@ -475,7 +475,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                 <Flex direction={"column"} gap={"2"}>
                   <Flex direction={"row"} gap={"2"} align={"stretch"}>
                     {/* Attribute Name */}
-                    <CompareAttributeFieldDiff
+                    <DialogCompareAttributeFieldDiff
                       label={"Name"}
                       isDifferent={!!nameIsDifferent}
                       useOriginal={useOriginalName}
@@ -484,7 +484,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                       originalValue={originalAttribute.name || "(empty)"}
                     />
                     {/* Attribute Description */}
-                    <CompareAttributeFieldDiff
+                    <DialogCompareAttributeFieldDiff
                       label={"Description"}
                       isDifferent={!!descriptionIsDifferent}
                       useOriginal={useOriginalDescription}
@@ -527,7 +527,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                           </Text>
                         </Flex>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"unmodified"}
                           icon={"check"}
                           color={unchangedValues.length === 0 ? "gray" : "green"}
@@ -566,9 +566,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Flex>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"modified"}
                           icon={"edit"}
                           color={modifiedValues.length === 0 ? "gray" : "orange"}
@@ -613,9 +613,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Flex>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"add-remove"}
                           icon={"remove"}
                           color={entityOnlyValues.length === 0 ? "gray" : "purple"}
@@ -677,7 +677,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Checkbox.Root>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
                       </Flex>
 
                       <Icon name={"a_both"} size={"xs"} />
@@ -701,7 +701,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                           </Text>
                         </Flex>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"unmodified"}
                           icon={"check"}
                           color={unchangedValues.length === 0 ? "gray" : "green"}
@@ -740,9 +740,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Flex>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"modified"}
                           icon={"edit"}
                           color={modifiedValues.length === 0 ? "gray" : "orange"}
@@ -799,9 +799,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Flex>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
 
-                        <CompareAttributeDialogCollapsible
+                        <DialogCompareAttributeCollapsible
                           sectionKey={"add-remove"}
                           icon={"add"}
                           color={originalOnlyValues.length === 0 ? "gray" : "teal"}
@@ -863,7 +863,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               </Checkbox.Root>
                             </Flex>
                           ))}
-                        </CompareAttributeDialogCollapsible>
+                        </DialogCompareAttributeCollapsible>
                       </Flex>
                     </Flex>
                   </Flex>

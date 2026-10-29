@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 
-import { DialogPreviewProps, PreviewContentProps } from "@types";
+import { DialogPreviewProps, DialogPreviewContentProps } from "@types";
 
 // PDF preview
 import { pdfjs, Document, Page } from "react-pdf";
@@ -381,7 +381,7 @@ const SequencePreview = ({ name, fileUrl }: SequencePreviewProps) => {
 };
 
 /** Manages file URL resolution and preview type detection for a given attachment. */
-const PreviewContent = (props: PreviewContentProps) => {
+const DialogPreviewContent = (props: DialogPreviewContentProps) => {
   const [previewPages, setPreviewPages] = useState(0);
   const [previewIndex, setPreviewIndex] = useState(1);
   const [previewType, setPreviewType] = useState<"document" | "image" | "sequence" | null>(null);
@@ -630,7 +630,7 @@ const DialogPreview = (props: DialogPreviewProps) => {
             </Dialog.CloseTrigger>
           </Dialog.Header>
           <Dialog.Body p={"2"} display={"flex"} flexDirection={"column"} flex={"1"} overflow={"hidden"} minH={0}>
-            <PreviewContent
+            <DialogPreviewContent
               attachment={props.attachment}
               workspace={props.workspace}
               isPublic={props.isPublic}

@@ -3,20 +3,20 @@ import { createListCollection } from "@chakra-ui/react";
 import { toaster } from "@components/Toast";
 
 // Existing and custom types
-import { ColumnInfo, IGenericItem, MutationResult } from "@types";
+import { ColumnInfo, IGenericItem, IResponseMessage } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 
 /**
  * Shows an error toast for a failed or malformed mutation response
- * @param {MutationResult | undefined} result Response payload to check
+ * @param {IResponseMessage | undefined} result Response payload to check
  * @param {unknown} mutationError Apollo error captured alongside the mutation, if any
  * @param {string} errorTitle Toast title, identifying which import step failed
  * @return {boolean} `true` if the response succeeded
  */
 export const reportMutationResult = (
-  result: MutationResult | undefined,
+  result: IResponseMessage | undefined,
   mutationError: unknown,
   errorTitle: string,
 ): boolean => {

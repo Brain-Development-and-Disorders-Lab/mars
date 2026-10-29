@@ -1,7 +1,7 @@
 import {
   Context,
   EntityFilter,
-  EntityMetrics,
+  ContentMetrics,
   EntityModel,
   ExportFormat,
   IEntity,
@@ -229,7 +229,7 @@ export const EntitiesResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<EntityMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

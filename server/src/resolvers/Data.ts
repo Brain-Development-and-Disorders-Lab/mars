@@ -2,8 +2,7 @@
 import {
   AttributeModel,
   Context,
-  EntityImportReview,
-  AttributeImportReview,
+  ImportReview,
   IColumnMapping,
   IFile,
   IResolverParent,
@@ -81,7 +80,7 @@ export const DataResolvers = {
       _parent: IResolverParent,
       args: { columnMapping: IColumnMapping; file: IFile[] },
       context: Context,
-    ): Promise<ResponseData<EntityImportReview[]>> => {
+    ): Promise<ResponseData<ImportReview[]>> => {
       // Verify access to the Workspace
       await assertWorkspaceAccess(context, "entities.create");
 
@@ -133,7 +132,7 @@ export const DataResolvers = {
       _parent: IResolverParent,
       args: { file: IFile[] },
       context: Context,
-    ): Promise<ResponseData<AttributeImportReview[]>> => {
+    ): Promise<ResponseData<ImportReview[]>> => {
       // Verify access to the Workspace
       await assertWorkspaceAccess(context, "attributes.create");
 

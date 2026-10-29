@@ -9,16 +9,16 @@ import { REVIEW_ATTRIBUTE_JSON, IMPORT_ATTRIBUTE_JSON } from "@components/Dialog
 import { reportMutationResult } from "@components/DialogImport/helpers";
 
 // Existing and custom types
-import { AttributeImportReview, IResponseMessage, ResponseData, UseAttributeImportParams } from "@types";
+import { ImportReview, IResponseMessage, ResponseData, UseAttributeImportParams } from "@types";
 
 /** State, GraphQL calls, and handlers for the "Attribute" JSON import flow */
 export const useAttributeImport = ({ fileUpload, setContinueDisabled }: UseAttributeImportParams) => {
   const [attributeImportPage, setAttributeImportPage] = useState<"upload" | "review">("upload");
   const [attributeStep, setAttributeStep] = useState(0);
-  const [reviewAttributes, setReviewAttributes] = useState<AttributeImportReview[]>([]);
+  const [reviewAttributes, setReviewAttributes] = useState<ImportReview[]>([]);
 
   const [reviewAttributeJSON, { error: reviewAttributeJSONError }] = useMutation<{
-    reviewAttributeJSON: ResponseData<AttributeImportReview[]>;
+    reviewAttributeJSON: ResponseData<ImportReview[]>;
   }>(REVIEW_ATTRIBUTE_JSON);
   const [importAttributeJSON, { error: importAttributeJSONError }] = useMutation<{
     importAttributeJSON: IResponseMessage;

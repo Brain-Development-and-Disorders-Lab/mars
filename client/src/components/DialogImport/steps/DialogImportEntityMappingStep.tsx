@@ -14,7 +14,7 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { AttributeModel, AttributeNameCellProps, EntityMappingStepProps } from "@types";
+import { AttributeModel, AttributeNameCellProps, DialogImportEntityMappingStepProps } from "@types";
 
 // Utility functions and libraries
 import { isSpreadsheetFile } from "@lib/util";
@@ -70,7 +70,7 @@ const AttributeNameCell = ({ attribute, fileType, columns, onRemove, onUpdate }:
   );
 };
 
-const EntityMappingStep = ({
+const DialogImportEntityMappingStep = ({
   attributesField,
   onAttributesFieldChange,
   addAttributeOpen,
@@ -79,7 +79,7 @@ const EntityMappingStep = ({
   attributes,
   fileType,
   columns,
-}: EntityMappingStepProps) => {
+}: DialogImportEntityMappingStepProps) => {
   const onRemoveAttribute = (identifier: string) => {
     onAttributesFieldChange(attributesField.filter((attribute) => attribute._id !== identifier));
   };
@@ -189,4 +189,4 @@ const EntityMappingStep = ({
   );
 };
 
-export default EntityMappingStep;
+export default DialogImportEntityMappingStep;

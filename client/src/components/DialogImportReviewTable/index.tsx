@@ -9,12 +9,12 @@ import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
-import { DialogImportReviewTableProps, DialogImportReviewTableRow } from "@types";
+import { DialogImportReviewTableProps, ImportReview } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 
-const columnHelper = createColumnHelper<DialogImportReviewTableRow>();
+const columnHelper = createColumnHelper<ImportReview>();
 
 /** Review table shared by the Entity and Attribute import flows */
 const DialogImportReviewTable = ({

@@ -3,7 +3,7 @@ import {
   Context,
   ExportFormat,
   IProject,
-  ProjectMetrics,
+  ContentMetrics,
   ProjectModel,
   IResponseMessage,
   IResolverParent,
@@ -166,7 +166,7 @@ export const ProjectsResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<ProjectMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

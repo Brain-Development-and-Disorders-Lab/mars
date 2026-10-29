@@ -5,12 +5,12 @@ import React from "react";
 import DialogImportReviewTable from "@components/DialogImportReviewTable";
 
 // Existing and custom types
-import { EntityReviewStepProps } from "@types";
+import { DialogImportEntityReviewStepProps } from "@types";
 
 // Variables
 import { STYLES } from "@variables";
 
-const EntityReviewStep = ({ reviewEntities }: EntityReviewStepProps) => (
+const DialogImportEntityReviewStep = ({ reviewEntities }: DialogImportEntityReviewStepProps) => (
   <DialogImportReviewTable
     items={reviewEntities}
     icon={"entity"}
@@ -24,4 +24,4 @@ const EntityReviewStep = ({ reviewEntities }: EntityReviewStepProps) => (
   />
 );
 
-export default EntityReviewStep;
+export default DialogImportEntityReviewStep;

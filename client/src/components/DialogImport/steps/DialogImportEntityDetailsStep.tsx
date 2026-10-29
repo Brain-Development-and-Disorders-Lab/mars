@@ -10,7 +10,7 @@ import SelectIdentifierFormat from "@components/SelectIdentifierFormat";
 import { SELECT_BG, SELECT_ROUNDED, SELECT_SIZE } from "@components/Select";
 
 // Existing and custom types
-import { EntityDetailsStepProps, IGenericItem } from "@types";
+import { DialogImportEntityDetailsStepProps, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import { isSpreadsheetFile } from "@lib/util";
@@ -18,7 +18,7 @@ import { isSpreadsheetFile } from "@lib/util";
 // Variables
 import { JSON_MIME_TYPE, STYLES } from "@variables";
 
-const EntityDetailsStep = ({
+const DialogImportEntityDetailsStep = ({
   fileType,
   columns,
   namePrefixField,
@@ -43,7 +43,7 @@ const EntityDetailsStep = ({
   projectsCollection,
   ownerField,
   getSelectComponent,
-}: EntityDetailsStepProps) => (
+}: DialogImportEntityDetailsStepProps) => (
   <Flex
     w={"100%"}
     direction={"column"}
@@ -326,4 +326,4 @@ const EntityDetailsStep = ({
   </Flex>
 );
 
-export default EntityDetailsStep;
+export default DialogImportEntityDetailsStep;
