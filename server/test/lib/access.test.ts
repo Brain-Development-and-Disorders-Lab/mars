@@ -20,12 +20,12 @@ const ADMIN_ID = "admin-collaborator";
 const MEMBER_ID = "member-collaborator";
 const OTHER_ID = "other-collaborator";
 
-// Collaborator permissions with Workspace administration enabled
+// Administration permissions
 const ADMIN_PERMISSIONS: UserWorkspacePermissions = _.merge(_.cloneDeep(DEFAULT_WORKSPACE_PERMISSIONS), {
   administration: { edit: true, invite: true },
 });
 
-// Workspace with an administrating collaborator and two regular collaborators
+// Test Workspace
 const buildWorkspace = (): WorkspaceModel => ({
   _id: "workspace",
   timestamp: dayjs(Date.now()).toISOString(),
@@ -44,10 +44,10 @@ const buildWorkspace = (): WorkspaceModel => ({
   activity: [],
 });
 
-// Request context for the given User within the test Workspace
+// Request context
 const buildContext = (user: string): Context => ({ user, workspace: "workspace", userRole: "user" });
 
-// Copy of the Workspace without the given collaborator
+// Remove a collaborator
 const withoutCollaborator = (workspace: WorkspaceModel, _id: string): WorkspaceModel => ({
   ...workspace,
   collaborators: workspace.collaborators.filter((collaborator) => collaborator._id !== _id),
