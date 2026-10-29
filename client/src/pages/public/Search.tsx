@@ -677,7 +677,7 @@ export const Search = () => {
                 ) : (
                   <Flex w={"100%"} minH={"200px"} align={"center"} justify={"center"}>
                     <Text fontSize={"sm"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
-                      No results found
+                      No Entities found
                     </Text>
                   </Flex>
                 )}

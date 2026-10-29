@@ -56,7 +56,7 @@ test.describe("Search Query Builder", () => {
 
     await page.click('[aria-label="Run Query"]');
 
-    await expect(page.locator("#resultsContainer")).toContainText("No results found");
+    await expect(page.locator("#resultsContainer")).toContainText("No Entities found");
   });
 
   test("should build a query with Name inclusion and Attribute Value (Text) inclusion rule", async ({ page }) => {
