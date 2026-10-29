@@ -24,6 +24,7 @@ import _ from "lodash";
 
 // Collection names
 const USERS_COLLECTION = "user";
+const SESSIONS_COLLECTION = "session";
 const WORKSPACES_COLLECTION = "workspaces";
 const ENTITIES_COLLECTION = "entities";
 const PROJECTS_COLLECTION = "projects";
@@ -49,6 +50,29 @@ export const DEFAULT_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
     create: false,
     edit: false,
     archive: false,
+  },
+};
+
+// Workspace owners are always granted every Workspace permission
+export const OWNER_WORKSPACE_PERMISSIONS: UserWorkspacePermissions = {
+  administration: {
+    edit: true,
+    invite: true,
+  },
+  entities: {
+    create: true,
+    edit: true,
+    archive: true,
+  },
+  attributes: {
+    create: true,
+    edit: true,
+    archive: true,
+  },
+  projects: {
+    create: true,
+    edit: true,
+    archive: true,
   },
 };
 
@@ -183,6 +207,36 @@ export class Admin {
     };
   };
 
+  /**
+   * Resolve the permissions a User holds within a Workspace, the single source of truth for Workspace permissions
+   * @param {string} _id Identifier of the User, `""` for unauthenticated requests
+   * @param {WorkspaceModel} workspace Target Workspace
+   * @return {UserWorkspacePermissions} All permissions for the owner, stored permissions for a collaborator
+   * (missing fields are denied), and no permissions for anyone else
+   */
+  static resolveWorkspacePermissions = (_id: string, workspace: WorkspaceModel): UserWorkspacePermissions => {
+    if (_id === "") {
+      return DEFAULT_WORKSPACE_PERMISSIONS;
+    }
+    if (workspace.owner === _id) {
+      return OWNER_WORKSPACE_PERMISSIONS;
+    }
+
+    const collaborator = workspace.collaborators.find((collaborator: Collaborator) => collaborator._id === _id);
+    return Admin.normalizeWorkspacePermissions(collaborator?.permissions);
+  };
+
+  /**
+   * Fill in any missing Workspace permissions as denied, so stored or submitted permissions can be compared
+   * @param {Partial<UserWorkspacePermissions>} permissions Stored or submitted permissions
+   * @return {UserWorkspacePermissions}
+   */
+  static normalizeWorkspacePermissions = (
+    permissions?: Partial<UserWorkspacePermissions>,
+  ): UserWorkspacePermissions => {
+    return _.merge(_.cloneDeep(DEFAULT_WORKSPACE_PERMISSIONS), permissions);
+  };
+
   static getUserWorkspacePermissions = async (_id: string, workspace: string): Promise<UserWorkspacePermissions> => {
     const workspaceResult = await getDatabase()
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
@@ -193,36 +247,7 @@ export class Admin {
       return DEFAULT_WORKSPACE_PERMISSIONS;
     }
 
-    // Get the permissions of the User, assuming they are a collaborator
-    const collaboratorResult = workspaceResult.collaborators.find(
-      (collaborator: Collaborator) => collaborator._id === _id,
-    );
-    if (collaboratorResult) {
-      return collaboratorResult.permissions;
-    } else {
-      // In the case where the User is the owner, return all permissions enabled by default
-      return {
-        administration: {
-          edit: true,
-          invite: true,
-        },
-        entities: {
-          create: true,
-          edit: true,
-          archive: true,
-        },
-        projects: {
-          create: true,
-          edit: true,
-          archive: true,
-        },
-        attributes: {
-          create: true,
-          edit: true,
-          archive: true,
-        },
-      };
-    }
+    return Admin.resolveWorkspacePermissions(_id, workspaceResult);
   };
 
   static setUserWorkspacePermissions = async (
@@ -313,58 +338,21 @@ export class Admin {
       };
     }
 
-    const globalPermissions = parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS);
-
-    // Check if User is Workspace owner or Collaborator
-    if (workspaceResult.owner === _id) {
-      // If owner, all permissions granted
-      return {
-        workspace: {
-          administration: {
-            edit: true,
-            invite: true,
-          },
-          entities: {
-            create: true,
-            edit: true,
-            archive: true,
-          },
-          projects: {
-            create: true,
-            edit: true,
-            archive: true,
-          },
-          attributes: {
-            create: true,
-            edit: true,
-            archive: true,
-          },
-        },
-        global: globalPermissions,
-      };
-    } else {
-      const workspacePermissions = workspaceResult.collaborators.filter((collaborator: Collaborator) => {
-        return collaborator._id === _id;
-      });
-
-      if (workspacePermissions.length !== 1) {
-        return {
-          workspace: DEFAULT_WORKSPACE_PERMISSIONS, // Replace with default permissions
-          global: globalPermissions,
-        };
-      }
-
-      return {
-        workspace: workspacePermissions[0].permissions,
-        global: globalPermissions,
-      };
-    }
+    return {
+      workspace: Admin.resolveWorkspacePermissions(_id, workspaceResult),
+      global: parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS),
+    };
   };
 
   static setBanStatus = async (_id: string, banned: boolean): Promise<IResponseMessage> => {
     const result = await getDatabase()
       .collection<UserModel>(USERS_COLLECTION)
       .updateOne({ _id: _id }, { $set: { banned } });
+
+    // Sign a banned User out everywhere by revoking all of their sessions
+    if (banned && result.matchedCount === 1) {
+      await getDatabase().collection(SESSIONS_COLLECTION).deleteMany({ userId: _id });
+    }
 
     return {
       success: result.modifiedCount === 1,

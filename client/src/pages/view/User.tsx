@@ -41,7 +41,7 @@ import { auth } from "@lib/auth";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
+import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL, STYLES } from "@variables";
@@ -469,7 +469,7 @@ const User = () => {
           name: workspace.name,
           description: workspace.description,
           isPublic: workspace.isPublic,
-          collaborators: workspace.collaborators.filter((c) => !isCollaborator(c._id, workspace.collaborators)),
+          collaborators: workspace.collaborators.filter((c) => c._id !== user),
         },
       },
     });
@@ -503,7 +503,7 @@ const User = () => {
               name: w.name,
               description: w.description,
               isPublic: w.isPublic,
-              collaborators: w.collaborators.filter((c) => !isCollaborator(c._id, w.collaborators)),
+              collaborators: w.collaborators.filter((c) => c._id !== user),
             },
           },
         }),

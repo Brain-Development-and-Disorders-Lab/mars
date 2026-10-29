@@ -8,7 +8,7 @@ import DialogPermissions from "@components/DialogPermissions";
 import { toaster } from "@components/Toast";
 
 // Custom types
-import { Collaborator, CollaboratorsProps, ResponseData, UserModel } from "@types";
+import { Collaborator, CollaboratorEmailProps, CollaboratorsProps, ResponseData, UserModel } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -17,7 +17,7 @@ import { useLazyQuery, useQuery } from "@apollo/client/react";
 // Utility functions
 import {
   getCollaboratorPermissions,
-  getCollaboratorPermissionsLevel,
+  getCollaboratorPermissionsLabels,
   ignoreAbort,
   isCollaborator,
   isValidEmail,
@@ -52,18 +52,21 @@ const GET_USER_EMAIL = gql`
 `;
 
 // Displays a Collaborator's email address, filling the space beside their name and actions
-const CollaboratorEmail = (props: { userId: string }) => {
+const CollaboratorEmail = (props: CollaboratorEmailProps) => {
+  // Emails are only returned for Users sharing a Workspace, so unsaved collaborators use the entered email
   const { loading, data } = useQuery<{ user: Partial<UserModel> }>(GET_USER_EMAIL, {
     variables: { _id: props.userId },
     fetchPolicy: "network-only",
+    skip: !!props.email,
   });
+  const email = props.email ?? data?.user.email;
 
   return (
     <Flex direction={"row"} gap={"1"}>
       <Icon name={"email"} size={"xs"} color={"text.muted"} />
-      <Link href={`mailto:${data?.user.email}`}>
+      <Link href={`mailto:${email}`}>
         <Text fontSize={"xs"} color={"text.muted"} ml={"0.5"}>
-          {loading ? "" : data?.user.email}
+          {loading ? "" : email}
         </Text>
       </Link>
     </Flex>
@@ -79,8 +82,14 @@ const Collaborators = (props: CollaboratorsProps) => {
   const [newCollaborator, setNewCollaborator] = useState("");
   const [validEmail, setValidEmail] = useState(false);
 
+  // Emails entered for collaborators added in this session, keyed by User identifier
+  const [enteredEmails, setEnteredEmails] = useState<Record<string, string>>({});
+
   // Flag to enable owner-specific features
   const isOwner = props.currentUser === props.owner;
+
+  // Removing collaborators and changing their permissions requires Workspace administration rights
+  const canManageCollaborators = workspacePermissions.administration.edit;
 
   const [addCollaboratorLoading, setAddCollaboratorLoading] = useState(false);
 
@@ -129,6 +138,7 @@ const Collaborators = (props: CollaboratorsProps) => {
         if (!isCollaborator(collaborator._id, props.collaborators)) {
           posthog.capture("client.collaborator.added");
           props.setCollaborators((collaborators) => [...collaborators, collaborator]);
+          setEnteredEmails((emails) => ({ ...emails, [collaborator._id]: newCollaborator }));
         } else {
           toaster.create({
             title: "Warning",
@@ -239,7 +249,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                     </Text>
                     <TagActor identifier={collaborator._id} fallback={"New User"} size={"sm"} />
                     <Flex ml={"0.5"}>
-                      <CollaboratorEmail userId={collaborator._id} />
+                      <CollaboratorEmail userId={collaborator._id} email={enteredEmails[collaborator._id]} />
                     </Flex>
                   </Flex>
 
@@ -247,7 +257,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                   <Flex direction={"column"} gap={"2"} align={"center"}>
                     {/* Permissions Labels */}
                     <Flex direction={"row"} gap={"1"} w={"100%"} align={"center"} justify={"end"} mr={"0.5"}>
-                      {getCollaboratorPermissionsLevel(collaborator.permissions).map((label) => {
+                      {getCollaboratorPermissionsLabels(collaborator.permissions).map((label) => {
                         return (
                           <Tag.Root colorPalette={label.includes("Partial") ? "orange" : "green"}>
                             <Tag.Label fontSize={"xs"}>{label}</Tag.Label>
@@ -273,7 +283,7 @@ const Collaborators = (props: CollaboratorsProps) => {
                           </Button>
                         )}
 
-                        {isOwner && (
+                        {canManageCollaborators && props.currentUser !== collaborator._id && (
                           <Button
                             size={"xs"}
                             colorPalette={"red"}
@@ -291,13 +301,13 @@ const Collaborators = (props: CollaboratorsProps) => {
                           colorPalette={"blue"}
                           rounded={"md"}
                           variant={"solid"}
-                          aria-label={isOwner ? "Manage permissions" : "View permissions"}
+                          aria-label={canManageCollaborators ? "Manage permissions" : "View permissions"}
                           onClick={() => {
                             setPermissionsDialogUser(collaborator._id);
                             setPermissionsDialogOpen(true);
                           }}
                         >
-                          {isOwner ? "Manage Permissions" : "View Permissions"}
+                          {canManageCollaborators ? "Manage Permissions" : "View Permissions"}
                           <Icon name={"settings"} size={"xs"} />
                         </Button>
                       </Flex>
@@ -316,7 +326,7 @@ const Collaborators = (props: CollaboratorsProps) => {
           setOpen={setPermissionsDialogOpen}
           user={permissionsDialogUser}
           isGlobal={false}
-          editable={isOwner}
+          editable={canManageCollaborators}
           workspacePermissions={getCollaboratorPermissions(permissionsDialogUser, props.collaborators)}
           onUpdateWorkspacePermissions={(permissions) =>
             props.setCollaborators((collaborators) =>

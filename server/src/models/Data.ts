@@ -572,14 +572,12 @@ export class Data {
           created: rawEntity.created ?? dayjs(Date.now()).toISOString(),
           timestamp: rawEntity.timestamp ?? dayjs(Date.now()).toISOString(),
           description: rawEntity.description ?? "",
-          // Drop any references to Projects or Entities outside of this Workspace
           projects: (rawEntity.projects ?? []).filter((_id) => _.includes(workspace.projects, _id)),
           links: (rawEntity.links ?? []).filter((link) => _.includes(workspace.entities, link.target._id)),
           attachments: rawEntity.attachments ?? [],
           history: rawEntity.history ?? [],
           secondaryIdentifier: rawEntity.secondaryIdentifier ?? { value: "", format: "" },
           attributes: rawEntity.attributes ?? [],
-          // The importing party always takes ownership of imported content
           owner: context.user,
         };
 

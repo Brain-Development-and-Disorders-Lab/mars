@@ -114,10 +114,12 @@ const start = async () => {
 
   // Setup authentication helper function
   const checkSession: RequestHandler = async (req, res, next) => {
+    // Bypass the cookie cache so revoked sessions, bans, and role changes apply immediately
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
+      query: { disableCookieCache: true },
     });
-    if (session === null) {
+    if (session === null || (session.user as Record<string, unknown>).banned === true) {
       res.status(401).json({ message: `You do not have permission to access ${req.path}` });
     } else {
       res.locals.session = session;

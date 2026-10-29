@@ -21,7 +21,13 @@ import { Workspaces } from "@models/Workspaces";
 import { audit } from "@lib/audit";
 
 // Access control
-import { assertEntityReferencesInWorkspace, assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
+import {
+  assertEntityReferencesInWorkspace,
+  assertInWorkspace,
+  assertWorkspaceAccess,
+  assertWorkspacePermission,
+  unauthorized,
+} from "@lib/access";
 
 export const EntitiesResolvers = {
   Value: {
@@ -124,20 +130,16 @@ export const EntitiesResolvers = {
         audit("entity.read", context.user, { entityId: entity._id, workspaceId: context.workspace });
         return entity;
       } else {
-        throw new GraphQLError("You do not have permission to access this Entity", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Entity");
       }
     },
 
-    // Check if Entity exists by name
+    // Check if an Entity exists by name within the Workspace
     entityNameExists: async (_parent: IResolverParent, args: { name: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context, "read");
+      const workspace = await assertWorkspaceAccess(context, "read");
 
-      return await Entities.existByName(args.name);
+      return await Entities.existByName(args.name, workspace.entities);
     },
 
     // Export one Entity by _id
@@ -169,11 +171,7 @@ export const EntitiesResolvers = {
         });
         return exportResult;
       } else {
-        throw new GraphQLError("You do not have permission to access this Entity", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Entity");
       }
     },
 
@@ -198,7 +196,7 @@ export const EntitiesResolvers = {
 
       const exportResult = await Entities.exportMany(
         authorizedEntities,
-        args.format,
+        args.format as ExportFormat,
         args.includeAttributes ?? true,
         args.includeHistory ?? false,
       );
@@ -221,7 +219,7 @@ export const EntitiesResolvers = {
 
       const exportResult = await Entities.exportMany(
         workspace.entities,
-        args.format,
+        args.format as ExportFormat,
         args.includeAttributes ?? true,
         args.includeHistory ?? false,
       );
@@ -271,7 +269,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "entities.edit");
 
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
@@ -289,11 +287,7 @@ export const EntitiesResolvers = {
         }
         return result;
       } else {
-        throw new GraphQLError("You do not have permission to modify this Entity", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify this Entity");
       }
     },
 
@@ -304,7 +298,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<ResponseData<string>> => {
       // Verify access to the Workspace and that any referenced Projects or Entities belong to it
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "entities.create");
       assertEntityReferencesInWorkspace(workspace, args.entity);
 
       // Apply create operation
@@ -345,7 +339,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "entities.edit");
 
       const entity = await Entities.getOne(args.entity._id);
       if (_.isNull(entity)) {
@@ -390,18 +384,14 @@ export const EntitiesResolvers = {
 
         return result;
       } else {
-        throw new GraphQLError("You do not have permission to modify this Entity", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify this Entity");
       }
     },
 
     // Archive an Entity
     archiveEntity: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "entities.archive");
 
       const entity = await Entities.getOne(args._id);
       if (_.isNull(entity)) {
@@ -413,11 +403,7 @@ export const EntitiesResolvers = {
       }
 
       if (!_.includes(workspace.entities, args._id)) {
-        throw new GraphQLError("You do not have permission to modify the archive state of this Entity", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify the archive state of this Entity");
       }
 
       if (entity.archived === args.state) {
@@ -463,7 +449,7 @@ export const EntitiesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace and that every Entity belongs to it
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "member");
       assertInWorkspace(workspace, "entities", args.toArchive);
 
       let archiveCounter = 0;
@@ -480,6 +466,9 @@ export const EntitiesResolvers = {
         if (entity.archived === args.state) {
           archiveCounter += 1;
         } else {
+          // Only check the archive permission for actual changes, the Workspace page submits every Entity
+          assertWorkspacePermission(context, workspace, "entities.archive");
+
           // Perform archive operation
           const result = await Entities.setArchived(_id, args.state);
 

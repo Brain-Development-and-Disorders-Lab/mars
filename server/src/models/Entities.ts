@@ -311,10 +311,10 @@ export class Entities {
     return !_.isNull(entity);
   };
 
-  static existByName = async (name: string): Promise<boolean> => {
+  static existByName = async (name: string, entities: string[]): Promise<boolean> => {
     const entity = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, archived: false });
+      .findOne({ _id: { $in: entities }, name: name, archived: false });
 
     return !_.isNull(entity);
   };

@@ -42,11 +42,11 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
   const [featuresScan, setFeaturesScan] = useState(globalPermissions.features.scan);
   const [featuresAI, setFeaturesAI] = useState(globalPermissions.features.ai);
   const [featuresAPI, setFeaturesAPI] = useState(globalPermissions.features.api);
-  const [workspaceCreate] = useState(globalPermissions.workspaces.create);
+  const [workspacesCreate] = useState(globalPermissions.workspaces.create);
 
   // Workspace-specific permissions for the specified user
-  const [workspaceEdit, setWorkspaceEdit] = useState(workspacePermissions.administration.edit);
-  const [workspaceInvite, setWorkspaceInvite] = useState(workspacePermissions.administration.invite);
+  const [administrationEdit, setAdministrationEdit] = useState(workspacePermissions.administration.edit);
+  const [administrationInvite, setAdministrationInvite] = useState(workspacePermissions.administration.invite);
   const [entitiesCreate, setEntitiesCreate] = useState(workspacePermissions.entities.create);
   const [entitiesEdit, setEntitiesEdit] = useState(workspacePermissions.entities.edit);
   const [entitiesArchive, setEntitiesArchive] = useState(workspacePermissions.entities.archive);
@@ -105,8 +105,8 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
 
   // If `isGlobal` is `false`, seed the toggles from the collaborator's local (unsaved) permissions
   const applyLocalWorkspacePermissions = (permissions: UserWorkspacePermissions) => {
-    setWorkspaceEdit(permissions.administration.edit);
-    setWorkspaceInvite(permissions.administration.invite);
+    setAdministrationEdit(permissions.administration.edit);
+    setAdministrationInvite(permissions.administration.invite);
     setEntitiesCreate(permissions.entities.create);
     setEntitiesEdit(permissions.entities.edit);
     setEntitiesArchive(permissions.entities.archive);
@@ -160,7 +160,7 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
               api: featuresAPI,
             },
             workspaces: {
-              create: workspaceCreate,
+              create: workspacesCreate,
             },
           },
         },
@@ -191,8 +191,8 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
       // action is responsible for persisting them to the server
       props.onUpdateWorkspacePermissions?.({
         administration: {
-          edit: workspaceEdit,
-          invite: workspaceInvite,
+          edit: administrationEdit,
+          invite: administrationInvite,
         },
         entities: {
           create: entitiesCreate,
@@ -368,8 +368,8 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                     <Text fontSize={"xs"} color={"text.muted"} fontWeight={"semibold"}>
                       Workspace
                     </Text>
-                    <PermissionStatus label={"Edit"} granted={workspaceEdit} />
-                    <PermissionStatus label={"Invite Collaborators"} granted={workspaceInvite} />
+                    <PermissionStatus label={"Edit"} granted={administrationEdit} />
+                    <PermissionStatus label={"Invite Collaborators"} granted={administrationInvite} />
                   </Flex>
 
                   <Separator variant={"solid"} h={"20"} orientation={"vertical"} />
@@ -431,8 +431,8 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         Workspace Permissions
                       </Text>
                       <Switch.Root
-                        checked={workspaceEdit}
-                        onCheckedChange={(event) => setWorkspaceEdit(event.checked)}
+                        checked={administrationEdit}
+                        onCheckedChange={(event) => setAdministrationEdit(event.checked)}
                         colorPalette={"green"}
                       >
                         <Switch.HiddenInput />
@@ -447,8 +447,8 @@ const DialogPermissions = (props: DialogPermissionsProps) => {
                         </Switch.Label>
                       </Switch.Root>
                       <Switch.Root
-                        checked={workspaceInvite}
-                        onCheckedChange={(event) => setWorkspaceInvite(event.checked)}
+                        checked={administrationInvite}
+                        onCheckedChange={(event) => setAdministrationInvite(event.checked)}
                         colorPalette={"green"}
                       >
                         <Switch.HiddenInput />

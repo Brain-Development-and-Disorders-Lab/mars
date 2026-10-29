@@ -443,7 +443,7 @@ const Attribute = () => {
             </Flex>
             <Flex direction={"row"} gap={"2"} align={"center"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.attributes.archive}
                 showArrow
               >
@@ -490,7 +490,7 @@ const Attribute = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {attributeArchived ? (
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.attributes.archive}
                 showArrow
               >
@@ -515,7 +515,7 @@ const Attribute = () => {
                   </Button>
                 )}
                 <Tooltip
-                  content={"Insufficient permissions in this Workspace"}
+                  content={"You do not have permission to do this in this Workspace"}
                   disabled={workspacePermissions.attributes.edit}
                   showArrow
                 >
@@ -560,7 +560,7 @@ const Attribute = () => {
                       Export Attribute
                     </Menu.Item>
                     <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
+                      content={"You do not have permission to do this in this Workspace"}
                       disabled={workspacePermissions.attributes.archive}
                       showArrow
                     >

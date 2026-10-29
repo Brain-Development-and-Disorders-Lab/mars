@@ -8,7 +8,7 @@ import { Context, IdentifierFormatModel, IResolverParent } from "@types";
 import { Identifiers } from "@models/Identifiers";
 
 // Access control
-import { assertWorkspaceAccess } from "@lib/access";
+import { assertWorkspaceAccess, unauthorized } from "@lib/access";
 
 // Utilities
 import _ from "lodash";
@@ -32,11 +32,7 @@ export const IdentifiersResolvers = {
       if (_.isEqual(identifierFormat.workspace, workspace._id)) {
         return identifierFormat;
       } else {
-        throw new GraphQLError("This Identifier Format is outside the current Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Identifier Format");
       }
     },
     identifierFormats: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
@@ -53,7 +49,7 @@ export const IdentifiersResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context, "write");
+      await assertWorkspaceAccess(context, "entities.create");
 
       // Apply create operation, always within the current Workspace
       return await Identifiers.create({ ...args.format, workspace: context.workspace });

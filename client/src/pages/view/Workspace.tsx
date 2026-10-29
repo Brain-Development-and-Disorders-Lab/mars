@@ -566,7 +566,7 @@ const Workspace = () => {
             </Tooltip>
             <Flex p={"0.5"} gap={"1"} align={"center"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.entities.archive}
                 showArrow
               >
@@ -633,7 +633,7 @@ const Workspace = () => {
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.projects.archive}
                 showArrow
               >
@@ -700,7 +700,7 @@ const Workspace = () => {
             </Tooltip>
             <Flex p={"0.5"} gap={"1"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.attributes.archive}
                 showArrow
               >
@@ -921,7 +921,11 @@ const Workspace = () => {
 
           {!editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
-              <Tooltip content={"Insufficient permissions in this Workspace"} disabled={canEditWorkspace} showArrow>
+              <Tooltip
+                content={"You do not have permission to do this in this Workspace"}
+                disabled={canEditWorkspace}
+                showArrow
+              >
                 <Button
                   id={"dialogWorkspaceEditButton"}
                   size={"xs"}

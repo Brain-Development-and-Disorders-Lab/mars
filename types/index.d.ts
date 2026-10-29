@@ -260,6 +260,12 @@ export type CollaboratorsProps = {
   setCollaborators: (value: React.SetStateAction<Collaborator[]>) => void;
 };
 
+// `CollaboratorEmail` component props
+export type CollaboratorEmailProps = {
+  userId: string;
+  email?: string;
+};
+
 // `Linky` component props
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects" | "workspaces";
@@ -524,8 +530,16 @@ export type IWorkspace = {
   activity: string[];
 };
 
-// Level of access required to interact with a Workspace
-export type WorkspaceAccess = "read" | "write";
+// Individual permission within `UserWorkspacePermissions`, derived as `category.action` paths
+export type UserWorkspacePermission = {
+  [K in keyof UserWorkspacePermissions]: `${K}.${keyof UserWorkspacePermissions[K] & string}`;
+}[keyof UserWorkspacePermissions];
+
+// General level of access to a Workspace, independent of specific permissions
+export type WorkspaceAccessLevel = "read" | "member";
+
+// Access a check requires, either a general level or a specific permission
+export type WorkspaceRequirement = WorkspaceAccessLevel | UserWorkspacePermission;
 
 // Collections of Workspace contents that can be checked for membership
 export type WorkspaceCollection = "entities" | "projects" | "attributes";

@@ -952,7 +952,7 @@ const Entity = () => {
             </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.entities.archive}
                 showArrow
               >
@@ -1012,7 +1012,7 @@ const Entity = () => {
             )}
             {entityArchived ? (
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.entities.archive}
                 showArrow
               >
@@ -1031,7 +1031,7 @@ const Entity = () => {
               </Tooltip>
             ) : (
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.entities.edit}
                 showArrow
               >
@@ -1096,7 +1096,7 @@ const Entity = () => {
                         Manage
                       </Menu.ItemGroupLabel>
                       <Tooltip
-                        content={"Insufficient permissions in this Workspace"}
+                        content={"You do not have permission to do this in this Workspace"}
                         disabled={workspacePermissions.entities.create}
                         showArrow
                       >
@@ -1120,7 +1120,7 @@ const Entity = () => {
                         Export Entity
                       </Menu.Item>
                       <Tooltip
-                        content={"Insufficient permissions in this Workspace"}
+                        content={"You do not have permission to do this in this Workspace"}
                         disabled={workspacePermissions.entities.archive}
                         showArrow
                       >

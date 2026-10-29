@@ -948,7 +948,7 @@ const Entity = () => {
         </Flex>
 
         <Tooltip
-          content={"Insufficient permissions in this Workspace"}
+          content={"You do not have permission to do this in this Workspace"}
           disabled={workspacePermissions.entities.create}
           showArrow
         >

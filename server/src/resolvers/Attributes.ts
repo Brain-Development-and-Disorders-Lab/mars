@@ -24,7 +24,7 @@ import { GraphQLError } from "graphql/index";
 import { PostHogClient } from "@lib/posthog";
 
 // Access control
-import { assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
+import { assertInWorkspace, assertWorkspaceAccess, assertWorkspacePermission, unauthorized } from "@lib/access";
 
 export const AttributesResolvers = {
   Query: {
@@ -59,11 +59,7 @@ export const AttributesResolvers = {
       if (_.includes(workspace.attributes, attribute._id)) {
         return attribute;
       } else {
-        throw new GraphQLError("You do not have permission to access this Attribute", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Attribute");
       }
     },
 
@@ -129,11 +125,7 @@ export const AttributesResolvers = {
       if (_.includes(workspace.attributes, args._id)) {
         return await Attributes.export(args._id, args.fields, args.includeHistory);
       } else {
-        throw new GraphQLError("You do not have permission to access this Attribute", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Attribute");
       }
     },
   },
@@ -142,7 +134,7 @@ export const AttributesResolvers = {
     // Create a new Attribute
     createAttribute: async (_parent: IResolverParent, args: { attribute: IAttribute }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context, "write");
+      await assertWorkspaceAccess(context, "attributes.create");
 
       const result = await Attributes.create(args.attribute);
 
@@ -185,7 +177,7 @@ export const AttributesResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "attributes.edit");
 
       const attribute = await Attributes.getOne(args.attribute._id);
       if (_.isNull(attribute)) {
@@ -197,11 +189,7 @@ export const AttributesResolvers = {
       }
 
       if (!_.includes(workspace.attributes, args.attribute._id)) {
-        throw new GraphQLError("You do not have permission to modify this Attribute", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify this Attribute");
       }
 
       // Add history entry before executing the update
@@ -242,7 +230,7 @@ export const AttributesResolvers = {
     // Archive a Attribute
     archiveAttribute: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "attributes.archive");
 
       const attribute = await Attributes.getOne(args._id);
       if (_.isNull(attribute)) {
@@ -254,11 +242,7 @@ export const AttributesResolvers = {
       }
 
       if (!_.includes(workspace.attributes, args._id)) {
-        throw new GraphQLError("You do not have permission to modify the archive state of this Attribute", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify the archive state of this Attribute");
       }
 
       // Capture event
@@ -307,7 +291,7 @@ export const AttributesResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace and that every Attribute belongs to it
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "member");
       assertInWorkspace(workspace, "attributes", args.toArchive);
 
       let archiveCounter = 0;
@@ -324,6 +308,9 @@ export const AttributesResolvers = {
         if (attribute.archived === args.state) {
           archiveCounter += 1;
         } else {
+          // Only check the archive permission for actual changes, the Workspace page submits every Attribute
+          assertWorkspacePermission(context, workspace, "attributes.archive");
+
           // Execute archive operation
           const result = await Attributes.setArchived(_id, args.state);
 

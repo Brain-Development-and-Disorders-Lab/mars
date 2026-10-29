@@ -1,5 +1,4 @@
 import { AdminMetrics, AdminUser, AdminWorkspace, Context, IResolverParent, IResponseMessage } from "@types";
-import { GraphQLError } from "graphql/index";
 
 // Models
 import { Admin } from "@models/Admin";
@@ -7,14 +6,8 @@ import { Admin } from "@models/Admin";
 // Audit logging
 import { audit } from "@lib/audit";
 
-const requireAdmin = (context: Context) => {
-  if (context.userRole !== "admin") {
-    audit("permission.denied", context.user, { gqlOperation: "admin", errorCode: "FORBIDDEN" });
-    throw new GraphQLError("You do not have permission to access this resource", {
-      extensions: { code: "FORBIDDEN" },
-    });
-  }
-};
+// Access control
+import { assertAdmin } from "@lib/access";
 
 export const AdminResolvers = {
   Query: {
@@ -23,7 +16,7 @@ export const AdminResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<AdminMetrics> => {
-      requireAdmin(context);
+      assertAdmin(context);
       return await Admin.getMetrics();
     },
 
@@ -32,7 +25,7 @@ export const AdminResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<AdminUser[]> => {
-      requireAdmin(context);
+      assertAdmin(context);
       return await Admin.getUsers();
     },
 
@@ -41,7 +34,7 @@ export const AdminResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<AdminWorkspace[]> => {
-      requireAdmin(context);
+      assertAdmin(context);
       return await Admin.getWorkspaces();
     },
   },
@@ -52,7 +45,7 @@ export const AdminResolvers = {
       args: { _id: string; banned: boolean },
       context: Context,
     ): Promise<IResponseMessage> => {
-      requireAdmin(context);
+      assertAdmin(context);
 
       if (context.user === args._id) {
         return { success: false, message: "You cannot ban your own account" };

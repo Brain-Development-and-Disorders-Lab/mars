@@ -1,5 +1,6 @@
 // Utility libraries and functions
 import { getDatabase } from "@connectors/database";
+import { GraphQLError } from "graphql";
 import _ from "lodash";
 
 // Models
@@ -11,6 +12,33 @@ import { Projects } from "@models/Projects";
 // Collection names
 const ENTITIES_COLLECTION = "entities";
 const PROJECTS_COLLECTION = "projects";
+
+// Operators produced by the Client query builder, any other operator is rejected
+const ALLOWED_QUERY_OPERATORS = [
+  "$and",
+  "$or",
+  "$nor",
+  "$not",
+  "$elemMatch",
+  "$eq",
+  "$ne",
+  "$gt",
+  "$gte",
+  "$lt",
+  "$lte",
+  "$in",
+  "$nin",
+  "$exists",
+  "$regex",
+  "$options",
+  "$expr",
+  "$anyElementTrue",
+  "$map",
+  "$toDouble",
+];
+
+// Maximum execution time for a structured query, bounding expensive regular expressions
+const QUERY_TIMEOUT_MS = 5000;
 
 export class Search {
   /**
@@ -303,7 +331,27 @@ export class Search {
       return parsedQuery;
     }
   };
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+
+  /**
+   * Verify that a parsed query only uses operators produced by the Client query builder
+   * @param {unknown} query Parsed MongoDB query, or any value nested within it
+   */
+  private static assertAllowedOperators = (query: unknown): void => {
+    if (_.isArray(query)) {
+      query.forEach(Search.assertAllowedOperators);
+    } else if (_.isPlainObject(query)) {
+      for (const [key, value] of Object.entries(query as Record<string, unknown>)) {
+        if (key.startsWith("$") && !_.includes(ALLOWED_QUERY_OPERATORS, key)) {
+          throw new GraphQLError(`Query operator "${key}" is not supported`, {
+            extensions: {
+              code: "BAD_USER_INPUT",
+            },
+          });
+        }
+        Search.assertAllowedOperators(value);
+      }
+    }
+  };
 
   /**
    * Create and execute a structured MongoDB query
@@ -317,48 +365,27 @@ export class Search {
     resultType: string,
     workspace: string,
   ): Promise<EntityModel[] | ProjectModel[]> => {
-    // Parse the query string into a MongoDB query object
-    const parsedQuery = JSON.parse(query);
-    const mongoQuery = Search.generateMongoQuery(parsedQuery);
-
-    if (resultType === "project") {
-      // Execute the search query with any specified options
-      const results = await getDatabase().collection<ProjectModel>(PROJECTS_COLLECTION).find(mongoQuery).toArray();
-
-      // Get the current Workspace context and retrieve all Entities
-      const context = await Workspaces.getOne(workspace);
-      if (!context) {
-        return [];
-      }
-      const projects = await Projects.getMany(context.projects);
-
-      // Create an intersection of the search results and all Projects
-      const intersected = _.intersection<string>(
-        results.map((e) => e._id),
-        projects.map((e) => e._id),
-      );
-
-      // Filter the query results to only those matching the current Workspace
-      return _.filter(projects, (project) => _.includes(intersected, project._id));
-    } else {
-      // Execute the search query with any specified options
-      const results = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(mongoQuery).toArray();
-
-      // Get the current Workspace context and retrieve all Entities
-      const context = await Workspaces.getOne(workspace);
-      if (!context) {
-        return [];
-      }
-      const entities = await Entities.getMany(context.entities);
-
-      // Create an intersection of the search results and all Entities
-      const intersected = _.intersection<string>(
-        results.map((e) => e._id),
-        entities.map((e) => e._id),
-      );
-
-      // Filter the query results to only those matching the current Workspace
-      return _.filter(entities, (entity) => _.includes(intersected, entity._id));
+    // Get the current Workspace context to scope the query
+    const context = await Workspaces.getOne(workspace);
+    if (!context) {
+      return [];
     }
+
+    // Parse the query string into a MongoDB query object, rejecting unsupported operators
+    const mongoQuery = Search.generateMongoQuery(JSON.parse(query));
+    Search.assertAllowedOperators(mongoQuery);
+
+    // Run the query against this Workspace's Entities or Projects only, with a bounded execution time
+    if (resultType === "project") {
+      return await getDatabase()
+        .collection<ProjectModel>(PROJECTS_COLLECTION)
+        .find({ $and: [{ _id: { $in: context.projects } }, mongoQuery] }, { maxTimeMS: QUERY_TIMEOUT_MS })
+        .toArray();
+    }
+    return await getDatabase()
+      .collection<EntityModel>(ENTITIES_COLLECTION)
+      .find({ $and: [{ _id: { $in: context.entities } }, mongoQuery] }, { maxTimeMS: QUERY_TIMEOUT_MS })
+      .sort({ timestamp: 1 })
+      .toArray();
   };
 }

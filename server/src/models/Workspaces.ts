@@ -6,8 +6,8 @@ import {
   IWorkspace,
   ProjectModel,
   IResponseMessage,
-  WorkspaceAccess,
   WorkspaceModel,
+  WorkspaceRequirement,
   ResponseData,
 } from "@types";
 
@@ -19,6 +19,7 @@ import _ from "lodash";
 
 // Models
 import { Activity } from "@models/Activity";
+import { Admin } from "@models/Admin";
 import { Attributes } from "@models/Attributes";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
@@ -332,40 +333,36 @@ export class Workspaces {
   };
 
   /**
-   * Basic access check function to validate that the User has permission to interact with a Workspace
-   * @param user Identifier of the User attempting to interact with the Workspace
-   * @param workspace Identifier of the target Workspace
-   * @param access Level of access required, defaults to `read`
-   * @return {Promise<boolean>} `true` if the User has access, `false` if not
+   * Check whether two Users are both members (owner or collaborator) of at least one common Workspace
+   * @param user Identifier of the first User
+   * @param other Identifier of the second User
+   * @return {Promise<boolean>} `true` if they share a Workspace, `false` if not
    */
-  static checkAccess = async (user: string, workspace: string, access: WorkspaceAccess = "read"): Promise<boolean> => {
-    // No Workspace specified, nothing to grant access to
-    if (workspace === "") {
-      return false;
-    }
-
-    const workspaceResult = await Workspaces.getOne(workspace);
-    if (workspaceResult === null) {
-      return false;
-    }
-
-    return Workspaces.canAccess(user, workspaceResult, access);
+  static shareWorkspace = async (user: string, other: string): Promise<boolean> => {
+    const memberOf = (_id: string) => ({ $or: [{ owner: _id }, { "collaborators._id": _id }] });
+    const result = await getDatabase()
+      .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
+      .findOne({ $and: [memberOf(user), memberOf(other)] }, { projection: { _id: 1 } });
+    return !_.isNull(result);
   };
 
   /**
    * Check the level of access a User has to an already retrieved Workspace
    * @param user Identifier of the User, `""` for unauthenticated requests
    * @param workspace Target Workspace
-   * @param access Level of access required
+   * @param requirement `read`, `member`, or a specific Workspace permission such as `entities.edit`
    * @return {boolean} `true` if the User has access, `false` if not
    */
-  static canAccess = (user: string, workspace: WorkspaceModel, access: WorkspaceAccess): boolean => {
+  static canAccess = (user: string, workspace: WorkspaceModel, requirement: WorkspaceRequirement): boolean => {
     const isMember = user !== "" && (workspace.owner === user || isCollaborator(user, workspace.collaborators));
 
-    // Public Workspaces are readable by anyone, but only members can write
-    if (access === "write") {
+    // Public Workspaces are readable by anyone, anything else requires membership (non-members hold no permissions)
+    if (requirement === "read") {
+      return isMember || workspace.isPublic === true;
+    }
+    if (requirement === "member") {
       return isMember;
     }
-    return isMember || workspace.isPublic === true;
+    return _.get(Admin.resolveWorkspacePermissions(user, workspace), requirement) === true;
   };
 }

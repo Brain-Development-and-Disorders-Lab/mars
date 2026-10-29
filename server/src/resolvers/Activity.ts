@@ -30,10 +30,10 @@ export const ActivityResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context, "write");
+      await assertWorkspaceAccess(context, "member");
 
-      // Apply the create operation
-      const result = await Activity.create(args.activity);
+      // Apply the create operation, always attributed to the requesting User
+      const result = await Activity.create({ ...args.activity, actor: context.user });
 
       if (result.success) {
         // Add the Activity to the Workspace

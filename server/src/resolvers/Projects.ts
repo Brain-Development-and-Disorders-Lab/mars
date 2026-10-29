@@ -23,7 +23,7 @@ import { Workspaces } from "@models/Workspaces";
 import { audit } from "@lib/audit";
 
 // Access control
-import { assertInWorkspace, assertWorkspaceAccess } from "@lib/access";
+import { assertInWorkspace, assertWorkspaceAccess, assertWorkspacePermission, unauthorized } from "@lib/access";
 
 export const ProjectsResolvers = {
   Query: {
@@ -73,11 +73,7 @@ export const ProjectsResolvers = {
         audit("project.read", context.user, { projectId: project._id, workspaceId: context.workspace });
         return project;
       } else {
-        throw new GraphQLError("You do not have permission to access this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Project");
       }
     },
 
@@ -101,11 +97,7 @@ export const ProjectsResolvers = {
         const entities = await Projects.getEntities(args._id);
         return entities.filter((entity) => _.includes(workspace.entities, entity._id));
       } else {
-        throw new GraphQLError("You do not have permission to access this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Project");
       }
     },
 
@@ -135,11 +127,7 @@ export const ProjectsResolvers = {
         });
         return exportResult;
       } else {
-        throw new GraphQLError("You do not have permission to access this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Project");
       }
     },
 
@@ -169,11 +157,7 @@ export const ProjectsResolvers = {
         });
         return exportResult;
       } else {
-        throw new GraphQLError("You do not have permission to access this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Project");
       }
     },
 
@@ -211,7 +195,7 @@ export const ProjectsResolvers = {
   Mutation: {
     createProject: async (_parent: IResolverParent, args: { project: IProject }, context: Context) => {
       // Verify access to the Workspace and that any Entities belong to it
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "projects.create");
       assertInWorkspace(workspace, "entities", args.project.entities ?? []);
 
       // Apply create operation
@@ -251,7 +235,7 @@ export const ProjectsResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "projects.edit");
 
       const project = await Projects.getOne(args.project._id);
       if (_.isNull(project)) {
@@ -298,7 +282,7 @@ export const ProjectsResolvers = {
 
     archiveProject: async (_parent: IResolverParent, args: { _id: string; state: boolean }, context: Context) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "projects.archive");
 
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
@@ -310,11 +294,7 @@ export const ProjectsResolvers = {
       }
 
       if (!_.includes(workspace.projects, args._id)) {
-        throw new GraphQLError("You do not have permission to modify the archive state of this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to modify the archive state of this Project");
       }
 
       if (project.archived === args.state) {
@@ -357,7 +337,7 @@ export const ProjectsResolvers = {
       context: Context,
     ): Promise<IResponseMessage> => {
       // Verify access to the Workspace and that every Project belongs to it
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "member");
       assertInWorkspace(workspace, "projects", args.toArchive);
 
       let archiveCounter = 0;
@@ -374,6 +354,8 @@ export const ProjectsResolvers = {
         if (project.archived === args.state) {
           archiveCounter += 1;
         } else {
+          assertWorkspacePermission(context, workspace, "projects.archive");
+
           const result = await Projects.setArchived(_id, args.state);
 
           if (result.success) {
@@ -412,7 +394,7 @@ export const ProjectsResolvers = {
 
     deleteProject: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      const workspace = await assertWorkspaceAccess(context, "write");
+      const workspace = await assertWorkspaceAccess(context, "projects.archive");
 
       const project = await Projects.getOne(args._id);
       if (_.isNull(project)) {
@@ -424,11 +406,7 @@ export const ProjectsResolvers = {
       }
 
       if (!_.includes(workspace.projects, args._id)) {
-        throw new GraphQLError("You do not have permission to delete this Project", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to delete this Project");
       }
 
       const result = await Projects.delete(args._id);
