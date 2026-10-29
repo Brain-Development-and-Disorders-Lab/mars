@@ -47,6 +47,7 @@ export type IAttribute = {
 export type AttributeModel = IAttribute & {
   _id: string;
   timestamp: string;
+  usageCount?: number;
   history?: AttributeHistory[];
 };
 
@@ -592,6 +593,24 @@ export type EntityModel = IEntity & {
   timestamp: string;
 };
 
+// Inclusive numeric range, either bound may be omitted
+export type CountRange = {
+  min?: number;
+  max?: number;
+};
+
+// Filters accepted when querying Entities
+export type EntityFilter = {
+  startDate?: string;
+  endDate?: string;
+  owners?: string[];
+  hasAttachments?: boolean;
+  hasAttributes?: boolean;
+  hasLinks?: boolean;
+  attributeCount?: CountRange;
+  projectCount?: CountRange;
+};
+
 export type EntityNode = IGenericItem & {
   links: ILink[];
   owner?: string;
@@ -991,52 +1010,91 @@ export type DataTableColumnSelectProps = {
   updateColumnVisibility: (toggleableColumns: string[]) => void;
 };
 
-// `DataTableFiltersCount` component props
-export type DataTableFiltersCountProps =
-  | {
-      mode: "range";
-      label: string;
-      min: string;
-      max: string;
-      onMinChange: (value: string) => void;
-      onMaxChange: (value: string) => void;
-    }
-  | {
-      mode: "buckets";
-      label: string;
-      unitLabel: string;
-      selected: string[];
-      onChange: (ranges: string[]) => void;
-    };
+// Count range input values, empty strings are unbounded
+export type DataTableFilterRange = {
+  min: string;
+  max: string;
+};
+
+// Filter values produced by `DataTableFilters`, keyed `ranges` and `toggles` match the filter definitions
+export type DataTableFilterValues = {
+  startDate: string;
+  endDate: string;
+  owners: string[];
+  ranges: Record<string, DataTableFilterRange>;
+  toggles: Record<string, boolean>;
+};
+
+// Count range filter shown by `DataTableFilters`
+export type DataTableRangeFilter = {
+  key: string;
+  label: string;
+};
+
+// Checkbox filter shown by `DataTableFilters`
+export type DataTableToggleFilter = {
+  key: string;
+  label: string;
+  checkboxLabel: string;
+};
+
+// Accessors used to apply `DataTableFilterValues` to rows on the client
+export type DataTableFilterAccessors<T> = {
+  created: (row: T) => string;
+  owner: (row: T) => string;
+  counts: Record<string, (row: T) => number>;
+};
+
+// Filter values on the Activity page
+export type ActivityFilterValues = {
+  startDate: string;
+  endDate: string;
+  activityTypes: string[];
+  targetTypes: string[];
+  mediums: string[];
+};
+
+// `FilterInput` component props
+export type FilterInputProps = {
+  label: string;
+  type: "date" | "number";
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+};
+
+// `FilterCheckbox` component props
+export type FilterCheckboxProps = {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+};
+
+// `FilterSection` component props
+export type FilterSectionProps = {
+  label: string;
+  children: React.ReactNode;
+};
+
+// `DataTableFilterPanel` component props, `onApply` is omitted when filters apply immediately
+export type DataTableFilterPanelProps = {
+  label: string;
+  activeFilterCount: number;
+  onApply?: () => void;
+  onReset: () => void;
+  children: React.ReactNode;
+};
 
 // `DataTableFilters` component props
 export type DataTableFiltersProps = {
   entityLabel: string;
-  filtersOpen: boolean;
-  onFiltersOpenChange: (open: boolean) => void;
-  activeFilterCount: number;
-
-  startDate: string;
-  endDate: string;
-  onStartDateChange: (value: string) => void;
-  onEndDateChange: (value: string) => void;
-
   owners: string[];
-  selectedOwners: string[];
-  onOwnersChange: (owners: string[]) => void;
   workspace?: string;
   isPublic?: boolean;
-
-  countFilter?: DataTableFiltersCountProps;
-  extraCheckbox?: {
-    label: string;
-    checkboxLabel: string;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-  };
-
-  onApply: () => void;
-  onReset: () => void;
+  ranges?: DataTableRangeFilter[];
+  toggles?: DataTableToggleFilter[];
+  values: DataTableFilterValues;
+  onApply: (values: DataTableFilterValues) => void;
 };
 
 // `DialogPreview` component props

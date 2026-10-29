@@ -16,15 +16,11 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { AttributeModel, IGenericItem } from "@types";
+import { AttributeModel, DataTableFilterValues, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
-import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
+import { countActiveFilters, createEmptyFilterValues, filterTableData } from "@lib/util";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -52,27 +48,17 @@ const Attributes = () => {
 
   // Page state
   const [attributes, setAttributes] = useState([] as AttributeModel[]);
-  const [filteredAttributes, setFilteredAttributes] = useState([] as AttributeModel[]);
 
-  // Filter state (temporary values before applying)
-  const [filterState, setFilterState] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    valueCountRanges: [] as string[],
+  // Applied filters
+  const [appliedFilters, setAppliedFilters] = useState<DataTableFilterValues>(createEmptyFilterValues);
+  const filteredAttributes = filterTableData(attributes, appliedFilters, {
+    created: (attribute) => attribute.timestamp,
+    owner: (attribute) => attribute.owner,
+    counts: {
+      values: (attribute) => attribute.values.length,
+      usage: (attribute) => attribute.usageCount ?? 0,
+    },
   });
-
-  // Applied filters state
-  const [appliedFilters, setAppliedFilters] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    valueCountRanges: [] as string[],
-  });
-
-  // Collapsible state for filters
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // GraphQL operations
   const GET_ATTRIBUTES = gql`
@@ -84,6 +70,7 @@ const Attributes = () => {
         archived
         timestamp
         description
+        usageCount
         values {
           _id
           name
@@ -97,7 +84,7 @@ const Attributes = () => {
       }
     }
   `;
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data, previousData } = useQuery<{
     attributes: AttributeModel[];
     workspace: IGenericItem;
   }>(GET_ATTRIBUTES, {
@@ -112,7 +99,6 @@ const Attributes = () => {
     if (data?.attributes) {
       // Unpack all the Attribute data
       setAttributes(data.attributes);
-      setFilteredAttributes(data.attributes);
     }
 
     if (data?.workspace) {
@@ -120,48 +106,6 @@ const Attributes = () => {
       setWorkspaceName(data.workspace.name);
     }
   }, [loading]);
-
-  // Apply filters to Attribute data
-  useEffect(() => {
-    let filtered = [...attributes];
-    let activeFilterCount = 0;
-
-    // Filter by date range
-    if (appliedFilters.startDate) {
-      const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((attribute) => dayjs(attribute.timestamp).isSameOrAfter(startDate));
-      activeFilterCount++;
-    }
-    if (appliedFilters.endDate) {
-      const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((attribute) => dayjs(attribute.timestamp).isSameOrBefore(endDate));
-      activeFilterCount++;
-    }
-
-    // Filter by owners
-    if (appliedFilters.owners.length > 0) {
-      filtered = filtered.filter((attribute) => appliedFilters.owners.includes(attribute.owner));
-      activeFilterCount += appliedFilters.owners.length;
-    }
-
-    // Filter by value count ranges
-    if (appliedFilters.valueCountRanges.length > 0) {
-      filtered = filtered.filter((attribute) => {
-        const valueCount = attribute.values.length;
-        return appliedFilters.valueCountRanges.some((range) => {
-          if (range === "0") return valueCount === 0;
-          if (range === "1-5") return valueCount >= 1 && valueCount <= 5;
-          if (range === "6-10") return valueCount >= 6 && valueCount <= 10;
-          if (range === "11+") return valueCount >= 11;
-          return false;
-        });
-      });
-      activeFilterCount += appliedFilters.valueCountRanges.length;
-    }
-
-    setActiveFilterCount(activeFilterCount);
-    setFilteredAttributes(filtered);
-  }, [attributes, appliedFilters]);
 
   useEffect(() => {
     if (error) {
@@ -266,7 +210,7 @@ const Attributes = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading || !_.isUndefined(previousData)}>
       <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
@@ -305,34 +249,13 @@ const Attributes = () => {
           {/* Filter Section */}
           <DataTableFilters
             entityLabel={"Attribute"}
-            filtersOpen={filtersOpen}
-            onFiltersOpenChange={setFiltersOpen}
-            activeFilterCount={activeFilterCount}
-            startDate={filterState.startDate}
-            endDate={filterState.endDate}
-            onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
-            onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
             owners={attributes.map((attribute) => attribute.owner)}
-            selectedOwners={filterState.owners}
-            onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
-            countFilter={{
-              mode: "buckets",
-              label: "Value Count",
-              unitLabel: "values",
-              selected: filterState.valueCountRanges,
-              onChange: (valueCountRanges) => setFilterState({ ...filterState, valueCountRanges }),
-            }}
-            onApply={() => setAppliedFilters({ ...filterState })}
-            onReset={() => {
-              const clearedState = {
-                startDate: "",
-                endDate: "",
-                owners: [],
-                valueCountRanges: [],
-              };
-              setFilterState(clearedState);
-              setAppliedFilters(clearedState);
-            }}
+            ranges={[
+              { key: "values", label: "Value Count" },
+              { key: "usage", label: "Usage Count" },
+            ]}
+            values={appliedFilters}
+            onApply={setAppliedFilters}
           />
 
           {filteredAttributes.filter((attribute) => _.isEqual(attribute.archived, false)).length > 0 ? (
@@ -352,7 +275,9 @@ const Attributes = () => {
                   <Icon name={"attribute"} size={"lg"} color={STYLES.attribute.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0 ? "No Attributes match the selected filters" : "No Attributes"}
+                  {countActiveFilters(appliedFilters) > 0
+                    ? "No Attributes match the selected filters"
+                    : "No Attributes"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>

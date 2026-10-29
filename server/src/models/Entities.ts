@@ -1,6 +1,8 @@
 // Custom types
 import {
   AttributeModel,
+  CountRange,
+  EntityFilter,
   EntityHistory,
   EntityModel,
   ExportFormat,
@@ -65,33 +67,17 @@ export class Entities {
   };
 
   /**
-   * Get multiple Entities from identifiers with pagination, filtering, and sorting
+   * Build the MongoDB query filter shared by paginated retrieval and counting
    * @param entities Collection of Entity identifiers
-   * @param skip Number of entities to skip
-   * @param limit Maximum number of entities to return
    * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
-   * @param reverse Reverse the sort order (deprecated, use sort instead)
    * @param filter Additional filters
-   * @param sort Sort configuration
-   * @return {Promise<EntityModel[]>}
+   * @return {Record<string, unknown>}
    */
-  static getManyPaginated = async (
+  private static buildQueryFilter = (
     entities: string[],
-    skip: number = 0,
-    limit: number = 0,
     archived?: boolean,
-    reverse: boolean = false,
-    filter?: {
-      startDate?: string;
-      endDate?: string;
-      owners?: string[];
-      hasAttachments?: boolean;
-      hasAttributes?: boolean;
-      hasLinks?: boolean;
-      attributeCountRanges?: string[];
-    },
-    sort?: { field: string; direction: string },
-  ): Promise<EntityModel[]> => {
+    filter?: EntityFilter,
+  ): Record<string, unknown> => {
     const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
 
     // Add archived filter if specified
@@ -110,9 +96,7 @@ export class Entities {
         endDate.setHours(23, 59, 59, 999);
         dateFilter.$lte = endDate.toISOString();
       }
-      if (Object.keys(dateFilter).length > 0) {
-        queryFilter.created = dateFilter;
-      }
+      queryFilter.created = dateFilter;
     }
 
     // Add owner filter
@@ -135,6 +119,57 @@ export class Entities {
       queryFilter["links.0"] = { $exists: true };
     }
 
+    // Add Attribute and Project count range filters
+    const sizeConditions = [
+      ...Entities.arraySizeRangeConditions("attributes", filter?.attributeCount),
+      ...Entities.arraySizeRangeConditions("projects", filter?.projectCount),
+    ];
+    if (sizeConditions.length > 0) {
+      queryFilter.$expr = { $and: sizeConditions };
+    }
+
+    return queryFilter;
+  };
+
+  /**
+   * Build MongoDB expression conditions matching documents whose array field length is within a range
+   * @param field Name of the array field
+   * @param range Inclusive range of lengths
+   * @return {Record<string, unknown>[]} Conditions to combine with `$and`, empty if no bounds are given
+   */
+  private static arraySizeRangeConditions = (field: string, range?: CountRange): Record<string, unknown>[] => {
+    const size = { $size: { $ifNull: [`$${field}`, []] } };
+    const conditions = [];
+    if (range?.min !== undefined && range.min !== null) {
+      conditions.push({ $gte: [size, range.min] });
+    }
+    if (range?.max !== undefined && range.max !== null) {
+      conditions.push({ $lte: [size, range.max] });
+    }
+    return conditions;
+  };
+
+  /**
+   * Get multiple Entities from identifiers with pagination, filtering, and sorting
+   * @param entities Collection of Entity identifiers
+   * @param skip Number of entities to skip
+   * @param limit Maximum number of entities to return
+   * @param archived Filter by archived status (undefined = all, true = archived only, false = non-archived only)
+   * @param reverse Reverse the sort order (deprecated, use sort instead)
+   * @param filter Additional filters
+   * @param sort Sort configuration
+   * @return {Promise<EntityModel[]>}
+   */
+  static getManyPaginated = async (
+    entities: string[],
+    skip: number = 0,
+    limit: number = 0,
+    archived?: boolean,
+    reverse: boolean = false,
+    filter?: EntityFilter,
+    sort?: { field: string; direction: string },
+  ): Promise<EntityModel[]> => {
+    const queryFilter = Entities.buildQueryFilter(entities, archived, filter);
     let query = getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(queryFilter);
 
     // Determine sort field and direction
@@ -166,48 +201,14 @@ export class Entities {
     // For array fields (attributes, attachments), we need to sort by length
     // This is handled after fetching by sorting the results
 
-    // If attribute count filtering is active, we need to fetch more results
-    // to ensure we can fill a full page after filtering
-    const needsAttributeFilter = filter?.attributeCountRanges && filter.attributeCountRanges.length > 0;
-
-    if (needsAttributeFilter) {
-      // When filtering by attribute count, fetch a large batch, filter, then paginate
-      // Fetch enough to likely fill multiple pages after filtering
-      const fetchLimit = limit > 0 ? limit * 50 : 10000; // Fetch 50x page size or up to 10k
-      query = query.limit(fetchLimit);
-    } else {
-      // Normal pagination
-      if (skip > 0) {
-        query = query.skip(skip);
-      }
-      if (limit > 0) {
-        query = query.limit(limit);
-      }
+    if (skip > 0) {
+      query = query.skip(skip);
+    }
+    if (limit > 0) {
+      query = query.limit(limit);
     }
 
-    let results = await query.toArray();
-
-    // Apply attribute count range filter (client-side as it requires counting)
-    if (needsAttributeFilter) {
-      results = results.filter((entity) => {
-        const attributeCount = entity.attributes.length;
-        return filter.attributeCountRanges!.some((range) => {
-          if (range === "0") return attributeCount === 0;
-          if (range === "1-5") return attributeCount >= 1 && attributeCount <= 5;
-          if (range === "6-10") return attributeCount >= 6 && attributeCount <= 10;
-          if (range === "11+") return attributeCount >= 11;
-          return false;
-        });
-      });
-
-      // After filtering, apply pagination
-      if (skip > 0) {
-        results = results.slice(skip);
-      }
-      if (limit > 0) {
-        results = results.slice(0, limit);
-      }
-    }
+    const results = await query.toArray();
 
     // Handle sorting for array fields (attributes, attachments) by length
     if (sort && (sort.field === "attributes" || sort.field === "attachments")) {
@@ -229,80 +230,9 @@ export class Entities {
    * @param filter Additional filters
    * @return {Promise<number>}
    */
-  static countMany = async (
-    entities: string[],
-    archived?: boolean,
-    filter?: {
-      startDate?: string;
-      endDate?: string;
-      owners?: string[];
-      hasAttachments?: boolean;
-      hasAttributes?: boolean;
-      hasLinks?: boolean;
-      attributeCountRanges?: string[];
-    },
-  ): Promise<number> => {
-    const queryFilter: Record<string, unknown> = { _id: { $in: entities } };
-
-    // Add archived filter if specified
-    if (archived !== undefined) {
-      queryFilter.archived = archived === true;
-    }
-
-    // Add date range filters
-    if (filter?.startDate || filter?.endDate) {
-      const dateFilter: Record<string, unknown> = {};
-      if (filter.startDate) {
-        dateFilter.$gte = new Date(filter.startDate).toISOString();
-      }
-      if (filter.endDate) {
-        const endDate = new Date(filter.endDate);
-        endDate.setHours(23, 59, 59, 999);
-        dateFilter.$lte = endDate.toISOString();
-      }
-      if (Object.keys(dateFilter).length > 0) {
-        queryFilter.created = dateFilter;
-      }
-    }
-
-    // Add owner filter
-    if (filter?.owners && filter.owners.length > 0) {
-      queryFilter.owner = { $in: filter.owners };
-    }
-
-    // Add has attachments filter
-    if (filter?.hasAttachments === true) {
-      queryFilter["attachments.0"] = { $exists: true };
-    }
-
-    // Add has attributes filter
-    if (filter?.hasAttributes === true) {
-      queryFilter["attributes.0"] = { $exists: true };
-    }
-
-    // Add has links filter
-    if (filter?.hasLinks === true) {
-      queryFilter["links.0"] = { $exists: true };
-    }
-
-    let count = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).countDocuments(queryFilter);
-
-    // Apply attribute count range filter (client-side as it requires counting)
-    if (filter?.attributeCountRanges && filter.attributeCountRanges.length > 0) {
-      const allEntities = await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).find(queryFilter).toArray();
-      count = allEntities.filter((entity) => {
-        const attributeCount = entity.attributes.length;
-        return filter.attributeCountRanges!.some((range) => {
-          if (range === "0") return attributeCount === 0;
-          if (range === "1-5") return attributeCount >= 1 && attributeCount <= 5;
-          if (range === "6-10") return attributeCount >= 6 && attributeCount <= 10;
-          if (range === "11+") return attributeCount >= 11;
-          return false;
-        });
-      }).length;
-    }
-
-    return count;
+  static countMany = async (entities: string[], archived?: boolean, filter?: EntityFilter): Promise<number> => {
+    const queryFilter = Entities.buildQueryFilter(entities, archived, filter);
+    return await getDatabase().collection<EntityModel>(ENTITIES_COLLECTION).countDocuments(queryFilter);
   };
 
   static exists = async (_id: string): Promise<boolean> => {

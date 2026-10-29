@@ -4,7 +4,7 @@ import { GraphQLError } from "graphql";
 import _ from "lodash";
 
 // Models
-import { EntityModel, ProjectModel } from "@types";
+import { EntityFilter, EntityModel, ProjectModel } from "@types";
 import { Workspaces } from "@models/Workspaces";
 import { Entities } from "@models/Entities";
 import { Projects } from "@models/Projects";
@@ -54,17 +54,7 @@ export class Search {
     query: string,
     resultType: string,
     showArchived: boolean,
-    filters:
-      | {
-          startDate?: string;
-          endDate?: string;
-          owners?: string[];
-          hasAttachments?: boolean;
-          hasAttributes?: boolean;
-          hasLinks?: boolean;
-          attributeCountRanges?: string[];
-        }
-      | undefined,
+    filters: EntityFilter | undefined,
     workspace: string,
   ): Promise<EntityModel[] | ProjectModel[]> => {
     // Sanitize database query

@@ -293,6 +293,7 @@ export const typedefs = `#graphql
     archived: Boolean
     description: String
     values: [Value]
+    usageCount: Int
     history: [AttributeHistory]
   }
 
@@ -632,6 +633,12 @@ export const typedefs = `#graphql
     total: Int
   }
 
+  # "CountRangeInput" input for an inclusive numeric range
+  input CountRangeInput {
+    min: Int
+    max: Int
+  }
+
   # "EntityFilterInput" input for filtering entities
   input EntityFilterInput {
     startDate: String
@@ -640,7 +647,8 @@ export const typedefs = `#graphql
     hasAttachments: Boolean
     hasAttributes: Boolean
     hasLinks: Boolean
-    attributeCountRanges: [String]
+    attributeCount: CountRangeInput
+    projectCount: CountRangeInput
   }
 
   # "EntitySortInput" input for sorting entities

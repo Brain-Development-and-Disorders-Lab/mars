@@ -5,6 +5,10 @@ import _ from "lodash";
 import {
   AttributeModel,
   Collaborator,
+  CountRange,
+  DataTableFilterAccessors,
+  DataTableFilterRange,
+  DataTableFilterValues,
   FileName,
   FormattedValueDisplay,
   IAttribute,
@@ -716,4 +720,90 @@ export const buildMongoQuery = (query: SearchQuery): Record<string, unknown> => 
   }
 
   return query.combinator === "and" ? { $and: conditions } : { $or: conditions };
+};
+
+/**
+ * Add or remove a value from an array, used for checkbox lists
+ * @param {T[]} values Current values
+ * @param {T} value Value to add or remove
+ * @param {boolean} include Whether the value should be present
+ * @returns {T[]} Updated values
+ */
+export const toggleArrayValue = <T>(values: T[], value: T, include: boolean): T[] => {
+  return include ? [...values, value] : values.filter((v) => v !== value);
+};
+
+/**
+ * Create empty `DataTableFilters` values
+ * @returns {DataTableFilterValues}
+ */
+export const createEmptyFilterValues = (): DataTableFilterValues => ({
+  startDate: "",
+  endDate: "",
+  owners: [],
+  ranges: {},
+  toggles: {},
+});
+
+/**
+ * Count the filters currently set, with each selected Owner counted individually
+ * @param {DataTableFilterValues} values Filter values
+ * @returns {number}
+ */
+export const countActiveFilters = (values: DataTableFilterValues): number => {
+  let count = values.owners.length;
+  if (values.startDate) count++;
+  if (values.endDate) count++;
+  count += Object.values(values.ranges).filter((range) => range.min !== "" || range.max !== "").length;
+  count += Object.values(values.toggles).filter(Boolean).length;
+  return count;
+};
+
+/**
+ * Check if a value is within an inclusive range, empty bounds are unbounded
+ * @param {number} value Value to check
+ * @param {DataTableFilterRange} range Range to check against
+ * @returns {boolean}
+ */
+export const isInRange = (value: number, range?: DataTableFilterRange): boolean => {
+  if (range?.min && value < parseInt(range.min)) return false;
+  if (range?.max && value > parseInt(range.max)) return false;
+  return true;
+};
+
+/**
+ * Convert a range of input values to a `CountRange` for GraphQL queries
+ * @param {DataTableFilterRange} range Range of input values
+ * @returns {CountRange | undefined} `undefined` if neither bound is set
+ */
+export const toCountRange = (range?: DataTableFilterRange): CountRange | undefined => {
+  if (!range || (range.min === "" && range.max === "")) return undefined;
+  return {
+    min: range.min !== "" ? parseInt(range.min) : undefined,
+    max: range.max !== "" ? parseInt(range.max) : undefined,
+  };
+};
+
+/**
+ * Apply `DataTableFilters` values to rows on the client
+ * @param {T[]} rows Rows to filter
+ * @param {DataTableFilterValues} values Filter values
+ * @param {DataTableFilterAccessors<T>} accessors Accessors for the filtered fields of each row
+ * @returns {T[]} Rows matching all filters
+ */
+export const filterTableData = <T>(
+  rows: T[],
+  values: DataTableFilterValues,
+  accessors: DataTableFilterAccessors<T>,
+): T[] => {
+  const startDate = values.startDate ? dayjs(values.startDate).startOf("day") : undefined;
+  const endDate = values.endDate ? dayjs(values.endDate).endOf("day") : undefined;
+
+  return rows.filter((row) => {
+    const created = dayjs(accessors.created(row));
+    if (startDate && created.isBefore(startDate)) return false;
+    if (endDate && created.isAfter(endDate)) return false;
+    if (values.owners.length > 0 && !values.owners.includes(accessors.owner(row))) return false;
+    return Object.entries(accessors.counts).every(([key, count]) => isInRange(count(row), values.ranges[key]));
+  });
 };

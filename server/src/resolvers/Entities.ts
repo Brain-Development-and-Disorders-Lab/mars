@@ -1,5 +1,6 @@
 import {
   Context,
+  EntityFilter,
   EntityMetrics,
   EntityModel,
   ExportFormat,
@@ -53,15 +54,7 @@ export const EntitiesResolvers = {
         reverse: boolean | undefined;
         page: number | undefined;
         pageSize: number | undefined;
-        filter:
-          | {
-              startDate?: string;
-              endDate?: string;
-              owners?: string[];
-              hasAttachments?: boolean;
-              attributeCountRanges?: string[];
-            }
-          | undefined;
+        filter: EntityFilter | undefined;
         sort: { field: string; direction: string } | undefined;
       },
       context: Context,

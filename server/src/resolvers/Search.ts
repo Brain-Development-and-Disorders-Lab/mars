@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 
 // Custom types
-import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
+import { Context, EntityFilter, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
 import { Search } from "@models/Search";
@@ -22,15 +22,7 @@ export const SearchResolvers = {
         resultType: string;
         isBuilder: boolean;
         showArchived: boolean;
-        filters?: {
-          startDate?: string;
-          endDate?: string;
-          owners?: string[];
-          hasAttachments?: boolean;
-          hasAttributes?: boolean;
-          hasLinks?: boolean;
-          attributeCountRanges?: string[];
-        };
+        filters?: EntityFilter;
       },
       context: Context,
     ): Promise<EntityModel[] | ProjectModel[]> => {

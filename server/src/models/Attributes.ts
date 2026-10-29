@@ -137,6 +137,33 @@ export class Attributes {
   };
 
   /**
+   * Check if an Entity's Attribute was created from a base Attribute
+   * @param instanceId Identifier of the Attribute on the Entity
+   * @param _id Identifier of the base Attribute
+   * @return {boolean}
+   */
+  static isInstanceOf = (instanceId: string, _id: string): boolean => {
+    return _.startsWith(instanceId, _id);
+  };
+
+  /**
+   * Count the Entities in a Workspace using each of the given Attributes
+   * @param workspace Workspace identifier
+   * @param attributes Collection of Attribute identifiers
+   * @return {Promise<Record<string, number>>} Usage count keyed by Attribute identifier
+   */
+  static usageCounts = async (workspace: string, attributes: string[]): Promise<Record<string, number>> => {
+    const entities = await Workspaces.getEntities(workspace);
+    const counts: Record<string, number> = {};
+    for (const _id of attributes) {
+      counts[_id] = entities.filter((entity) =>
+        entity.attributes.some((attribute) => Attributes.isInstanceOf(attribute._id, _id)),
+      ).length;
+    }
+    return counts;
+  };
+
+  /**
    * Get the collection of Entities currently utilizing the Attribute and whether it has
    * been modified or not
    * @param _id Attribute identifier
@@ -149,17 +176,10 @@ export class Attributes {
     // Retrieve collection of Entities to examine
     const entities = await Workspaces.getEntities(workspace);
 
-    // Iterate through all Workspace Entities, extracting Attribute IDs and checking if they match known Attributes
-    const activeEntities: EntityModel[] = [];
-    for (const entity of entities) {
-      const attributeIds = entity.attributes.map((attribute) => attribute._id);
-      for (const id of attributeIds) {
-        if (_.startsWith(id, _id) || _.isEqual(id, _id)) {
-          activeEntities.push(entity);
-          break;
-        }
-      }
-    }
+    // Find all Workspace Entities with an instance of the Attribute
+    const activeEntities: EntityModel[] = entities.filter((entity) =>
+      entity.attributes.some((attribute) => Attributes.isInstanceOf(attribute._id, _id)),
+    );
 
     // Run comparison check across all Entities using the attribute
     const usage: AttributeUsage[] = [];
@@ -167,9 +187,9 @@ export class Attributes {
       const modifications: AttributeUsage["modifications"] = [];
 
       // Get the instance of the Attribute from the Entity
-      const downstreamAttribute = entity.attributes.filter((attribute) => {
-        return _.startsWith(attribute._id, _id) || _.isEqual(attribute._id, _id);
-      })[0];
+      const downstreamAttribute = entity.attributes.filter((attribute) =>
+        Attributes.isInstanceOf(attribute._id, _id),
+      )[0];
 
       // Run comparisons: name, description, values
       if (downstreamAttribute.name !== attribute?.name) {
