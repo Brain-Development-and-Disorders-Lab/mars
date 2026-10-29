@@ -14,15 +14,11 @@ import Tooltip from "@components/Tooltip";
 import { createColumnHelper } from "@tanstack/react-table";
 
 // Existing and custom types
-import { IGenericItem, ProjectModel } from "@types";
+import { DataTableFilterValues, IGenericItem, ProjectModel } from "@types";
 
 // Utility functions and types
 import _ from "lodash";
-import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
+import { countActiveFilters, createEmptyFilterValues, filterTableData } from "@lib/util";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -89,7 +85,7 @@ const Projects = () => {
   }, [breakpoint]);
 
   // Execute GraphQL query both on page load and navigation
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data, previousData } = useQuery<{
     projects: ProjectModel[];
     workspace: IGenericItem;
   }>(GET_PROJECTS, {
@@ -100,79 +96,24 @@ const Projects = () => {
   });
 
   const [projects, setProjects] = useState<ProjectModel[]>([]);
-  const [filteredProjects, setFilteredProjects] = useState<ProjectModel[]>([]);
 
-  // Filter state (temporary values before applying)
-  const [filterState, setFilterState] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    entityCountMin: "",
-    entityCountMax: "",
+  // Applied filters
+  const [appliedFilters, setAppliedFilters] = useState<DataTableFilterValues>(createEmptyFilterValues);
+  const filteredProjects = filterTableData(projects, appliedFilters, {
+    created: (project) => project.created,
+    owner: (project) => project.owner,
+    counts: { entities: (project) => project.entities.length },
   });
-
-  // Applied filters state
-  const [appliedFilters, setAppliedFilters] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    entityCountMin: "",
-    entityCountMax: "",
-  });
-
-  // Collapsible state for filters
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   // Manage data once retrieved
   useEffect(() => {
     if (data?.projects) {
       setProjects(data.projects);
-      setFilteredProjects(data.projects);
     }
     if (data?.workspace) {
       setWorkspaceName(data.workspace.name);
     }
   }, [data]);
-
-  // Apply filters to project data
-  useEffect(() => {
-    let filtered = [...projects];
-    let activeFilterCount = 0;
-
-    // Filter by date range
-    if (appliedFilters.startDate) {
-      const startDate = dayjs(appliedFilters.startDate).startOf("day");
-      filtered = filtered.filter((project) => dayjs(project.created).isSameOrAfter(startDate));
-      activeFilterCount++;
-    }
-    if (appliedFilters.endDate) {
-      const endDate = dayjs(appliedFilters.endDate).endOf("day");
-      filtered = filtered.filter((project) => dayjs(project.created).isSameOrBefore(endDate));
-      activeFilterCount++;
-    }
-
-    // Filter by owners
-    if (appliedFilters.owners.length > 0) {
-      filtered = filtered.filter((project) => appliedFilters.owners.includes(project.owner));
-      activeFilterCount += appliedFilters.owners.length;
-    }
-
-    // Filter by entity count range (min/max)
-    if (appliedFilters.entityCountMin || appliedFilters.entityCountMax) {
-      filtered = filtered.filter((project) => {
-        const entityCount = project.entities.length;
-        const min = appliedFilters.entityCountMin ? parseInt(appliedFilters.entityCountMin) : 0;
-        const max = appliedFilters.entityCountMax ? parseInt(appliedFilters.entityCountMax) : Infinity;
-        return entityCount >= min && entityCount <= max;
-      });
-      if (appliedFilters.entityCountMin) activeFilterCount++;
-      if (appliedFilters.entityCountMax) activeFilterCount++;
-    }
-
-    setActiveFilterCount(activeFilterCount);
-    setFilteredProjects(filtered);
-  }, [projects, appliedFilters]);
 
   // Display error messages from GraphQL usage
   useEffect(() => {
@@ -259,7 +200,7 @@ const Projects = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading || !_.isUndefined(previousData)}>
       <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} justify={"center"}>
         <Flex w={"100%"} direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} ml={"0.5"}>
@@ -299,36 +240,10 @@ const Projects = () => {
           {/* Filter Section */}
           <DataTableFilters
             entityLabel={"Project"}
-            filtersOpen={filtersOpen}
-            onFiltersOpenChange={setFiltersOpen}
-            activeFilterCount={activeFilterCount}
-            startDate={filterState.startDate}
-            endDate={filterState.endDate}
-            onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
-            onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
             owners={projects.map((p) => p.owner)}
-            selectedOwners={filterState.owners}
-            onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
-            countFilter={{
-              mode: "range",
-              label: "Entity Count",
-              min: filterState.entityCountMin,
-              max: filterState.entityCountMax,
-              onMinChange: (value) => setFilterState({ ...filterState, entityCountMin: value }),
-              onMaxChange: (value) => setFilterState({ ...filterState, entityCountMax: value }),
-            }}
-            onApply={() => setAppliedFilters({ ...filterState })}
-            onReset={() => {
-              const clearedState = {
-                startDate: "",
-                endDate: "",
-                owners: [],
-                entityCountMin: "",
-                entityCountMax: "",
-              };
-              setFilterState(clearedState);
-              setAppliedFilters(clearedState);
-            }}
+            ranges={[{ key: "entities", label: "Entity Count" }]}
+            values={appliedFilters}
+            onApply={setAppliedFilters}
           />
 
           {filteredProjects.length > 0 ? (
@@ -348,7 +263,7 @@ const Projects = () => {
                   <Icon name={"project"} size={"lg"} color={STYLES.project.color.default} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0 ? "No projects match the selected filters" : "No Projects"}
+                  {countActiveFilters(appliedFilters) > 0 ? "No projects match the selected filters" : "No Projects"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>

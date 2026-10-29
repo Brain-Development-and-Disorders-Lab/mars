@@ -44,7 +44,7 @@ import {
   ColumnInfo,
   ColumnMappingSuggestion,
   IGenericItem,
-  EntityImportReview,
+  ImportReview,
   IColumnMapping,
   EntityModel,
   IResponseMessage,
@@ -90,7 +90,7 @@ export const useEntityImport = ({ open, fileUpload, fileType, setContinueDisable
   const [identifierFormat, setIdentifierFormat] = useState<string[]>([]);
 
   // Review state
-  const [reviewEntities, setReviewEntities] = useState([] as EntityImportReview[]);
+  const [reviewEntities, setReviewEntities] = useState([] as ImportReview[]);
 
   // Authentication and user
   const { data: session, error: sessionErrorState } = auth.useSession();
@@ -110,7 +110,7 @@ export const useEntityImport = ({ open, fileUpload, fileType, setContinueDisable
     attributes: AttributeModel[];
   }>(GET_MAPPING_DATA);
   const [reviewEntitySpreadsheet, { error: reviewEntitySpreadsheetError }] = useMutation<{
-    reviewEntitySpreadsheet: ResponseData<EntityImportReview[]>;
+    reviewEntitySpreadsheet: ResponseData<ImportReview[]>;
   }>(REVIEW_ENTITY_SPREADSHEET);
   const [getCounterValues, { error: counterValuesError }] = useLazyQuery<{
     nextCounterValues: ResponseData<string[]>;
@@ -122,7 +122,7 @@ export const useEntityImport = ({ open, fileUpload, fileType, setContinueDisable
     importEntitySpreadsheet: IResponseMessage;
   }>(IMPORT_ENTITY_SPREADSHEET);
   const [reviewEntityJSON, { error: reviewEntityJSONError }] = useMutation<{
-    reviewEntityJSON: ResponseData<EntityImportReview[]>;
+    reviewEntityJSON: ResponseData<ImportReview[]>;
   }>(REVIEW_ENTITY_JSON);
   const [importEntityJSON, { error: importEntityJSONError }] = useMutation<{
     importEntityJSON: IResponseMessage;
@@ -392,7 +392,7 @@ export const useEntityImport = ({ open, fileUpload, fileType, setContinueDisable
 
       const counterValues = counterResponse.data?.nextCounterValues?.data;
       if (counterValues && counterValues.length > 0) {
-        const counterValuesSpliced = reviewData.map((entity: EntityImportReview, index: number) => ({
+        const counterValuesSpliced = reviewData.map((entity: ImportReview, index: number) => ({
           ...entity,
           name: counterValues[index],
         }));

@@ -69,7 +69,7 @@ const DialogCreateIdentifierFormat = (props: DialogCreateIdentifierFormatProps) 
 
   // GraphQL operations
   const CREATE_IDENTIFIER_FORMAT = gql`
-    mutation CreateIdentifierFormat($format: IdentifierFormatInput) {
+    mutation CreateIdentifierFormat($format: IdentifierFormatCreateInput) {
       createIdentifierFormat(format: $format) {
         success
         message

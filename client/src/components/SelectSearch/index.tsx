@@ -24,14 +24,29 @@ import { STYLES } from "@variables";
 // College Scorecard API URL
 const SCORECARD_URL = "https://api.data.gov/ed/collegescorecard/v1/schools";
 
-// Placeholder text and icon per result type
+// Placeholder text, plural label, and icon per result type
 const RESULT_TYPE_STYLE: Record<
   SelectSearchProps["resultType"],
-  { placeholder: string; iconName: IconNames; iconColor: string }
+  { placeholder: string; plural: string; iconName: IconNames; iconColor: string }
 > = {
-  entity: { placeholder: "Search Entities...", iconName: "entity", iconColor: STYLES.entity.color.icon },
-  institution: { placeholder: "Search Institutions...", iconName: "institution", iconColor: "gray.600" },
-  project: { placeholder: "Search Projects...", iconName: "project", iconColor: STYLES.project.color.icon },
+  entity: {
+    placeholder: "Search Entities...",
+    plural: "Entities",
+    iconName: "entity",
+    iconColor: STYLES.entity.color.icon,
+  },
+  institution: {
+    placeholder: "Search Institutions...",
+    plural: "Institutions",
+    iconName: "institution",
+    iconColor: "gray.600",
+  },
+  project: {
+    placeholder: "Search Projects...",
+    plural: "Projects",
+    iconName: "project",
+    iconColor: STYLES.project.color.icon,
+  },
 };
 
 const GET_ENTITIES = gql`
@@ -101,7 +116,7 @@ const SelectSearch = (props: SelectSearchProps) => {
   const isLoading =
     entitiesLoading || projectsLoading || searchLoading || institutionLoading || (isTyping && !hasSearched);
 
-  const { placeholder, iconName, iconColor } = RESULT_TYPE_STYLE[props.resultType];
+  const { placeholder, plural, iconName, iconColor } = RESULT_TYPE_STYLE[props.resultType];
 
   useEffect(() => {
     setInputValue(props.value?.name || "");
@@ -453,8 +468,8 @@ const SelectSearch = (props: SelectSearchProps) => {
               {!isLoading && hasSearched && prependDefault(results).length > 0 && renderItems(prependDefault(results))}
               {!isLoading && hasSearched && results.length === 0 && !defaultItem && (
                 <Flex w="100%" minH="100px" align="center" justify="center">
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    No Results
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.neutral.textSecondary}>
+                    No {plural} found
                   </Text>
                 </Flex>
               )}
@@ -463,6 +478,13 @@ const SelectSearch = (props: SelectSearchProps) => {
                 !isTyping &&
                 prependDefault(options).length > 0 &&
                 renderItems(prependDefault(options))}
+              {!isLoading && !hasSearched && !isTyping && prependDefault(options).length === 0 && (
+                <Flex w="100%" minH="100px" align="center" justify="center">
+                  <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.neutral.textSecondary}>
+                    No {plural} available
+                  </Text>
+                </Flex>
+              )}
             </Box>
           </Box>
         </React.Fragment>

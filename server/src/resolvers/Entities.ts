@@ -1,6 +1,7 @@
 import {
   Context,
-  EntityMetrics,
+  EntityFilter,
+  ContentMetrics,
   EntityModel,
   ExportFormat,
   IEntity,
@@ -53,15 +54,7 @@ export const EntitiesResolvers = {
         reverse: boolean | undefined;
         page: number | undefined;
         pageSize: number | undefined;
-        filter:
-          | {
-              startDate?: string;
-              endDate?: string;
-              owners?: string[];
-              hasAttachments?: boolean;
-              attributeCountRanges?: string[];
-            }
-          | undefined;
+        filter: EntityFilter | undefined;
         sort: { field: string; direction: string } | undefined;
       },
       context: Context,
@@ -236,7 +229,7 @@ export const EntitiesResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<EntityMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

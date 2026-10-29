@@ -6,7 +6,7 @@ import {
   IAttribute,
   IResolverParent,
   IResponseMessage,
-  AttributeMetrics,
+  ContentMetrics,
 } from "@types";
 
 // Models
@@ -26,7 +26,25 @@ import { PostHogClient } from "@lib/posthog";
 // Access control
 import { assertInWorkspace, assertWorkspaceAccess, assertWorkspacePermission, unauthorized } from "@lib/access";
 
+// Usage counts per Attribute, computed at most once per request
+const usageCountsByRequest = new WeakMap<Context, Promise<Record<string, number>>>();
+
 export const AttributesResolvers = {
+  Attribute: {
+    // Number of Entities in the Workspace using the Attribute
+    usageCount: async (parent: AttributeModel, _args: Record<string, unknown>, context: Context): Promise<number> => {
+      if (!usageCountsByRequest.has(context)) {
+        usageCountsByRequest.set(
+          context,
+          assertWorkspaceAccess(context, "read").then((workspace) =>
+            Attributes.usageCounts(workspace._id, workspace.attributes),
+          ),
+        );
+      }
+      const counts = await usageCountsByRequest.get(context)!;
+      return counts[parent._id] ?? 0;
+    },
+  },
   Query: {
     // Retrieve all Attribute
     attributes: async (_parent: IResolverParent, args: { limit: 100 }, context: Context) => {
@@ -79,7 +97,7 @@ export const AttributesResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<AttributeMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

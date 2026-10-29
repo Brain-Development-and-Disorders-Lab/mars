@@ -20,7 +20,7 @@ import { getRecentErrors } from "@lib/errors";
 import { usePostHog } from "posthog-js/react";
 
 // Custom types
-import { DialogReportProps } from "@types";
+import { DialogGenericProps } from "@types";
 
 // Variables
 import { STYLES } from "@variables";
@@ -48,7 +48,7 @@ const REPORT_ISSUE = gql`
   }
 `;
 
-const DialogReport = (props: DialogReportProps) => {
+const DialogReport = (props: DialogGenericProps) => {
   const { open, setOpen } = props;
   const posthog = usePostHog();
 

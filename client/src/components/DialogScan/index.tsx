@@ -7,7 +7,7 @@ import { toaster } from "@components/Toast";
 import { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeScannerState } from "html5-qrcode";
 
 // Custom types
-import { IGenericItem, DialogScanProps, ScannerProps } from "@types";
+import { IGenericItem, DialogGenericProps, ScannerProps } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -28,7 +28,7 @@ import { STYLES } from "@variables";
 // Constants
 const REGION_ID = "scanner-region";
 
-const DialogScan = (props: DialogScanProps) => {
+const DialogScan = (props: DialogGenericProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
 

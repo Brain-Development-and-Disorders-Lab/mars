@@ -51,7 +51,7 @@ type SignupPageMode = "loading" | "signup" | "complete";
 
 // GraphQL mutation to update an existing user record during profile completion
 const UPDATE_USER = gql`
-  mutation UpdateUser($user: UserInput) {
+  mutation UpdateUser($user: UserUpdateInput) {
     updateUser(user: $user) {
       success
       message

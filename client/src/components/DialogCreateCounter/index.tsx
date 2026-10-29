@@ -53,7 +53,7 @@ const DialogCreateCounter = (props: DialogCreateCounterProps) => {
 
   // GraphQL operations
   const CREATE_COUNTER = gql`
-    mutation CreateCounter($counter: CounterInput) {
+    mutation CreateCounter($counter: CounterCreateInput) {
       createCounter(counter: $counter) {
         success
         message

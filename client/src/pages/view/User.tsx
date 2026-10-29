@@ -159,7 +159,7 @@ const User = () => {
 
   // Mutation to update User
   const UPDATE_USER = gql`
-    mutation UpdateUser($user: UserInput) {
+    mutation UpdateUser($user: UserUpdateInput) {
       updateUser(user: $user) {
         success
         message

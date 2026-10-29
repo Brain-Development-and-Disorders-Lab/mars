@@ -2,21 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 // Existing and custom components
-import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  Tag,
-  EmptyState,
-  Button,
-  Checkbox,
-  Input,
-  Field,
-  Collapsible,
-  SkeletonText,
-  Separator,
-} from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, Tag, EmptyState, SkeletonText } from "@chakra-ui/react";
 import TagActor from "@components/TagActor";
 import { Content } from "@components/Container";
 import Icon from "@components/Icon";
@@ -25,10 +11,15 @@ import Linky from "@components/Linky";
 import ActivityGraph from "@components/ActivityGraph";
 import RelativeTime from "@components/RelativeTime";
 import Tooltip from "@components/Tooltip";
+import DataTableFilterPanel, {
+  FilterCheckbox,
+  FilterInput,
+  FilterSection,
+} from "@components/DataTable/DataTableFilterPanel";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { ActivityModel, IGenericItem } from "@types";
+import { ActivityFilterValues, ActivityModel, IGenericItem, ISelectOption } from "@types";
 
 // Context and hooks
 import { useBreakpoint } from "@hooks/useBreakpoint";
@@ -38,6 +29,7 @@ import { useWatchQuery } from "@hooks/useWatchQuery";
 // Utility functions and libraries
 import { gql } from "@apollo/client";
 import _ from "lodash";
+import { toggleArrayValue } from "@lib/util";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -46,6 +38,29 @@ dayjs.extend(isSameOrBefore);
 
 // Variables
 import { STYLES } from "@variables";
+
+// Filter options
+const OPERATION_TYPE_OPTIONS: ISelectOption[] = [
+  { value: "create", label: "Created" },
+  { value: "update", label: "Updated" },
+  { value: "archived", label: "Archived" },
+];
+const TARGET_TYPE_OPTIONS: ISelectOption[] = [
+  { value: "entities", label: "Entity" },
+  { value: "projects", label: "Project" },
+  { value: "attributes", label: "Attribute" },
+];
+const MEDIUM_OPTIONS: ISelectOption[] = [
+  { value: "api", label: "API" },
+  { value: "web", label: "Web" },
+];
+const EMPTY_FILTERS: ActivityFilterValues = {
+  startDate: "",
+  endDate: "",
+  activityTypes: [],
+  targetTypes: [],
+  mediums: [],
+};
 
 // Query to retrieve Activity
 const GET_ACTIVITY = gql`
@@ -85,29 +100,13 @@ const Activity = () => {
   // Column filters state for activity table
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  // Filter state (temporary values before applying)
-  const [filterState, setFilterState] = useState({
-    startDate: "",
-    endDate: "",
-    activityTypes: [] as string[],
-    targetTypes: [] as string[],
-    mediums: [] as string[],
-  });
-
-  // Applied filters state
-  const [appliedFilters, setAppliedFilters] = useState({
-    startDate: "",
-    endDate: "",
-    activityTypes: [] as string[],
-    targetTypes: [] as string[],
-    mediums: [] as string[],
-  });
+  // Filter state
+  const [filterState, setFilterState] = useState<ActivityFilterValues>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<ActivityFilterValues>(EMPTY_FILTERS);
 
   // Filtered activity data
   const [filteredActivityData, setFilteredActivityData] = useState([] as ActivityModel[]);
 
-  // Collapsible state for filters
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
   const { loading, error, data } = useWatchQuery<{
@@ -343,253 +342,80 @@ const Activity = () => {
           </Flex>
 
           {/* Filter Section */}
-          <Collapsible.Root open={filtersOpen} onOpenChange={(event) => setFiltersOpen(event.open)}>
-            <Flex
-              direction={"column"}
-              gap={"1"}
-              p={"2"}
-              rounded={"md"}
-              border={STYLES.border.style}
-              borderColor={STYLES.border.color}
-              bg={STYLES.surface.card}
-            >
-              <Flex direction={"row"} gap={"1"} align={"center"} justify={"space-between"}>
-                <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Icon name={"filter"} size={"sm"} />
-                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                    Activity Filters:
-                  </Text>
-                  <Text fontWeight={"semibold"} fontSize={"xs"} color={activeFilterCount >= 1 ? "green.700" : "black"}>
-                    {activeFilterCount} Active
-                  </Text>
-                </Flex>
-                <Collapsible.Trigger asChild>
-                  <Button size={"xs"} variant={"ghost"} colorPalette={"gray"}>
-                    {filtersOpen ? "Hide" : "Show"} Filters
-                    <Icon name={filtersOpen ? "c_up" : "c_down"} size={"xs"} />
-                  </Button>
-                </Collapsible.Trigger>
+          <DataTableFilterPanel
+            label={"Activity"}
+            activeFilterCount={activeFilterCount}
+            onApply={() => setAppliedFilters({ ...filterState })}
+            onReset={() => {
+              setFilterState(EMPTY_FILTERS);
+              setAppliedFilters(EMPTY_FILTERS);
+            }}
+          >
+            <FilterSection label={"Date Range"}>
+              <Flex direction={"row"} gap={"2"}>
+                <FilterInput
+                  label={"Start"}
+                  type={"date"}
+                  value={filterState.startDate}
+                  onChange={(value) => setFilterState({ ...filterState, startDate: value })}
+                />
+                <FilterInput
+                  label={"End"}
+                  type={"date"}
+                  value={filterState.endDate}
+                  onChange={(value) => setFilterState({ ...filterState, endDate: value })}
+                />
               </Flex>
+            </FilterSection>
 
-              <Collapsible.Content>
-                <Flex direction={"column"} gap={"2"}>
-                  <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
-                    {/* Date Range Filter */}
-                    <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Date Range
-                      </Text>
-                      <Flex direction={"row"} gap={"2"} align={"center"}>
-                        <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
-                            Start (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.startDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                startDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                        <Field.Root gap={"0"}>
-                          <Field.Label fontSize={"xs"} ml={"0.5"} color={STYLES.font.secondaryHeader.color}>
-                            End (optional)
-                          </Field.Label>
-                          <Input
-                            type={"date"}
-                            size={"xs"}
-                            bg={"white"}
-                            value={filterState.endDate}
-                            onChange={(e) =>
-                              setFilterState({
-                                ...filterState,
-                                endDate: e.target.value,
-                              })
-                            }
-                          />
-                        </Field.Root>
-                      </Flex>
-                    </Flex>
+            <FilterSection label={"Operation Type"}>
+              {OPERATION_TYPE_OPTIONS.map((option) => (
+                <FilterCheckbox
+                  key={option.value}
+                  label={option.label}
+                  checked={filterState.activityTypes.includes(option.value)}
+                  onChange={(checked) =>
+                    setFilterState({
+                      ...filterState,
+                      activityTypes: toggleArrayValue(filterState.activityTypes, option.value, checked),
+                    })
+                  }
+                />
+              ))}
+            </FilterSection>
 
-                    <Separator orientation={"vertical"} />
+            <FilterSection label={"Target Type"}>
+              {TARGET_TYPE_OPTIONS.map((option) => (
+                <FilterCheckbox
+                  key={option.value}
+                  label={option.label}
+                  checked={filterState.targetTypes.includes(option.value)}
+                  onChange={(checked) =>
+                    setFilterState({
+                      ...filterState,
+                      targetTypes: toggleArrayValue(filterState.targetTypes, option.value, checked),
+                    })
+                  }
+                />
+              ))}
+            </FilterSection>
 
-                    {/* Checkbox Filters Group */}
-                    <Flex direction={"column"} gap={"2"} minW={"200px"} flexShrink={0}>
-                      <Text fontSize={"xs"} fontWeight={"semibold"} ml={"0.5"}>
-                        Activity Details
-                      </Text>
-                      <Flex direction={"row"} gap={"4"} wrap={"nowrap"} flexShrink={0}>
-                        {/* Operation Type Filter */}
-                        <Flex direction={"column"} gap={"1"}>
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            ml={"0.5"}
-                            color={STYLES.font.secondaryHeader.color}
-                          >
-                            Operation Type
-                          </Text>
-                          <Flex direction={"column"} gap={"2"} ml={"1"}>
-                            {["create", "update", "archived"].map((type) => (
-                              <Checkbox.Root
-                                key={type}
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={filterState.activityTypes.includes(type)}
-                                onCheckedChange={(details) => {
-                                  const isChecked = details.checked as boolean;
-                                  if (isChecked) {
-                                    setFilterState({
-                                      ...filterState,
-                                      activityTypes: [...filterState.activityTypes, type],
-                                    });
-                                  } else {
-                                    setFilterState({
-                                      ...filterState,
-                                      activityTypes: filterState.activityTypes.filter((t) => t !== type),
-                                    });
-                                  }
-                                }}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                                  {type === "create" ? "Created" : type}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            ))}
-                          </Flex>
-                        </Flex>
-
-                        {/* Target Type Filter */}
-                        <Flex direction={"column"} gap={"1"}>
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            ml={"0.5"}
-                            color={STYLES.font.secondaryHeader.color}
-                          >
-                            Target Type
-                          </Text>
-                          <Flex direction={"column"} gap={"2"} ml={"1"}>
-                            {["entities", "projects", "attributes"].map((type) => (
-                              <Checkbox.Root
-                                key={type}
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={filterState.targetTypes.includes(type)}
-                                onCheckedChange={(details) => {
-                                  const isChecked = details.checked as boolean;
-                                  if (isChecked) {
-                                    setFilterState({
-                                      ...filterState,
-                                      targetTypes: [...filterState.targetTypes, type],
-                                    });
-                                  } else {
-                                    setFilterState({
-                                      ...filterState,
-                                      targetTypes: filterState.targetTypes.filter((t) => t !== type),
-                                    });
-                                  }
-                                }}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                                  {type === "entities" ? "Entity" : type === "projects" ? "Project" : "Attribute"}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            ))}
-                          </Flex>
-                        </Flex>
-
-                        {/* Medium Filter */}
-                        <Flex direction={"column"} gap={"1"}>
-                          <Text
-                            fontSize={"xs"}
-                            fontWeight={"semibold"}
-                            ml={"0.5"}
-                            color={STYLES.font.secondaryHeader.color}
-                          >
-                            Medium
-                          </Text>
-                          <Flex direction={"column"} gap={"2"} ml={"1"}>
-                            {["api", "web"].map((type) => (
-                              <Checkbox.Root
-                                key={type}
-                                size={"xs"}
-                                colorPalette={"blue"}
-                                checked={filterState.mediums.includes(type)}
-                                onCheckedChange={(details) => {
-                                  const isChecked = details.checked as boolean;
-                                  if (isChecked) {
-                                    setFilterState({
-                                      ...filterState,
-                                      mediums: [...filterState.mediums, type],
-                                    });
-                                  } else {
-                                    setFilterState({
-                                      ...filterState,
-                                      mediums: filterState.mediums.filter((t) => t !== type),
-                                    });
-                                  }
-                                }}
-                              >
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control />
-                                <Checkbox.Label fontSize={"xs"} textTransform={"capitalize"}>
-                                  {type === "api" ? "API" : type}
-                                </Checkbox.Label>
-                              </Checkbox.Root>
-                            ))}
-                          </Flex>
-                        </Flex>
-                      </Flex>
-                    </Flex>
-                  </Flex>
-
-                  {/* Filter control buttons */}
-                  <Flex direction={"row"} gap={"2"} align={"center"} justify={"flex-end"}>
-                    <Button
-                      size={"xs"}
-                      rounded={"md"}
-                      colorPalette={"blue"}
-                      onClick={() => {
-                        setAppliedFilters({ ...filterState });
-                      }}
-                    >
-                      Apply Filters
-                    </Button>
-                    <Button
-                      size={"xs"}
-                      variant={"outline"}
-                      rounded={"md"}
-                      onClick={() => {
-                        const clearedState = {
-                          startDate: "",
-                          endDate: "",
-                          activityTypes: [],
-                          targetTypes: [],
-                          mediums: [],
-                        };
-                        setFilterState(clearedState);
-                        setAppliedFilters(clearedState);
-                      }}
-                      disabled={activeFilterCount === 0}
-                    >
-                      Reset Filters
-                    </Button>
-                  </Flex>
-                </Flex>
-              </Collapsible.Content>
-            </Flex>
-          </Collapsible.Root>
+            <FilterSection label={"Medium"}>
+              {MEDIUM_OPTIONS.map((option) => (
+                <FilterCheckbox
+                  key={option.value}
+                  label={option.label}
+                  checked={filterState.mediums.includes(option.value)}
+                  onChange={(checked) =>
+                    setFilterState({
+                      ...filterState,
+                      mediums: toggleArrayValue(filterState.mediums, option.value, checked),
+                    })
+                  }
+                />
+              ))}
+            </FilterSection>
+          </DataTableFilterPanel>
 
           <Flex
             direction={"column"}
@@ -638,12 +464,7 @@ const Activity = () => {
                     <Icon name={"activity"} size={"lg"} />
                   </EmptyState.Indicator>
                   <EmptyState.Description>
-                    {appliedFilters.startDate ||
-                    appliedFilters.endDate ||
-                    appliedFilters.activityTypes.length > 0 ||
-                    appliedFilters.targetTypes.length > 0
-                      ? "No activity matches the selected filters"
-                      : "No Activity"}
+                    {activeFilterCount > 0 ? "No activity matches the selected filters" : "No Activity"}
                   </EmptyState.Description>
                 </EmptyState.Content>
               </EmptyState.Root>

@@ -5,7 +5,7 @@ import {
   WorkspaceCreateInput,
   ProjectModel,
   IResponseMessage,
-  CollaboratorMetrics,
+  ContentMetrics,
   WorkspaceModel,
   IResolverParent,
   ResponseData,
@@ -150,7 +150,7 @@ export const WorkspacesResolvers = {
       _parent: IResolverParent,
       _args: Record<string, unknown>,
       context: Context,
-    ): Promise<CollaboratorMetrics> => {
+    ): Promise<ContentMetrics> => {
       // Verify access to the Workspace
       const workspace = await assertWorkspaceAccess(context, "read");
 

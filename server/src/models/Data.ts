@@ -12,8 +12,7 @@ import {
   IResponseMessage,
   ParsedJSONFile,
   ResponseData,
-  EntityImportReview,
-  AttributeImportReview,
+  ImportReview,
   IColumnMapping,
   IRow,
   SpreadsheetImportOptions,
@@ -328,12 +327,12 @@ export class Data {
    * per-row type validation warnings for column-mapped values
    * @param {IColumnMapping} columnMapping Mapping of Entity fields to column names or fixed values
    * @param {IFile[]} file Spreadsheet file (CSV or XLSX)
-   * @return {Promise<ResponseData<EntityImportReview[]>>}
+   * @return {Promise<ResponseData<ImportReview[]>>}
    */
   static reviewEntitySpreadsheet = async (
     columnMapping: IColumnMapping,
     file: IFile[],
-  ): Promise<ResponseData<EntityImportReview[]>> => {
+  ): Promise<ResponseData<ImportReview[]>> => {
     try {
       const parsedSheet = await Data.parseSpreadsheet(file[0]);
       if (parsedSheet.length === 0) {
@@ -485,9 +484,9 @@ export class Data {
   /**
    * Reviews an Entity JSON file and returns a list of operations that will be made on import
    * @param {IFile[]} file JSON file for import
-   * @return {Promise<ResponseData<EntityImportReview[]>>}
+   * @return {Promise<ResponseData<ImportReview[]>>}
    */
-  static reviewEntityJSON = async (file: IFile[]): Promise<ResponseData<EntityImportReview[]>> => {
+  static reviewEntityJSON = async (file: IFile[]): Promise<ResponseData<ImportReview[]>> => {
     const parseResult = await Data.parseJSONFile(file[0]);
     if ("error" in parseResult) {
       return { success: false, message: parseResult.error, data: [] };
@@ -499,7 +498,7 @@ export class Data {
       return { success: false, message: validationError, data: [] };
     }
 
-    const review: EntityImportReview[] = [];
+    const review: ImportReview[] = [];
     for (const entity of parsed["entities"]) {
       const exists = !_.isUndefined(entity._id) && (await Entities.exists(entity._id));
       review.push({ name: entity.name, state: exists ? "update" : "create" });
@@ -511,9 +510,9 @@ export class Data {
   /**
    * Reviews an Attribute JSON file and returns a list of operations that will be made on import
    * @param {IFile[]} file JSON file for import
-   * @return {Promise<ResponseData<AttributeImportReview[]>>}
+   * @return {Promise<ResponseData<ImportReview[]>>}
    */
-  static reviewAttributeJSON = async (file: IFile[]): Promise<ResponseData<AttributeImportReview[]>> => {
+  static reviewAttributeJSON = async (file: IFile[]): Promise<ResponseData<ImportReview[]>> => {
     const parseResult = await Data.parseJSONFile(file[0]);
     if ("error" in parseResult) {
       return { success: false, message: parseResult.error, data: [] };

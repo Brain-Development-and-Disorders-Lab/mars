@@ -408,7 +408,7 @@ const SearchBox = () => {
                     ) : (
                       <Flex m={"2"}>
                         <Text fontWeight={"semibold"} fontSize={"xs"}>
-                          No results found.
+                          No Entities found
                         </Text>
                       </Flex>
                     )}

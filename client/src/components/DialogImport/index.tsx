@@ -6,14 +6,14 @@ import { Flex, Button, Dialog, Text, Tag, Steps, CloseButton, useFileUpload } fr
 import FieldTagList from "@components/FieldTagList";
 import Icon from "@components/Icon";
 import { toaster } from "@components/Toast";
-import UploadStep from "@components/DialogImport/steps/UploadStep";
-import EntityDetailsStep from "@components/DialogImport/steps/EntityDetailsStep";
-import EntityMappingStep from "@components/DialogImport/steps/EntityMappingStep";
-import EntityReviewStep from "@components/DialogImport/steps/EntityReviewStep";
-import AttributeReviewStep from "@components/DialogImport/steps/AttributeReviewStep";
+import DialogImportUploadStep from "@components/DialogImport/steps/DialogImportUploadStep";
+import DialogImportEntityDetailsStep from "@components/DialogImport/steps/DialogImportEntityDetailsStep";
+import DialogImportEntityMappingStep from "@components/DialogImport/steps/DialogImportEntityMappingStep";
+import DialogImportEntityReviewStep from "@components/DialogImport/steps/DialogImportEntityReviewStep";
+import DialogImportAttributeReviewStep from "@components/DialogImport/steps/DialogImportAttributeReviewStep";
 
 // Custom and existing types
-import { ColumnInfo, DialogImportProps } from "@types";
+import { ColumnInfo, DialogGenericProps } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -38,7 +38,7 @@ import {
 import { useEntityImport } from "@components/DialogImport/useEntityImport";
 import { useAttributeImport } from "@components/DialogImport/useAttributeImport";
 
-const DialogImport = (props: DialogImportProps) => {
+const DialogImport = (props: DialogGenericProps) => {
   // Posthog
   const posthog = usePostHog();
 
@@ -385,7 +385,7 @@ const DialogImport = (props: DialogImportProps) => {
 
             {/* Select import type, and upload a file */}
             {entityImport.entityStep === 0 && attributeImport.attributeStep === 0 && (
-              <UploadStep
+              <DialogImportUploadStep
                 importType={importType}
                 isTypeSelectDisabled={isTypeSelectDisabled}
                 onSelectImportType={selectImportType}
@@ -451,7 +451,7 @@ const DialogImport = (props: DialogImportProps) => {
             {/* Entity Steps */}
             {/* Entity Step 1: Simple mapping, details */}
             {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "details") && (
-              <EntityDetailsStep
+              <DialogImportEntityDetailsStep
                 fileType={fileType}
                 columns={entityImport.columns}
                 namePrefixField={entityImport.namePrefixField}
@@ -481,7 +481,7 @@ const DialogImport = (props: DialogImportProps) => {
 
             {/* Entity Step 2: Advanced mapping */}
             {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "mapping") && (
-              <EntityMappingStep
+              <DialogImportEntityMappingStep
                 attributesField={entityImport.attributesField}
                 onAttributesFieldChange={entityImport.setAttributesField}
                 addAttributeOpen={entityImport.addAttributeOpen}
@@ -495,13 +495,13 @@ const DialogImport = (props: DialogImportProps) => {
 
             {/* Entity Step 3: Review */}
             {_.isEqual(importType, "entities") && _.isEqual(entityImport.entityImportPage, "review") && (
-              <EntityReviewStep reviewEntities={entityImport.reviewEntities} />
+              <DialogImportEntityReviewStep reviewEntities={entityImport.reviewEntities} />
             )}
 
             {/* Attribute Steps */}
             {/* Attribute Step 1: Review */}
             {_.isEqual(importType, "attribute") && _.isEqual(attributeImport.attributeImportPage, "review") && (
-              <AttributeReviewStep reviewAttributes={attributeImport.reviewAttributes} />
+              <DialogImportAttributeReviewStep reviewAttributes={attributeImport.reviewAttributes} />
             )}
           </Dialog.Body>
 

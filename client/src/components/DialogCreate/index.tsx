@@ -10,7 +10,7 @@ import Tooltip from "@components/Tooltip";
 import { useNavigate } from "react-router-dom";
 
 // Custom types
-import { DialogCreateProps } from "@types";
+import { DialogGenericProps } from "@types";
 
 // Hooks
 import { usePermissions } from "@hooks/usePermissions";
@@ -69,7 +69,7 @@ const CREATE_OPTIONS = [
   },
 ] as const;
 
-const DialogCreate = (props: DialogCreateProps) => {
+const DialogCreate = (props: DialogGenericProps) => {
   const posthog = usePostHog();
   const navigate = useNavigate();
 

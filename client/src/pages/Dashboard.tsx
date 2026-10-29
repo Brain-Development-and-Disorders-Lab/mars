@@ -21,15 +21,7 @@ import SearchBox from "@components/SearchBox";
 import ActivityFeed from "@components/ActivityFeed";
 
 // Existing and custom types
-import {
-  ProjectModel,
-  EntityModel,
-  EntityMetrics,
-  ProjectMetrics,
-  AttributeMetrics,
-  CollaboratorMetrics,
-  IGenericItem,
-} from "@types";
+import { ProjectModel, EntityModel, ContentMetrics, IGenericItem } from "@types";
 
 // Utility functions and libraries
 import dayjs from "dayjs";
@@ -50,7 +42,7 @@ import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // GraphQL mutation to mark walkthrough as seen
 const UPDATE_USER = gql`
-  mutation UpdateUser($user: UserInput) {
+  mutation UpdateUser($user: UserUpdateInput) {
     updateUser(user: $user) {
       success
       message
@@ -155,10 +147,10 @@ const Dashboard = () => {
   const [workspaceName, setWorkspaceName] = useState<string>();
 
   // Metrics
-  const [entityMetrics, setEntityMetrics] = useState<EntityMetrics>({} as EntityMetrics);
-  const [projectMetrics, setProjectMetrics] = useState<ProjectMetrics>({} as ProjectMetrics);
-  const [attributeMetrics, setAttributeMetrics] = useState<AttributeMetrics>({} as AttributeMetrics);
-  const [collaboratorMetrics, setCollaboratorMetrics] = useState<CollaboratorMetrics>({} as CollaboratorMetrics);
+  const [entityMetrics, setEntityMetrics] = useState<ContentMetrics>({} as ContentMetrics);
+  const [projectMetrics, setProjectMetrics] = useState<ContentMetrics>({} as ContentMetrics);
+  const [attributeMetrics, setAttributeMetrics] = useState<ContentMetrics>({} as ContentMetrics);
+  const [collaboratorMetrics, setCollaboratorMetrics] = useState<ContentMetrics>({} as ContentMetrics);
 
   // Use custom breakpoint hook
   const { breakpoint } = useBreakpoint();
@@ -184,12 +176,12 @@ const Dashboard = () => {
   // Execute GraphQL query both on page load and navigation
   const { loading, error, data } = useQuery<{
     projects: ProjectModel[];
-    projectMetrics: ProjectMetrics;
+    projectMetrics: ContentMetrics;
     entities: { entities: EntityModel[]; total: number };
     workspace: IGenericItem;
-    entityMetrics: EntityMetrics;
-    attributeMetrics: AttributeMetrics;
-    collaboratorMetrics: CollaboratorMetrics;
+    entityMetrics: ContentMetrics;
+    attributeMetrics: ContentMetrics;
+    collaboratorMetrics: ContentMetrics;
   }>(GET_DASHBOARD, {
     variables: {
       projectLimit: 10,

@@ -3,38 +3,92 @@ import { ListCollection, UseFileUploadReturn } from "@chakra-ui/react";
 import { Cell, RowData } from "@tanstack/react-table";
 import { Html5QrcodeCameraScanConfig } from "html5-qrcode";
 import { ReadStream } from "fs";
+import { Blocker } from "react-router-dom";
+import { Page } from "@playwright/test";
 
-export namespace State.Entity {
-  type Start = {
-    location: "none" | "start" | "links" | "attributes";
-    name: string;
-    created: string;
-    owner: string;
-    description: string;
-  };
+// ---------------------------------------------------------------------------
+// Shared utility types
+// ---------------------------------------------------------------------------
 
-  type Links = Start & {
-    projects: string[];
-    links: ILink[];
-  };
+// Metadata recorded with every history version of an Entity, Project, or Attribute
+export type HistoryVersion = {
+  author: string; // Change author identifier
+  message: string; // Change message
+  timestamp: string; // Timestamp of change
+  version: string; // Version identifier
+};
 
-  type Attributes = Links & {
-    attributes: IAttribute[];
-  };
-}
+// Minimal reference to a stored item by ID and name
+export type IGenericItem = {
+  _id: string;
+  name: string;
+};
 
-export namespace State.Project {
-  type Start = {
-    location: "none" | "start";
-    name: string;
-    created: string;
-    owner: string;
-    description: string;
-  };
-}
+// File name split into its base name and extension
+export type FileName = {
+  base: string;
+  extension: string;
+};
 
+// Label and value of a select option
+export type ISelectOption = {
+  label: string;
+  value: string;
+};
+
+// Inclusive numeric range, either bound may be omitted
+export type CountRange = {
+  min?: number;
+  max?: number;
+};
+
+// Result of an operation, whether it succeeded and a message describing the outcome
+export type IResponseMessage = {
+  success: boolean;
+  message: string;
+};
+
+// `IResponseMessage` carrying a data payload
+export type ResponseData<D> = IResponseMessage & {
+  data: D;
+};
+
+// Total count of a Workspace's Entities, Projects, Attributes, or Collaborators, and how many were added in the last day
+export type ContentMetrics = {
+  all: number;
+  addedDay: number;
+};
+
+// ---------------------------------------------------------------------------
+// Values
+// ---------------------------------------------------------------------------
+
+// Data types a Value can hold
+export type IValueType = "number" | "text" | "url" | "date" | "entity" | "select";
+
+// Single named, typed Value within an Attribute
+export type IValue = {
+  _id: string;
+  name: string;
+  type: IValueType;
+  data: string;
+  source?: "column" | "value"; // Whether `data` names a spreadsheet column or holds a fixed value
+};
+
+// Parsed `data` of a "select" Value, the chosen option and the available options
+export type IValueSelectData = {
+  selected: string;
+  options: string[];
+};
+
+// Parsed display label for an `IValue`, produced by `formatValueForDisplay`
+export type FormattedValueDisplay = { label: string; secondary?: string };
+
+// ---------------------------------------------------------------------------
 // Attributes
-// Generic Attribute interface containing required Values
+// ---------------------------------------------------------------------------
+
+// Attribute template, a named collection of Values
 export type IAttribute = {
   name: string;
   owner: string;
@@ -47,22 +101,12 @@ export type IAttribute = {
 export type AttributeModel = IAttribute & {
   _id: string;
   timestamp: string;
+  usageCount?: number;
   history?: AttributeHistory[];
 };
 
-export type AttributeHistory = {
-  author: string;
-  message: string;
-  timestamp: string;
-  version: string;
-
-  _id: string;
-  name: string;
-  owner: string;
-  archived: boolean;
-  description: string;
-  values: IValue[];
-};
+// Snapshot of an Attribute at a previous version
+export type AttributeHistory = HistoryVersion & IAttribute & { _id: string };
 
 // Database model of Attribute usage, includes Entity ID and status of modification
 export type AttributeUsage = {
@@ -70,124 +114,291 @@ export type AttributeUsage = {
   modifications: ("name" | "description" | "values")[];
 };
 
-// `AttributeBreadcrumb` component props, the breadcrumb trail and name tag
-export type AttributeBreadcrumbProps = {
-  loading: boolean;
-  workspaceName: string;
-  onNavigateHome: () => void;
-  onNavigateAttributes: () => void;
-  archived: boolean;
-  name: string;
+// ---------------------------------------------------------------------------
+// Entities
+// ---------------------------------------------------------------------------
+
+// Utility type to define set of Link types
+export type LinkType = "parent" | "child" | "general";
+
+// Utility type to define Link between two Entities
+export type ILink = {
+  type: LinkType;
+  source: IGenericItem;
+  target: IGenericItem;
 };
 
-// `AttributeOverviewCard` component props, Attribute Name/Owner/Timestamp/Visibility/Description fields
-export type AttributeOverviewCardProps = {
+// Secondary identifier assigned to an Entity
+export type SecondaryIdentifier = {
+  value: string; // Secondary identifier value
+  format: string; // Base format value or custom IdentifierFormat id
+};
+
+// Entity fields, excluding the assigned ID
+export type IEntity = {
   name: string;
-  onNameChange?: (value: string) => void;
-  nameReadOnly: boolean;
+  secondaryIdentifier?: SecondaryIdentifier;
   owner: string;
-  timestamp: string;
-  visibilityIsPublic: boolean;
+  archived: boolean;
+  created: string;
   description: string;
-  onDescriptionChange?: (value: string) => void;
-  descriptionReadOnly: boolean;
-  workspace?: string;
-  isPublic?: boolean;
-};
-
-// `AttributeUsageTable` component props, Entities using an Attribute
-export type AttributeUsageTableProps = {
-  attributeUsage: AttributeUsage[];
-  onViewEntity: (entityId: string) => void;
-  workspace?: string;
-  isPublic?: boolean;
-};
-
-export type AttributeCardActions = {
-  showRemove?: boolean;
-  onUpdate?: (data: AttributeCardProps) => void;
-  onRemove?: (id: string) => void;
-  onValidityChange?: (id: string, isValid: boolean) => void;
-};
-
-export type AttributeCardProps = IAttribute &
-  AttributeCardActions & {
-    _id: string;
-    restrictDataValues: boolean;
-    permittedDataValues?: ColumnInfo[];
-  };
-
-export type AttributeGroupProps = AttributeCardActions & {
+  projects: string[];
+  links: ILink[];
   attributes: AttributeModel[];
+  attachments: IGenericItem[];
+  history: EntityHistory[];
 };
 
-export type DialogViewAttributeProps = {
-  // Dialog state
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
+// Stored Entity, including assigned ID
+export type EntityModel = IEntity & {
+  _id: string;
+  timestamp: string;
+};
 
-  // Dialog Attribute information
-  attribute: AttributeModel;
-  editing?: boolean;
-  originalAttributeId?: string;
-  permittedDataValues?: ColumnInfo[];
+// Filters accepted when querying Entities
+export type EntityFilter = {
+  startDate?: string;
+  endDate?: string;
+  owners?: string[];
+  hasAttachments?: boolean;
+  hasAttributes?: boolean;
+  hasLinks?: boolean;
+  attributeCount?: CountRange;
+  projectCount?: CountRange;
+};
 
-  // Callback functions
-  onAttributeUpdate: (updated: AttributeModel) => void;
-  removeCallback?: () => void;
-  cancelCallback?: () => void;
+// Entity fields fetched to build a `LinksGraph` node
+export type EntityNode = IGenericItem & {
+  links: ILink[];
+  owner?: string;
+  created?: string;
+  archived?: boolean;
+  projects?: string[];
+  attributes?: IGenericItem[];
+};
 
-  // Optional context for comparison display
-  entityName?: string;
+// Snapshot of an Entity at a previous version
+export type EntityHistory = HistoryVersion & Omit<IEntity, "history"> & { _id: string };
 
-  // Optional fields for public view
-  workspace?: string;
+// ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
+// Project fields, excluding the assigned ID
+export type IProject = {
+  name: string;
+  owner: string;
+  archived: boolean;
+  created: string;
+  description: string;
+  entities: string[];
+  history: ProjectHistory[];
+};
+
+// Stored Project, including assigned ID
+export type ProjectModel = IProject & {
+  _id: string;
+  timestamp: string;
+};
+
+// Snapshot of a Project at a previous version
+export type ProjectHistory = HistoryVersion & Omit<IProject, "history"> & { _id: string };
+
+// ---------------------------------------------------------------------------
+// Workspaces, collaborators, and permissions
+// ---------------------------------------------------------------------------
+
+// Workspace collaborator and their Workspace permissions
+export type Collaborator = {
+  _id: string;
+  permissions: UserWorkspacePermissions; // Workspace-scoped permissions
+};
+
+// Workspace fields, excluding the assigned ID
+export type IWorkspace = {
+  name: string;
+  owner: string;
+  isPublic: boolean;
+  description: string;
+  collaborators: Collaborator[];
+  entities: string[];
+  projects: string[];
+  attributes: string[];
+  activity: string[];
+};
+
+// Individual permission within `UserWorkspacePermissions`, derived as `category.action` paths
+export type UserWorkspacePermission = {
+  [K in keyof UserWorkspacePermissions]: `${K}.${keyof UserWorkspacePermissions[K] & string}`;
+}[keyof UserWorkspacePermissions];
+
+// General level of access to a Workspace, independent of specific permissions
+export type WorkspaceAccessLevel = "read" | "member";
+
+// Access a check requires, either a general level or a specific permission
+export type WorkspaceRequirement = WorkspaceAccessLevel | UserWorkspacePermission;
+
+// Collections of Workspace contents that can be checked for membership
+export type WorkspaceCollection = "entities" | "projects" | "attributes";
+
+// Client-supplied fields accepted when creating a Workspace
+export type WorkspaceCreateInput = {
+  name: string;
+  description: string;
   isPublic?: boolean;
+  collaborators?: Collaborator[];
 };
 
-export type DialogCreateProps = {
-  // Dialog state
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
+// Stored Workspace, including assigned ID
+export type WorkspaceModel = IWorkspace & {
+  _id: string;
+  timestamp: string;
 };
 
-export type DialogCompareAttributeProps = {
-  // Dialog state
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
-
-  // Dialog Attribute information
-  modifiedAttribute: AttributeModel;
-  originalAttributeId: string;
-
-  // Optional callback to apply selected Attribute changes back to the Entity Attribute
-  onUpdate?: (updated: AttributeModel) => void;
-
-  // When true, all changes are pre-selected
-  defaultApplyAll?: boolean;
-
-  // Optional context for comparison display
-  entityName?: string;
+// `UserWorkspacePermissions` permissions structure
+export type UserWorkspacePermissions = {
+  administration: {
+    edit: boolean;
+    invite: boolean;
+  };
+  entities: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
+  projects: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
+  attributes: {
+    create: boolean;
+    edit: boolean;
+    archive: boolean;
+  };
 };
 
-export type CompareAttributeDialogCollapsibleProps = {
-  sectionKey: string;
-  icon: IconNames;
-  color: string;
-  label: string;
-  count: number;
-  disabled: boolean;
-  children: React.ReactNode;
+// `UserGlobalPermissions` permissions structure
+export type UserGlobalPermissions = {
+  features: {
+    import: boolean;
+    scan: boolean;
+    ai: boolean;
+    api: boolean;
+  };
+  workspaces: {
+    create: boolean;
+  };
 };
 
-export type CompareAttributeFieldDiffProps = {
-  label: string;
-  isDifferent: boolean;
-  currentValue: string;
-  originalValue: string;
-  useOriginal: boolean;
-  setUseOriginal: (v: boolean) => void;
+// User's Workspace and global permissions combined
+export type UserCollatedPermissions = {
+  workspace: UserWorkspacePermissions;
+  global: UserGlobalPermissions;
 };
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+// User fields, excluding the assigned ID
+export type IUser = {
+  firstName: string;
+  lastName: string;
+  name: string; // better-auth: Display name
+  affiliation: string;
+  email: string; // better-auth: Email
+  emailVerified: boolean; // better-auth: Email verification
+  image: string; // better-auth: Display image URL
+  createdAt: string; // better-auth: Created
+  updatedAt: string; // better-auth: Last updated
+  lastLogin: string; // better-auth: Timestamp of last login
+  api_keys: string; // better-auth: Stored as a JSON string
+  role: string; // better-auth: "user" or "admin"
+  banned: boolean; // better-auth: Overarching access status
+  permissions: UserGlobalPermissions; // Global permissions such as AI search or API access
+  account_orcid: string; // ORCiD if connected
+  hasSeenWalkthrough?: boolean; // If user has seen or skipped the initial walkthrough
+  completedProfile?: boolean; // `false` until third-party signup profile is completed
+};
+
+// Stored User, including assigned ID
+export type UserModel = IUser & {
+  _id: string;
+};
+
+// ---------------------------------------------------------------------------
+// Activity
+// ---------------------------------------------------------------------------
+
+// Activity entry recording a change to Workspace contents
+export type IActivity = {
+  timestamp: string;
+  type: "create" | "update" | "delete" | "archived";
+  details: string;
+  target: {
+    type: "entities" | "projects" | "attributes" | "workspaces";
+    _id: string;
+    name: string;
+  };
+  actor?: string;
+  medium?: "API" | "Web";
+};
+
+// Stored Activity entry, including assigned ID
+export type ActivityModel = IActivity & {
+  _id: string;
+};
+
+// Filter values on the Activity page
+export type ActivityFilterValues = {
+  startDate: string;
+  endDate: string;
+  activityTypes: string[];
+  targetTypes: string[];
+  mediums: string[];
+};
+
+// ---------------------------------------------------------------------------
+// Counters and identifier formats
+// ---------------------------------------------------------------------------
+
+// Counter generating sequential values for Entity names
+export type ICounter = {
+  workspace: string; // The Workspace ID assigned the Counter
+  name: string;
+  format: string; // Format, with one set of `{}` used to position the numerical values
+  current: number; // Current value of the numeric component
+  increment: number; // Amount to increase the counter by each iteration
+  created: string;
+};
+
+// Stored Counter, including assigned ID
+export type CounterModel = ICounter & {
+  _id: string;
+};
+
+// Custom format rules for Entity secondary identifiers
+export type IIdentifierFormat = {
+  name: string;
+  created: string;
+  workspace: string;
+  fixedLength: number;
+  alphanumericOnly: boolean;
+  lettersOnly: boolean;
+  numbersOnly: boolean;
+  allowSpecialCharacters: boolean;
+  uppercaseRequired: boolean;
+};
+
+// Stored identifier format, including assigned ID
+export type IdentifierFormatModel = IIdentifierFormat & {
+  _id: string;
+};
+
+// ---------------------------------------------------------------------------
+// Import and export
+// ---------------------------------------------------------------------------
 
 // `ColumnInfo` type, the Column descriptor returned by `prepareEntitySpreadsheet`
 export type ColumnInfo = {
@@ -195,31 +406,174 @@ export type ColumnInfo = {
   inferredType: IValueType;
 };
 
-// Values
-export type IValueType = "number" | "text" | "url" | "date" | "entity" | "select";
+// File formats supported when exporting Entities and Projects
+export type ExportFormat = "json" | "csv" | "xlsx";
 
-export type IValue = {
+// Spreadsheet subset of `ExportFormat`
+export type SpreadsheetFormat = Exclude<ExportFormat, "json">;
+
+// Review summary of an Entity or Attribute being imported, `warnings` only applies to Entities
+export type ImportReview = {
+  name: string;
+  state: "create" | "update";
+  warnings?: string[];
+};
+
+// A single parsed spreadsheet row
+export type IRow = Record<string, any>;
+
+// Maps Entity fields to spreadsheet column names (or fixed values) for a spreadsheet import
+export type IColumnMapping = {
+  namePrefix: string;
+  name?: string;
+  secondaryIdentifier?: {
+    value?: string; // Column name providing the secondary identifier value
+    format: string;
+  };
+  description?: string;
+  created: string;
+  owner: string;
+  project: string;
+  attributes: AttributeModel[];
+};
+
+// Entity built from a spreadsheet row, paired with any data validation warnings for that row
+export type EntityMappingResult = {
+  entity: IEntity;
+  warnings: string[];
+};
+
+// Result of parsing an uploaded JSON file: either the parsed contents, or an error message
+export type ParsedJSONFile = { parsed: IRow } | { error: string };
+
+// Import options for spreadsheet files
+export type SpreadsheetImportOptions = {
+  counters: { field: string; _id: string }[];
+};
+
+// `SampleFile` type representing a downloadable example file
+export type SampleFile = { label: string; filename: string; mimeType: string; content: string };
+
+// AI-suggested column mapping for the Entity name/description fields
+export type ColumnMappingSuggestion = {
+  name: string | null;
+  description: string | null;
+};
+
+// ---------------------------------------------------------------------------
+// Search
+// ---------------------------------------------------------------------------
+
+// Logical operator joining `SearchRule`s
+export type SearchCombinator = "and" | "or";
+
+// Entity field a `SearchRule` matches against
+export type SearchField = "name" | "description" | "projects" | "links" | "attributes";
+
+// Attribute Value condition within a `SearchRule`
+export type SearchAttributeValue = {
+  type: IValueType;
+  operator: "contains" | "does not contain" | "equals" | ">" | "<";
+  data: string;
+};
+
+// Single condition in a `SearchQuery`
+export type SearchRule = {
+  id: string;
+  field: SearchField;
+  operator: string;
+  value: string | SearchAttributeValue;
+};
+
+// Query built with `SearchQueryBuilder`, converted to MongoDB by `buildMongoQuery`
+export type SearchQuery = {
+  combinator: SearchCombinator;
+  rules: SearchRule[];
+};
+
+// ---------------------------------------------------------------------------
+// Administration
+// ---------------------------------------------------------------------------
+
+// Workspace summary shown on the administration page
+export type AdminWorkspace = {
   _id: string;
   name: string;
-  type: IValueType;
-  data: string;
-  source?: "column" | "value";
-  disabled?: boolean;
-  showRemove?: boolean;
-  onRemove?: (id: string) => void;
-  onUpdate?: (data: string) => void;
+  description: string;
+  owner: string;
+  entities: number;
+  projects: number;
+  attributes: number;
 };
 
-export type IValueSelectData = {
-  selected: string;
-  options: string[];
+// Instance-wide totals shown on the administration page
+export type AdminMetrics = {
+  users: number;
+  workspaces: number;
+  entities: number;
+  projects: number;
+  attributes: number;
 };
 
-// Parsed display label for an `IValue`, produced by `formatValueForDisplay`
-export type FormattedValueDisplay = { label: string; secondary?: string };
+// User summary shown on the administration page
+export type AdminUser = {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  workspaces: number;
+  permissions: UserGlobalPermissions;
+  banned: boolean;
+  lastLogin: string;
+};
 
+// ---------------------------------------------------------------------------
+// Server, GraphQL context, and API
+// ---------------------------------------------------------------------------
+
+// File type
+export type IFile = Promise<{
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => ReadStream;
+}>;
+
+// Generic GraphQL resolver parent type (for unused parents)
+export type IResolverParent = Record<string, any>;
+
+// GraphQL request context, the authenticated user and active Workspace
+export type Context = {
+  user: string;
+  workspace: string;
+  userRole: string;
+};
+
+// API key data
+export type APIKey = {
+  value: string;
+  expires: string;
+  scope: "view" | "edit";
+  workspaces: string[];
+};
+
+// API response
+export type APIData<D> = {
+  path: string;
+  version: string;
+  status: "success" | "warning" | "error" | "unauthorized";
+  message: string;
+  data: D;
+};
+
+// ---------------------------------------------------------------------------
+// Client data shapes and hooks
+// ---------------------------------------------------------------------------
+
+// Resolves the icon shown beside a styled select option
 type StyledSelectIconGetter<T> = (data: T) => { name: IconNames; color?: string } | undefined;
 
+// Styling for the select components built by `makeStyledSelectComponents`
 export type StyledSelectConfig<T> = {
   getIcon?: StyledSelectIconGetter<T>;
   optionHeight: string;
@@ -229,6 +583,141 @@ export type StyledSelectConfig<T> = {
   controlHasBorder: boolean;
   valueContainerHeight: string;
 };
+
+// Kinds of item `Linky` can link to
+export type LinkyType = LinkyProps["type"];
+
+// Normalized data returned by the "Linky" component's per-type data fetchers
+export type LinkyData = {
+  name: string;
+  archived: boolean;
+  description: string;
+  items: { _id: string; name: string; type?: IValueType }[];
+};
+
+// `ProjectEntityTableRow`, row shape for the `ProjectEntitiesTable`
+export type ProjectEntityTableRow = {
+  _id: string;
+  description?: string;
+  attributes?: AttributeModel[];
+};
+
+// Value provided by `WorkspaceProvider` through `useWorkspace`
+export type WorkspaceContextValue = {
+  workspace: string;
+  workspaces: WorkspaceModel[];
+  loading: boolean;
+  activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
+  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
+  signOut: () => Promise<void>;
+};
+
+// Details known about an Entity when building its `LinksGraph` node
+export type LinksGraphNodeInput = {
+  id: string;
+  name: string;
+  isPrimary: boolean;
+  linkCount?: number;
+  owner?: string;
+  created?: string;
+  projectCount?: number;
+  attributeCount?: number;
+  archived?: boolean;
+};
+
+// Item shape backing the `DataTableColumnSelect` collection
+export type DataTableColumnOption = ISelectOption & { disabled: boolean };
+
+// Count range input values, empty strings are unbounded
+export type DataTableFilterRange = {
+  min: string;
+  max: string;
+};
+
+// Filter values produced by `DataTableFilters`, keyed `ranges` and `toggles` match the filter definitions
+export type DataTableFilterValues = {
+  startDate: string;
+  endDate: string;
+  owners: string[];
+  ranges: Record<string, DataTableFilterRange>;
+  toggles: Record<string, boolean>;
+};
+
+// Count range filter shown by `DataTableFilters`
+export type DataTableRangeFilter = {
+  key: string;
+  label: string;
+};
+
+// Checkbox filter shown by `DataTableFilters`
+export type DataTableToggleFilter = {
+  key: string;
+  label: string;
+  checkboxLabel: string;
+};
+
+// Accessors used to apply `DataTableFilterValues` to rows on the client
+export type DataTableFilterAccessors<T> = {
+  created: (row: T) => string;
+  owner: (row: T) => string;
+  counts: Record<string, (row: T) => number>;
+};
+
+// `useEntityImport` hook parameters
+export type UseEntityImportParams = {
+  open: boolean;
+  fileUpload: UseFileUploadReturn;
+  fileType: string;
+  setContinueDisabled: (value: boolean) => void;
+};
+
+// `useAttributeImport` hook parameters
+export type UseAttributeImportParams = {
+  fileUpload: UseFileUploadReturn;
+  setContinueDisabled: (value: boolean) => void;
+};
+
+// Client state persisted to local storage by `useStorage`
+export type ApplicationStorage = {
+  setup: boolean; // Flag if application setup is complete
+  workspace: string; // ID of active Workspace
+};
+
+// ---------------------------------------------------------------------------
+// Component props: layout and navigation
+// ---------------------------------------------------------------------------
+
+// `PageHeader` component props, the icon, title, and Workspace subtitle shown atop list pages
+export type PageHeaderProps = {
+  icon: IconNames;
+  iconColor?: string;
+  title: string;
+  subtitle: string; // Workspace name
+  loading: boolean;
+};
+
+// `Content` component props
+export type ContentProps = {
+  children: React.ReactElement | React.ReactElement[];
+  isError?: boolean;
+  isLoaded?: boolean;
+};
+
+// `Page` component props
+export type PageProps = {
+  children?: React.ReactElement | React.ReactElement[];
+  isPublic: boolean;
+};
+
+// `Navigation` component props
+export type NavigationProps = {
+  isPublic: boolean;
+  workspace?: string;
+};
+
+// ---------------------------------------------------------------------------
+// Component props: tags, fields, and selects
+// ---------------------------------------------------------------------------
 
 // `Select` component props, shared native `Select` wrapper
 export type SelectProps<T> = {
@@ -244,11 +733,6 @@ export type SelectProps<T> = {
   testId?: string;
   groupBy?: (item: T) => string;
   itemDisabled?: (item: T) => boolean;
-};
-
-export type Collaborator = {
-  _id: string;
-  permissions: UserWorkspacePermissions; // Workspace-scoped permissions
 };
 
 // `Collaborators` component props
@@ -277,16 +761,6 @@ export type LinkyProps = {
   truncate?: boolean | number;
   workspace?: string; // Override the active Workspace, used on unauthenticated public pages
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
-};
-
-export type LinkyType = LinkyProps["type"];
-
-// Normalized data returned by the "Linky" component's per-type data fetchers
-export type LinkyData = {
-  name: string;
-  archived: boolean;
-  description: string;
-  items: { _id: string; name: string; type?: IValueType }[];
 };
 
 // `TagActor` component props
@@ -342,14 +816,66 @@ export type FieldTagListProps = {
   emptyLabel?: string; // When set, an `TagEmpty` is shown in place of an empty list
 };
 
-// `PageHeader` component props, the icon, title, and Workspace subtitle shown atop list pages
-export type PageHeaderProps = {
-  icon: IconNames;
-  iconColor?: string;
-  title: string;
-  subtitle: string; // Workspace name
-  loading: boolean;
+// `SelectCounter` component props
+export type SelectCounterProps = {
+  counter: string;
+  setCounter: (value: React.SetStateAction<string>) => void;
+  showCreate: boolean;
 };
+
+// `SelectIdentifierFormat` component props
+export type SelectIdentifierFormatProps = {
+  format: string[];
+  setFormat: (value: React.SetStateAction<string[]>) => void;
+  onFormatsChange?: (formats: IdentifierFormatModel[]) => void;
+  showCreate?: boolean;
+  disabled?: boolean;
+};
+
+// `ActivityFeed` component props
+export type ActivityFeedProps = {
+  activities?: ActivityModel[];
+  feedLimit?: number; // Number of activities to show in the feed (default: 5)
+};
+
+// `RelativeTime` component props
+export type RelativeTimeProps = {
+  value: string | number | Date;
+  format?: (relative: string) => string;
+  fontSize?: string;
+  fontWeight?: string;
+  color?: string;
+};
+
+// `Scanner` component props
+export type ScannerProps = Html5QrcodeCameraScanConfig & {
+  fps: number;
+  verbose: boolean;
+};
+
+// `SelectMultiEntity` component props
+export type SelectMultiEntityProps = {
+  projectEntities: string[];
+  selectedEntities: IGenericItem[];
+  setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
+};
+
+// `HistoryDrawer` component props, a version history Drawer shared by Entity, Project, and Attribute detail pages
+export type HistoryDrawerProps = {
+  type: "entity" | "project" | "attribute";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  history: (EntityHistory | ProjectHistory | AttributeHistory)[];
+  archived: boolean; // Disables Preview while the current item is archived
+  previewActive: boolean; // Whether a version is currently being previewed, disables Restore
+  canRestore: boolean; // Workspace permission to restore a version
+  onPreview: (version: any) => void;
+  onRestore: (version: any) => void | Promise<void>;
+};
+
+// ---------------------------------------------------------------------------
+// Component props: `DataTable` and filters
+// ---------------------------------------------------------------------------
 
 // `CellGeneric` component props
 export type CellGenericProps = {
@@ -374,115 +900,177 @@ export type CellDescriptionFieldProps = {
   maxLength?: number;
 };
 
-// Project types
-export type IProject = {
-  name: string;
-  owner: string;
-  archived: boolean;
-  created: string;
-  description: string;
-  entities: string[];
-  history: ProjectHistory[];
+// `DataTable` component props
+export type DataTableProps = {
+  columns: any[];
+  visibleColumns: Record<string, boolean>;
+  selectedRows: any;
+  onSelectedRowsChange?: (selectedRows: any[]) => void;
+  columnFilters?: any;
+  onColumnFiltersChange?: (filters: any) => void;
+  data: any[];
+  viewOnly?: boolean;
+
+  // Interface visibility
+  showColumnSelect?: boolean;
+  showColumnFilters?: boolean;
+  showPagination?: boolean;
+  showSelection?: boolean;
+  actions?: DataTableAction[];
+
+  // Layout behavior
+  fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
+  resizableColumns?: boolean; // If true, header columns can be resized by dragging their right edge
+  footerAction?: { label: string; icon: IconNames; onClick: () => void }; // Renders a full-width action button below the rows
+
+  // Server-side pagination (if pageCount is provided, pagination is handled server-side)
+  pageCount?: number; // Total number of pages (enables server-side pagination)
+  pageIndex?: number; // Current page index (0-based)
+  pageSize?: number; // Current page size
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void; // Callback when pagination changes
+  onSortChange?: (field: string, direction: "asc" | "desc" | null) => void; // Callback when sorting changes (for server-side sorting)
+  sortState?: { field: string; direction: "asc" | "desc" } | null; // Current sort state (for syncing with server-side sorting)
 };
 
-export type ProjectModel = IProject & {
-  _id: string;
-  timestamp: string;
+// Bulk action shown above a `DataTable` for the selected rows
+export type DataTableAction = {
+  label: string | ((selectedCount: number) => string); // Action label, or a function receiving the selected row count
+  icon: IconNames; // Icon
+  action: (table: any, rows: any) => void; // Action function acting on the provided the table and rows
+  disabled?: boolean; // Disable the action
+  alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
 };
 
-export type ProjectHistory = {
-  author: string; // Change author identifier
-  message: string; // Change message
-  timestamp: string; // Timestamp of change
-  version: string; // Project version
-
-  _id: string;
-  owner: string;
-  created: string;
-  archived: boolean;
-  name: string;
-  description: string;
-  entities: string[];
+// `DataTablePaginationNav` component props
+export type DataTablePaginationNavProps = {
+  table: any;
 };
 
-// `ProjectBreadcrumb` component props, Project breadcrumb trail and name tag
-export type ProjectBreadcrumbProps = {
-  loading: boolean;
-  workspaceName: string;
-  onNavigateHome: () => void;
-  onNavigateProjects: () => void;
-  archived: boolean;
-  name: string;
+// `DataTablePageSizeSelect` component props
+export type DataTablePageSizeSelectProps = {
+  table: any;
+  pageLength: string[];
+  setPageLength: (value: string[]) => void;
+  pageLengthsCollection: ListCollection<ISelectOption>;
 };
 
-// `ProjectOverviewCard` component props, Project Name/Owner/Timestamp/Visibility/Description fields
-export type ProjectOverviewCardProps = {
-  name: string;
-  onNameChange?: (value: string) => void;
-  nameReadOnly: boolean;
-  owner: string;
-  created: string;
-  visibilityIsPublic: boolean;
-  description: string;
-  onDescriptionChange?: (value: string) => void;
-  descriptionReadOnly: boolean;
-  workspace?: string;
-  isPublic?: boolean;
+// `DataTableColumnSelect` component props
+export type DataTableColumnSelectProps = {
+  columnNamesCollection: ListCollection<DataTableColumnOption>;
+  visibleColumnsForSelect: string[];
+  alwaysVisibleColumns: string[];
+  updateColumnVisibility: (toggleableColumns: string[]) => void;
 };
 
-// `ProjectEntityTableRow`, row shape for the `ProjectEntitiesTable`
-export type ProjectEntityTableRow = {
-  _id: string;
-  description?: string;
-  attributes?: AttributeModel[];
-};
-
-// `ProjectEntitiesTable` component props, the Entities within a Project, shared by the Project detail page
-export type ProjectEntitiesTableProps = {
-  entities: ProjectEntityTableRow[];
-  entityCount: number;
-  editing: boolean;
-  workspace?: string;
-  isPublic?: boolean;
-  onView: (entityId: string) => void;
-  onRemove?: (entityId: string) => void;
-  onRemoveMany?: (entityIds: string[]) => void;
-  onAddClick?: () => void;
-  addDisabled?: boolean;
-};
-
-// Utility type used across other types, typically in a list
-export type IGenericItem = {
-  _id: string;
-  name: string;
-};
-
-// Utility type to represent a file name split into its base name and extension
-export type FileName = {
-  base: string;
-  extension: string;
-};
-
-// File formats supported when exporting Entities and Projects
-export type ExportFormat = "json" | "csv" | "xlsx";
-
-// Spreadsheet subset of `ExportFormat`
-export type SpreadsheetFormat = Exclude<ExportFormat, "json">;
-
-// Utility type used for `Select` component options
-export type ISelectOption = {
+// `FilterInput` component props
+export type FilterInputProps = {
   label: string;
+  type: "date" | "number";
   value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
 };
 
-// Utility type to define set of Link types
-export type LinkType = "parent" | "child" | "general";
+// `FilterCheckbox` component props
+export type FilterCheckboxProps = {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+};
 
-// Utility type to define Link between two Entities
-export type ILink = {
-  type: LinkType;
-  source: IGenericItem;
-  target: IGenericItem;
+// `FilterSection` component props
+export type FilterSectionProps = {
+  label: string;
+  children: React.ReactNode;
+};
+
+// `DataTableFilterPanel` component props, `onApply` is omitted when filters apply immediately
+export type DataTableFilterPanelProps = {
+  label: string;
+  activeFilterCount: number;
+  onApply?: () => void;
+  onReset: () => void;
+  children: React.ReactNode;
+};
+
+// `DataTableFilters` component props
+export type DataTableFiltersProps = {
+  entityLabel: string;
+  owners: string[];
+  workspace?: string;
+  isPublic?: boolean;
+  ranges?: DataTableRangeFilter[];
+  toggles?: DataTableToggleFilter[];
+  values: DataTableFilterValues;
+  onApply: (values: DataTableFilterValues) => void;
+};
+
+// ---------------------------------------------------------------------------
+// Component props: dialogs
+// ---------------------------------------------------------------------------
+
+// Open state shared by dialog components
+export type DialogGenericProps = {
+  open: boolean;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+};
+
+// `DialogViewAttribute` component props
+export type DialogViewAttributeProps = DialogGenericProps & {
+  // Dialog Attribute information
+  attribute: AttributeModel;
+  editing?: boolean;
+  originalAttributeId?: string;
+  permittedDataValues?: ColumnInfo[];
+
+  // Callback functions
+  onAttributeUpdate: (updated: AttributeModel) => void;
+  removeCallback?: () => void;
+  cancelCallback?: () => void;
+
+  // Optional context for comparison display
+  entityName?: string;
+
+  // Optional fields for public view
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `DialogCompareAttribute` component props
+export type DialogCompareAttributeProps = DialogGenericProps & {
+  // Dialog Attribute information
+  modifiedAttribute: AttributeModel;
+  originalAttributeId: string;
+
+  // Optional callback to apply selected Attribute changes back to the Entity Attribute
+  onUpdate?: (updated: AttributeModel) => void;
+
+  // When true, all changes are pre-selected
+  defaultApplyAll?: boolean;
+
+  // Optional context for comparison display
+  entityName?: string;
+};
+
+// Collapsible section props within `DialogCompareAttribute`
+export type DialogCompareAttributeCollapsibleProps = {
+  sectionKey: string;
+  icon: IconNames;
+  color: string;
+  label: string;
+  count: number;
+  disabled: boolean;
+  children: React.ReactNode;
+};
+
+// Field comparison row props within `DialogCompareAttribute`
+export type DialogCompareAttributeFieldDiffProps = {
+  label: string;
+  isDifferent: boolean;
+  currentValue: string;
+  originalValue: string;
+  useOriginal: boolean;
+  setUseOriginal: (v: boolean) => void;
 };
 
 // Utility type to specify the props of `DialogAddLinks`
@@ -493,15 +1081,6 @@ export type DialogAddLinksProps = {
   sourceName: string;
   existingLinks: ILink[];
   onAdd: (links: ILink[]) => void;
-};
-
-// `Links` component props
-export type LinksProps = {
-  links: ILink[];
-  setLinks: (value: React.SetStateAction<ILink[]>) => void;
-  viewOnly?: boolean;
-  sourceName?: string;
-  sourceId?: string;
 };
 
 // `DialogAddAttribute` component props
@@ -517,125 +1096,239 @@ export type DialogAddAttributeProps = {
   onSaveAsAttribute?: (attribute: IAttribute) => Promise<void>; // Shown only when the user is creating from scratch
 };
 
-// Workspace types
-export type IWorkspace = {
-  name: string;
-  owner: string;
-  isPublic: boolean;
-  description: string;
-  collaborators: Collaborator[];
-  entities: string[];
-  projects: string[];
-  attributes: string[];
-  activity: string[];
+// `DialogCreateCounter` component props
+export type DialogCreateCounterProps = {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (_id: string) => void;
 };
 
-// Individual permission within `UserWorkspacePermissions`, derived as `category.action` paths
-export type UserWorkspacePermission = {
-  [K in keyof UserWorkspacePermissions]: `${K}.${keyof UserWorkspacePermissions[K] & string}`;
-}[keyof UserWorkspacePermissions];
+// `DialogCreateIdentifierFormat` component props
+export type DialogCreateIdentifierFormatProps = {
+  open: boolean;
+  onClose: () => void;
+  onCreated: (_id: string) => void;
+};
 
-// General level of access to a Workspace, independent of specific permissions
-export type WorkspaceAccessLevel = "read" | "member";
+// `DialogAlert` component props
+export type DialogAlertProps = DialogGenericProps & {
+  header: string;
+  children: React.ReactElement | React.ReactElement[];
+  // Left and right buttons
+  leftButtonLabel?: string;
+  leftButtonColor?: string;
+  leftButtonAction?: () => void;
+  rightButtonLabel?: string;
+  rightButtonColor?: string;
+  rightButtonAction?: () => void;
+};
 
-// Access a check requires, either a general level or a specific permission
-export type WorkspaceRequirement = WorkspaceAccessLevel | UserWorkspacePermission;
-
-// Collections of Workspace contents that can be checked for membership
-export type WorkspaceCollection = "entities" | "projects" | "attributes";
-
-// Client-supplied fields accepted when creating a Workspace
-export type WorkspaceCreateInput = {
-  name: string;
-  description: string;
+// `DialogPreview` component props
+export type DialogPreviewProps = {
+  attachment: IGenericItem;
+  trigger?: React.ReactNode;
+  workspace?: string;
   isPublic?: boolean;
-  collaborators?: Collaborator[];
+  onRename?: (id: string, name: string) => void;
 };
 
-export type WorkspaceModel = IWorkspace & {
-  _id: string;
-  timestamp: string;
+// `PreviewContent` component props, used within `DialogPreview`
+export type DialogPreviewContentProps = Pick<DialogPreviewProps, "attachment" | "workspace" | "isPublic"> & {
+  nameField?: React.ReactNode;
 };
 
-export type WorkspaceContextValue = {
-  workspace: string;
-  workspaces: WorkspaceModel[];
-  loading: boolean;
-  activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
-  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
-  signOut: () => Promise<void>;
+// `DialogExport` component props
+export type DialogExportProps = DialogGenericProps & {
+  dataType: "entity" | "entities" | "project" | "attribute";
+  // Single-item export (Entity, Project, or Attribute)
+  id?: string;
+  // Multi-entity export; undefined means export all Entities
+  ids?: string[];
 };
 
-// Secondary identifier assigned to an Entity
-export type SecondaryIdentifier = {
-  value: string; // Secondary identifier value
-  format: string; // Base format value or custom IdentifierFormat id
+// `DialogUnsavedChanges` component props
+export type DialogUnsavedChangesProps = {
+  blocker: Blocker;
+  cancelBlockerRef: React.MutableRefObject<null>;
+  onClose: () => void;
+  callback: () => void;
 };
 
-// Entity types
-export type IEntity = {
-  name: string;
-  secondaryIdentifier?: SecondaryIdentifier;
-  owner: string;
-  archived: boolean;
-  created: string;
-  description: string;
-  projects: string[];
-  links: ILink[];
+// `DialogUpload` component props
+export type DialogUploadProps = DialogGenericProps & {
+  target: string;
+  uploads: string[];
+  setUploads: React.Dispatch<React.SetStateAction<string[]>>;
+  onUploadSuccess?: () => void;
+};
+
+// `DialogSave` component props
+export type DialogSaveProps = {
+  open: boolean;
+  onOpenChange: (details: { open: boolean }) => void;
+  onDone: () => void;
+  value: string;
+  onChange: (value: string) => void;
+  description?: string;
+  placeholder?: string;
+  showCloseButton?: boolean;
+  modifiedType?: "Entity" | "Project" | "Attribute";
+  isPublic?: boolean;
+};
+
+// `DialogPermissions` component props
+export type DialogPermissionsProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  user: string;
+  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
+  isGlobal: boolean; // Define if modifying "global" permissions or just for the Workspace
+  workspace?: string; // Specify the Workspace if modifying Workspace permissions
+  workspacePermissions?: UserWorkspacePermissions; // Current local Workspace permissions for `user`, used instead of fetching from the server
+  onUpdateWorkspacePermissions?: (permissions: UserWorkspacePermissions) => void; // Called with the edited permissions instead of persisting them immediately
+};
+
+// ---------------------------------------------------------------------------
+// Component props: `DialogImport` steps
+// ---------------------------------------------------------------------------
+
+// `DialogImportReviewTable` component props
+export type DialogImportReviewTableProps = {
+  items: ImportReview[];
+  icon: IconNames;
+  iconColor: string;
+  bg: string;
+  borderColor: string;
+  nameHeader: string;
+  singular: string;
+  plural: string;
+  showWarnings?: boolean;
+};
+
+// `UploadStep` component props, the `DialogImport` step used to select the import type and upload a file
+export type DialogImportUploadStepProps = {
+  importType: "entities" | "attribute" | undefined;
+  isTypeSelectDisabled: boolean;
+  onSelectImportType: (type: "entities" | "attribute") => void;
+  fileUpload: UseFileUploadReturn;
+};
+
+// `DialogImportEntityDetailsStep` component props, the `DialogImport` step used to configure name/description/project/owner fields
+export type DialogImportEntityDetailsStepProps = {
+  fileType: string;
+  columns: ColumnInfo[];
+  namePrefixField: string;
+  onNamePrefixFieldChange: (value: string) => void;
+  nameField: ColumnInfo | undefined;
+  onNameFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  nameUseCounter: boolean;
+  onNameUseCounterChange: (value: boolean) => void;
+  counter: string;
+  onCounterChange: React.Dispatch<React.SetStateAction<string>>;
+  onContinueDisabledChange: (value: boolean) => void;
+  suggestions: ColumnMappingSuggestion | null;
+  isSuggesting: boolean;
+  descriptionField: ColumnInfo | undefined;
+  onDescriptionFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierField: ColumnInfo | undefined;
+  onIdentifierFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
+  identifierFormat: string[];
+  onIdentifierFormatChange: React.Dispatch<React.SetStateAction<string[]>>;
+  projectField: string;
+  onProjectFieldChange: (value: string) => void;
+  projectsCollection: ListCollection<IGenericItem>;
+  ownerField: string;
+  getSelectComponent: (
+    key: string,
+    currentValue: ColumnInfo | undefined,
+    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
+  ) => React.ReactElement;
+};
+
+// `DialogImportEntityMappingStep` component props, the `DialogImport` step used to add Attributes applied to all imported Entities
+export type DialogImportEntityMappingStepProps = {
+  attributesField: AttributeModel[];
+  onAttributesFieldChange: (value: AttributeModel[]) => void;
+  addAttributeOpen: boolean;
+  onAddAttributeOpenChange: (value: boolean) => void;
+  ownerField: string;
   attributes: AttributeModel[];
-  attachments: IGenericItem[];
-  history: EntityHistory[];
+  fileType: string;
+  columns: ColumnInfo[];
 };
 
-export type EntityModel = IEntity & {
-  _id: string;
-  timestamp: string;
+// `AttributeNameCell` component props, the "Name" column cell within `DialogImportEntityMappingStep`'s attribute table
+export type AttributeNameCellProps = {
+  attribute: AttributeModel;
+  fileType: string;
+  columns: ColumnInfo[];
+  onRemove: (identifier: string) => void;
+  onUpdate: (updated: AttributeModel) => void;
 };
 
-export type EntityNode = IGenericItem & {
-  links: ILink[];
-  owner?: string;
-  created?: string;
-  archived?: boolean;
-  projects?: string[];
-  attributes?: IGenericItem[];
+// `EntityReviewStep` component props, the final `DialogImport` review step for an Entity import
+export type DialogImportEntityReviewStepProps = {
+  reviewEntities: ImportReview[];
 };
 
-// Details known about an Entity when building its `LinksGraph` node
-export type LinksGraphNodeInput = {
-  id: string;
+// `AttributeReviewStep` component props, the final `DialogImport` review step for a Attribute import
+export type DialogImportAttributeReviewStepProps = {
+  reviewAttributes: ImportReview[];
+};
+
+// ---------------------------------------------------------------------------
+// Component props: Attribute pages
+// ---------------------------------------------------------------------------
+
+// `AttributeBreadcrumb` component props, the breadcrumb trail and name tag
+export type AttributeBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateAttributes: () => void;
+  archived: boolean;
   name: string;
-  isPrimary: boolean;
-  linkCount?: number;
-  owner?: string;
-  created?: string;
-  projectCount?: number;
-  attributeCount?: number;
-  archived?: boolean;
+};
+
+// `AttributeOverviewCard` component props, Attribute Name/Owner/Timestamp/Visibility/Description fields
+export type AttributeOverviewCardProps = {
+  name: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
+  owner: string;
+  timestamp: string;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// `AttributeUsageTable` component props, Entities using an Attribute
+export type AttributeUsageTableProps = {
+  attributeUsage: AttributeUsage[];
+  onViewEntity: (entityId: string) => void;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
+// ---------------------------------------------------------------------------
+// Component props: Entity pages and links
+// ---------------------------------------------------------------------------
+
+// `Links` component props
+export type LinksProps = {
+  links: ILink[];
+  setLinks: (value: React.SetStateAction<ILink[]>) => void;
+  viewOnly?: boolean;
+  sourceName?: string;
+  sourceId?: string;
 };
 
 // Utility type to specify the props of `LinksGraphNode`
 export type LinksGraphNodeProps = LinksGraphNodeInput & {
   onView: (id: string) => void;
-};
-
-export type EntityHistory = {
-  author: string; // Change author identifier
-  message: string; // Change message
-  timestamp: string; // Timestamp of change
-  version: string; // Entity version
-
-  _id: string;
-  name: string;
-  secondaryIdentifier?: SecondaryIdentifier;
-  owner: string;
-  archived: boolean;
-  created: string;
-  description: string;
-  projects: string[];
-  links: ILink[];
-  attributes: AttributeModel[];
-  attachments: IGenericItem[];
 };
 
 // `EntityBreadcrumb` component props, the breadcrumb trail and name tag shared by the Entity detail page
@@ -750,483 +1443,89 @@ export type EntityAttachmentsTableProps = {
   onUploadClick?: () => void;
 };
 
-// Import review summary for Entities being imported
-export type EntityImportReview = {
+// ---------------------------------------------------------------------------
+// Component props: Project pages
+// ---------------------------------------------------------------------------
+
+// `ProjectBreadcrumb` component props, Project breadcrumb trail and name tag
+export type ProjectBreadcrumbProps = {
+  loading: boolean;
+  workspaceName: string;
+  onNavigateHome: () => void;
+  onNavigateProjects: () => void;
+  archived: boolean;
   name: string;
-  state: "create" | "update";
-  warnings?: string[];
 };
 
-// Import review summary for Attributes being imported
-export type AttributeImportReview = {
+// `ProjectOverviewCard` component props, Project Name/Owner/Timestamp/Visibility/Description fields
+export type ProjectOverviewCardProps = {
   name: string;
-  state: "create" | "update";
-};
-
-// A single parsed spreadsheet row
-export type IRow = Record<string, any>;
-
-// Maps Entity fields to spreadsheet column names (or fixed values) for a spreadsheet import
-export type IColumnMapping = {
-  namePrefix: string;
-  name?: string;
-  secondaryIdentifier?: {
-    value?: string; // Column name providing the secondary identifier value
-    format: string;
-  };
-  description?: string;
-  created: string;
+  onNameChange?: (value: string) => void;
+  nameReadOnly: boolean;
   owner: string;
-  project: string;
-  attributes: AttributeModel[];
-};
-
-// Entity built from a spreadsheet row, paired with any data validation warnings for that row
-export type EntityMappingResult = {
-  entity: IEntity;
-  warnings: string[];
-};
-
-// Result of parsing an uploaded JSON file: either the parsed contents, or an error message
-export type ParsedJSONFile = { parsed: IRow } | { error: string };
-
-// Import options for spreadsheet files
-export type SpreadsheetImportOptions = {
-  counters: { field: string; _id: string }[];
-};
-
-// Counter types
-export type ICounter = {
-  workspace: string; // The Workspace ID assigned the Counter
-  name: string;
-  format: string; // Format, with one set of `{}` used to position the numerical values
-  current: number; // Current value of the numeric component
-  increment: number; // Amount to increase the counter by each iteration
   created: string;
-};
-
-export type CounterModel = ICounter & {
-  _id: string;
-};
-
-export type SelectCounterProps = {
-  counter: string;
-  setCounter: (value: React.SetStateAction<string>) => void;
-  showCreate: boolean;
-};
-
-export type DialogCreateCounterProps = {
-  open: boolean;
-  onClose: () => void;
-  onCreated: (_id: string) => void;
-};
-
-// Identifier format types
-export type IIdentifierFormat = {
-  name: string;
-  created: string;
-  workspace: string;
-  fixedLength: number;
-  alphanumericOnly: boolean;
-  lettersOnly: boolean;
-  numbersOnly: boolean;
-  allowSpecialCharacters: boolean;
-  uppercaseRequired: boolean;
-};
-
-export type IdentifierFormatModel = IIdentifierFormat & {
-  _id: string;
-};
-
-// `DialogCreateIdentifier` component props
-export type DialogCreateIdentifierFormatProps = {
-  open: boolean;
-  onClose: () => void;
-  onCreated: (_id: string) => void;
-};
-
-// `SelectIdentifierFormat` component props
-export type SelectIdentifierFormatProps = {
-  format: string[];
-  setFormat: (value: React.SetStateAction<string[]>) => void;
-  onFormatsChange?: (formats: IdentifierFormatModel[]) => void;
-  showCreate?: boolean;
-  disabled?: boolean;
-};
-
-// Activity types
-export type IActivity = {
-  timestamp: string;
-  type: "create" | "update" | "delete" | "archived";
-  details: string;
-  target: {
-    type: "entities" | "projects" | "attributes" | "workspaces";
-    _id: string;
-    name: string;
-  };
-  actor?: string;
-  medium?: "API" | "Web";
-};
-
-export type ActivityModel = IActivity & {
-  _id: string;
-};
-
-// `ActivityFeed` component props
-export type ActivityFeedProps = {
-  activities?: ActivityModel[];
-  feedLimit?: number; // Number of activities to show in the feed (default: 5)
-};
-
-// `RelativeTime` component props
-export type RelativeTimeProps = {
-  value: string | number | Date;
-  format?: (relative: string) => string;
-  fontSize?: string;
-  fontWeight?: string;
-  color?: string;
-};
-
-// `Content` component
-export type ContentProps = {
-  children: React.ReactElement | React.ReactElement[];
-  isError?: boolean;
-  isLoaded?: boolean;
-};
-
-// `Page` component
-export type PageProps = {
-  children?: React.ReactElement | React.ReactElement[];
-  isPublic: boolean;
-};
-
-// `Navigation` component
-export type NavigationProps = {
-  isPublic: boolean;
-  workspace?: string;
-};
-
-// `DialogAlert` component
-export type DialogAlertProps = {
-  // Ref for placement
-  header: string;
-  children: React.ReactElement | React.ReactElement[];
-  // Dialog actions and state
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
-  // Left and right buttons
-  leftButtonLabel?: string;
-  leftButtonColor?: string;
-  leftButtonAction?: () => void;
-  rightButtonLabel?: string;
-  rightButtonColor?: string;
-  rightButtonAction?: () => void;
-};
-
-// `DataTable` component
-export type DataTableProps = {
-  columns: any[];
-  visibleColumns: Record<string, boolean>;
-  selectedRows: any;
-  onSelectedRowsChange?: (selectedRows: any[]) => void;
-  columnFilters?: any;
-  onColumnFiltersChange?: (filters: any) => void;
-  data: any[];
-  viewOnly?: boolean;
-
-  // Interface visibility
-  showColumnSelect?: boolean;
-  showColumnFilters?: boolean;
-  showPagination?: boolean;
-  showSelection?: boolean;
-  actions?: DataTableAction[];
-
-  // Layout behavior
-  fill?: boolean; // If true, table fills available space and scrolls. If false, fits within parent container.
-  resizableColumns?: boolean; // If true, header columns can be resized by dragging their right edge
-  footerAction?: { label: string; icon: IconNames; onClick: () => void }; // Renders a full-width action button below the rows
-
-  // Server-side pagination (if pageCount is provided, pagination is handled server-side)
-  pageCount?: number; // Total number of pages (enables server-side pagination)
-  pageIndex?: number; // Current page index (0-based)
-  pageSize?: number; // Current page size
-  onPaginationChange?: (pageIndex: number, pageSize: number) => void; // Callback when pagination changes
-  onSortChange?: (field: string, direction: "asc" | "desc" | null) => void; // Callback when sorting changes (for server-side sorting)
-  sortState?: { field: string; direction: "asc" | "desc" } | null; // Current sort state (for syncing with server-side sorting)
-};
-
-// `DataTableAction` component props
-export type DataTableAction = {
-  label: string | ((selectedCount: number) => string); // Action label, or a function receiving the selected row count
-  icon: IconNames; // Icon
-  action: (table: any, rows: any) => void; // Action function acting on the provided the table and rows
-  disabled?: boolean; // Disable the action
-  alwaysEnabled?: boolean; // Enable the action at all times, regardless if any rows selected
-};
-
-// `DataTablePaginationNav` component props
-export type DataTablePaginationNavProps = {
-  table: any;
-};
-
-// Item shape backing the `DataTablePageSizeSelect` collection
-export type DataTablePageSizeOption = { label: string; value: string };
-
-// `DataTablePageSizeSelect` component props
-export type DataTablePageSizeSelectProps = {
-  table: any;
-  pageLength: string[];
-  setPageLength: (value: string[]) => void;
-  pageLengthsCollection: ListCollection<DataTablePageSizeOption>;
-};
-
-// Item shape backing the `DataTableColumnSelect` collection
-export type DataTableColumnOption = DataTablePageSizeOption & { disabled: boolean };
-
-// `DataTableColumnSelect` component props
-export type DataTableColumnSelectProps = {
-  columnNamesCollection: ListCollection<DataTableColumnOption>;
-  visibleColumnsForSelect: string[];
-  alwaysVisibleColumns: string[];
-  updateColumnVisibility: (toggleableColumns: string[]) => void;
-};
-
-// `DataTableFiltersCount` component props
-export type DataTableFiltersCountProps =
-  | {
-      mode: "range";
-      label: string;
-      min: string;
-      max: string;
-      onMinChange: (value: string) => void;
-      onMaxChange: (value: string) => void;
-    }
-  | {
-      mode: "buckets";
-      label: string;
-      unitLabel: string;
-      selected: string[];
-      onChange: (ranges: string[]) => void;
-    };
-
-// `DataTableFilters` component props
-export type DataTableFiltersProps = {
-  entityLabel: string;
-  filtersOpen: boolean;
-  onFiltersOpenChange: (open: boolean) => void;
-  activeFilterCount: number;
-
-  startDate: string;
-  endDate: string;
-  onStartDateChange: (value: string) => void;
-  onEndDateChange: (value: string) => void;
-
-  owners: string[];
-  selectedOwners: string[];
-  onOwnersChange: (owners: string[]) => void;
+  visibilityIsPublic: boolean;
+  description: string;
+  onDescriptionChange?: (value: string) => void;
+  descriptionReadOnly: boolean;
   workspace?: string;
   isPublic?: boolean;
-
-  countFilter?: DataTableFiltersCountProps;
-  extraCheckbox?: {
-    label: string;
-    checkboxLabel: string;
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-  };
-
-  onApply: () => void;
-  onReset: () => void;
 };
 
-// `DialogPreview` component props
-export type DialogPreviewProps = {
-  attachment: IGenericItem;
-  trigger?: React.ReactNode;
+// `ProjectEntitiesTable` component props, the Entities within a Project, shared by the Project detail page
+export type ProjectEntitiesTableProps = {
+  entities: ProjectEntityTableRow[];
+  entityCount: number;
+  editing: boolean;
   workspace?: string;
   isPublic?: boolean;
-  onRename?: (id: string, name: string) => void;
+  onView: (entityId: string) => void;
+  onRemove?: (entityId: string) => void;
+  onRemoveMany?: (entityIds: string[]) => void;
+  onAddClick?: () => void;
+  addDisabled?: boolean;
 };
 
-// `PreviewContent` component props, used within `DialogPreview`
-export type PreviewContentProps = Pick<DialogPreviewProps, "attachment" | "workspace" | "isPublic"> & {
-  nameField?: React.ReactNode;
+// ---------------------------------------------------------------------------
+// Component props: search
+// ---------------------------------------------------------------------------
+
+// `SearchQueryBuilder` component props
+export type SearchQueryBuilderProps = {
+  query: SearchQuery;
+  onQueryChange: (query: SearchQuery) => void;
+  isValid: boolean;
+  onSearch: () => void;
+  onClear: () => void;
 };
 
-// `DialogImport` component props
-export type DialogImportProps = {
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
+// `SearchRuleSelect` component props
+export type SearchRuleSelectProps = {
+  value: string;
+  collection: ListCollection<string>;
+  onChange: (value: string) => void;
+  minW?: string;
+  placeholder?: string;
+  testId?: string;
 };
 
-// `SampleFile` type representing a downloadable example file
-export type SampleFile = { label: string; filename: string; mimeType: string; content: string };
-
-// AI-suggested column mapping for the Entity name/description fields
-export type ColumnMappingSuggestion = {
-  name: string | null;
-  description: string | null;
-};
-
-// `useEntityImport` hook parameters
-export type UseEntityImportParams = {
-  open: boolean;
-  fileUpload: UseFileUploadReturn;
-  fileType: string;
-  setContinueDisabled: (value: boolean) => void;
-};
-
-// `useAttributeImport` hook parameters
-export type UseAttributeImportParams = {
-  fileUpload: UseFileUploadReturn;
-  setContinueDisabled: (value: boolean) => void;
-};
-
-// Minimal shape of a mutation response checked by `reportMutationResult`
-export type MutationResult = {
-  success: boolean;
-  message: string;
-};
-
-// A row shared by both the Entity and Attribute import review tables; `warnings` only applies to Entities
-export type DialogImportReviewTableRow = {
-  name: string;
-  state: "create" | "update";
-  warnings?: string[];
-};
-
-// `DialogImportReviewTable` component props
-export type DialogImportReviewTableProps = {
-  items: DialogImportReviewTableRow[];
-  icon: IconNames;
-  iconColor: string;
-  bg: string;
-  borderColor: string;
-  nameHeader: string;
-  singular: string;
-  plural: string;
-  showWarnings?: boolean;
-};
-
-// `UploadStep` component props, the `DialogImport` step used to select the import type and upload a file
-export type UploadStepProps = {
-  importType: "entities" | "attribute" | undefined;
-  isTypeSelectDisabled: boolean;
-  onSelectImportType: (type: "entities" | "attribute") => void;
-  fileUpload: UseFileUploadReturn;
-};
-
-// `EntityDetailsStep` component props, the `DialogImport` step used to configure name/description/project/owner fields
-export type EntityDetailsStepProps = {
-  fileType: string;
-  columns: ColumnInfo[];
-  namePrefixField: string;
-  onNamePrefixFieldChange: (value: string) => void;
-  nameField: ColumnInfo | undefined;
-  onNameFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
-  nameUseCounter: boolean;
-  onNameUseCounterChange: (value: boolean) => void;
-  counter: string;
-  onCounterChange: React.Dispatch<React.SetStateAction<string>>;
-  onContinueDisabledChange: (value: boolean) => void;
-  suggestions: ColumnMappingSuggestion | null;
-  isSuggesting: boolean;
-  descriptionField: ColumnInfo | undefined;
-  onDescriptionFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
-  identifierField: ColumnInfo | undefined;
-  onIdentifierFieldChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>;
-  identifierFormat: string[];
-  onIdentifierFormatChange: React.Dispatch<React.SetStateAction<string[]>>;
-  projectField: string;
-  onProjectFieldChange: (value: string) => void;
-  projectsCollection: ListCollection<IGenericItem>;
-  ownerField: string;
-  getSelectComponent: (
-    key: string,
-    currentValue: ColumnInfo | undefined,
-    onValueChange: React.Dispatch<React.SetStateAction<ColumnInfo | undefined>>,
-  ) => React.ReactElement;
-};
-
-// `EntityMappingStep` component props, the `DialogImport` step used to add Attributes applied to all imported Entities
-export type EntityMappingStepProps = {
-  attributesField: AttributeModel[];
-  onAttributesFieldChange: (value: AttributeModel[]) => void;
-  addAttributeOpen: boolean;
-  onAddAttributeOpenChange: (value: boolean) => void;
-  ownerField: string;
-  attributes: AttributeModel[];
-  fileType: string;
-  columns: ColumnInfo[];
-};
-
-// `AttributeNameCell` component props, the "Name" column cell within `EntityMappingStep`'s attribute table
-export type AttributeNameCellProps = {
-  attribute: AttributeModel;
-  fileType: string;
-  columns: ColumnInfo[];
-  onRemove: (identifier: string) => void;
-  onUpdate: (updated: AttributeModel) => void;
-};
-
-// `EntityReviewStep` component props, the final `DialogImport` review step for an Entity import
-export type EntityReviewStepProps = {
-  reviewEntities: EntityImportReview[];
-};
-
-// `AttributeReviewStep` component props, the final `DialogImport` review step for a Attribute import
-export type AttributeReviewStepProps = {
-  reviewAttributes: AttributeImportReview[];
-};
-
-// `DialogExport` component props
-export type DialogExportProps = {
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
-  dataType: "entity" | "entities" | "project" | "attribute";
-  // Single-item export (Entity, Project, or Attribute)
+// `SelectSearch` component props
+export type SelectSearchProps = {
   id?: string;
-  // Multi-entity export; undefined means export all Entities
-  ids?: string[];
+  value: IGenericItem;
+  resultType: "entity" | "project" | "institution";
+  placeholder?: string;
+  defaultOption?: string;
+  onChange?: (value: any) => void;
+  disabled?: boolean;
+  isEmbedded?: boolean;
 };
 
-// `DialogScan` component props
-export type DialogScanProps = {
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
-};
+// ---------------------------------------------------------------------------
+// Icons
+// ---------------------------------------------------------------------------
 
-// `DialogReport` component props
-export type DialogReportProps = {
-  open: boolean;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
-};
-
-// `DialogUnsavedChanges` component props
-export type DialogUnsavedChangesProps = {
-  blocker: Blocker;
-  cancelBlockerRef: React.MutableRefObject<null>;
-  onClose: () => void;
-  callback: () => void;
-};
-
-// `DialogUpload` component props
-export type DialogUploadProps = {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  target: string;
-  uploads: string[];
-  setUploads: React.Dispatch<React.SetStateAction<string[]>>;
-  onUploadSuccess?: () => void;
-};
-
-// `Scanner` component props
-export type ScannerProps = Html5QrcodeCameraScanConfig & {
-  fps: number;
-  verbose: boolean;
-};
-
-// Icon component
+// Names of the icons available to `Icon`
 export type IconNames =
   // Default
   | "unknown"
@@ -1326,264 +1625,11 @@ export type IconNames =
   | "sort_up"
   | "sort_down";
 
-// `SearchQuery` types
-export type SearchCombinator = "and" | "or";
-export type SearchField = "name" | "description" | "projects" | "links" | "attributes";
+// ---------------------------------------------------------------------------
+// Test helpers
+// ---------------------------------------------------------------------------
 
-export interface SearchAttributeValue {
-  type: IValueType;
-  operator: "contains" | "does not contain" | "equals" | ">" | "<";
-  data: string;
-}
-
-export interface SearchRule {
-  id: string;
-  field: SearchField;
-  operator: string;
-  value: string | SearchAttributeValue;
-}
-
-export interface SearchQuery {
-  combinator: SearchCombinator;
-  rules: SearchRule[];
-}
-
-// `SearchQueryBuilder` component props
-export interface SearchQueryBuilderProps {
-  query: SearchQuery;
-  onQueryChange: (query: SearchQuery) => void;
-  isValid: boolean;
-  onSearch: () => void;
-  onClear: () => void;
-}
-
-// `SearchRuleSelect` component props
-export type SearchRuleSelectProps = {
-  value: string;
-  collection: ListCollection<string>;
-  onChange: (value: string) => void;
-  minW?: string;
-  placeholder?: string;
-  testId?: string;
-};
-
-// `SelectSearch` component props
-export type SelectSearchProps = {
-  id?: string;
-  value: IGenericItem;
-  resultType: "entity" | "project" | "institution";
-  placeholder?: string;
-  defaultOption?: string;
-  onChange?: (value: any) => void;
-  disabled?: boolean;
-  isEmbedded?: boolean;
-};
-
-// `SelectMultiEntity` component props
-export type SelectMultiEntityProps = {
-  projectEntities: string[];
-  selectedEntities: IGenericItem[];
-  setSelectedEntities: React.Dispatch<React.SetStateAction<IGenericItem[]>>;
-};
-
-// `DialogSave` component props
-export type DialogSaveProps = {
-  open: boolean;
-  onOpenChange: (details: { open: boolean }) => void;
-  onDone: () => void;
-  value: string;
-  onChange: (value: string) => void;
-  description?: string;
-  placeholder?: string;
-  showCloseButton?: boolean;
-  modifiedType?: "Entity" | "Project" | "Attribute";
-  isPublic?: boolean;
-};
-
-// `HistoryDrawer` component props, a version history Drawer shared by Entity, Project, and Attribute detail pages
-export type HistoryDrawerProps = {
-  type: "entity" | "project" | "attribute";
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  history: (EntityHistory | ProjectHistory | AttributeHistory)[];
-  archived: boolean; // Disables Preview while the current item is archived
-  previewActive: boolean; // Whether a version is currently being previewed, disables Restore
-  canRestore: boolean; // Workspace permission to restore a version
-  onPreview: (version: any) => void;
-  onRestore: (version: any) => void | Promise<void>;
-};
-
-// Generic ResponseMessage type
-export type IResponseMessage = {
-  success: boolean;
-  message: string;
-};
-
-// ResponseMessage type carrying a data payload
-export type ResponseData<D> = IResponseMessage & {
-  data: D;
-};
-
-// Storage and local data management types
-export type ApplicationStorage = {
-  setup: boolean; // Flag if application setup is complete
-  workspace: string; // ID of active Workspace
-};
-
-// File type
-export type IFile = Promise<{
-  filename: string;
-  mimetype: string;
-  encoding: string;
-  createReadStream: () => ReadStream;
-}>;
-
-// Generic GraphQL resolver parent type (for unused parents)
-export type IResolverParent = Record<string, any>;
-
-// Context passed through the request headers, includes the ORCID of the user
-export type Context = {
-  user: string;
-  workspace: string;
-  userRole: string;
-};
-
-// API key data
-export type APIKey = {
-  value: string;
-  expires: string;
-  scope: "view" | "edit";
-  workspaces: string[];
-};
-
-// API response
-export type APIData<D> = {
-  path: string;
-  version: string;
-  status: "success" | "warning" | "error" | "unauthorized";
-  message: string;
-  data: D;
-};
-
-// User types
-export type IUser = {
-  firstName: string;
-  lastName: string;
-  name: string; // better-auth: Display name
-  affiliation: string;
-  email: string; // better-auth: Email
-  emailVerified: boolean; // better-auth: Email verification
-  image: string; // better-auth: Display image URL
-  createdAt: string; // better-auth: Created
-  updatedAt: string; // better-auth: Last updated
-  lastLogin: string; // better-auth: Timestamp of last login
-  api_keys: string; // better-auth: Stored as a JSON string
-  role: string; // better-auth: "user" or "admin"
-  banned: boolean; // better-auth: Overarching access status
-  permissions: UserGlobalPermissions; // Global permissions such as AI search or API access
-  account_orcid: string; // ORCiD if connected
-  hasSeenWalkthrough?: boolean; // If user has seen or skipped the initial walkthrough
-  completedProfile?: boolean; // `false` until third-party signup profile is completed
-};
-
-export type UserModel = IUser & {
-  _id: string;
-};
-
-// `UserWorkspacePermissions` permissions structure
-export type UserWorkspacePermissions = {
-  administration: {
-    edit: boolean;
-    invite: boolean;
-  };
-  entities: {
-    create: boolean;
-    edit: boolean;
-    archive: boolean;
-  };
-  projects: {
-    create: boolean;
-    edit: boolean;
-    archive: boolean;
-  };
-  attributes: {
-    create: boolean;
-    edit: boolean;
-    archive: boolean;
-  };
-};
-
-// `UserGlobalPermissions` permissions structure
-export type UserGlobalPermissions = {
-  features: {
-    import: boolean;
-    scan: boolean;
-    ai: boolean;
-    api: boolean;
-  };
-  workspaces: {
-    create: boolean;
-  };
-};
-
-export type UserCollatedPermissions = {
-  workspace: UserWorkspacePermissions;
-  global: UserGlobalPermissions;
-};
-
-// `DialogPermisions` component props
-export type DialogPermissionsProps = {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  user: string;
-  editable?: boolean; // If `false`, show a read-only preview instead of editable toggles
-  isGlobal: boolean; // Define if modifying "global" permissions or just for the Workspace
-  workspace?: string; // Specify the Workspace if modifying Workspace permissions
-  workspacePermissions?: UserWorkspacePermissions; // Current local Workspace permissions for `user`, used instead of fetching from the server
-  onUpdateWorkspacePermissions?: (permissions: UserWorkspacePermissions) => void; // Called with the edited permissions instead of persisting them immediately
-};
-
-// Metrics
-export type IContentMetrics = {
-  all: number;
-  addedDay: number;
-};
-
-export type EntityMetrics = IContentMetrics;
-export type ProjectMetrics = IContentMetrics;
-export type AttributeMetrics = IContentMetrics;
-export type CollaboratorMetrics = IContentMetrics;
-
-export type AdminWorkspace = {
-  _id: string;
-  name: string;
-  description: string;
-  owner: string;
-  entities: number;
-  projects: number;
-  attributes: number;
-};
-
-export type AdminMetrics = {
-  users: number;
-  workspaces: number;
-  entities: number;
-  projects: number;
-  attributes: number;
-};
-
-export type AdminUser = {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  workspaces: number;
-  permissions: UserGlobalPermissions;
-  banned: boolean;
-  lastLogin: string;
-};
-
-// Types to assist with test frameworks
+// Client route and the check verifying access to it
 export type ClientPath = {
   name: string;
   verify: (page: Page, granted: boolean) => Promise<void>;

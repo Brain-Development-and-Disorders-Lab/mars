@@ -7,7 +7,7 @@ import Icon from "@components/Icon";
 import FileUploadList from "@components/UploadList";
 
 // Existing and custom types
-import { SampleFile, UploadStepProps } from "@types";
+import { SampleFile, DialogImportUploadStepProps } from "@types";
 
 // Utility functions and libraries
 import { downloadSampleFile, getFileExtension } from "@lib/util";
@@ -74,7 +74,12 @@ const SAMPLE_FILES: Record<"entities" | "attribute", SampleFile[]> = {
   ],
 };
 
-const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, fileUpload }: UploadStepProps) => (
+const DialogImportUploadStep = ({
+  importType,
+  isTypeSelectDisabled,
+  onSelectImportType,
+  fileUpload,
+}: DialogImportUploadStepProps) => (
   <>
     {/* Select file type of import */}
     <Flex direction={"column"} gap={"2"} py={"2"}>
@@ -209,4 +214,4 @@ const UploadStep = ({ importType, isTypeSelectDisabled, onSelectImportType, file
   </>
 );
 
-export default UploadStep;
+export default DialogImportUploadStep;

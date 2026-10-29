@@ -16,7 +16,7 @@ import DataTableFilters from "@components/DataTable/DataTableFilters";
 import { createColumnHelper, ColumnFiltersState } from "@tanstack/react-table";
 
 // Existing and custom types
-import { DataTableAction, EntityModel, IGenericItem } from "@types";
+import { DataTableAction, DataTableFilterValues, EntityFilter, EntityModel, IGenericItem } from "@types";
 
 // Routing and navigation
 import { useNavigate } from "react-router-dom";
@@ -32,11 +32,7 @@ import { useQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
+import { countActiveFilters, createEmptyFilterValues, toCountRange } from "@lib/util";
 
 // Variables
 import { STYLES } from "@variables";
@@ -62,27 +58,8 @@ const Entities = () => {
   // Column filters state for entity table
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  // Filter state (temporary values before applying)
-  const [filterState, setFilterState] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    hasAttachments: false,
-    attributeCountRanges: [] as string[],
-  });
-
-  // Applied filters state
-  const [appliedFilters, setAppliedFilters] = useState({
-    startDate: "",
-    endDate: "",
-    owners: [] as string[],
-    hasAttachments: false,
-    attributeCountRanges: [] as string[],
-  });
-
-  // Collapsible state for filters
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [activeFilterCount, setActiveFilterCount] = useState(0);
+  // Applied filters
+  const [appliedFilters, setAppliedFilters] = useState<DataTableFilterValues>(createEmptyFilterValues);
 
   // Entities export dialog
   const [exportOpen, setExportOpen] = useState(false);
@@ -137,28 +114,16 @@ const Entities = () => {
     }
   `;
   // Build filter object (only include non-empty values)
-  const filterVariables =
-    appliedFilters.startDate ||
-    appliedFilters.endDate ||
-    appliedFilters.owners.length > 0 ||
-    appliedFilters.hasAttachments ||
-    appliedFilters.attributeCountRanges.length > 0
-      ? {
-          ...(appliedFilters.startDate && {
-            startDate: appliedFilters.startDate,
-          }),
-          ...(appliedFilters.endDate && { endDate: appliedFilters.endDate }),
-          ...(appliedFilters.owners.length > 0 && {
-            owners: appliedFilters.owners,
-          }),
-          ...(appliedFilters.hasAttachments && { hasAttachments: true }),
-          ...(appliedFilters.attributeCountRanges.length > 0 && {
-            attributeCountRanges: appliedFilters.attributeCountRanges,
-          }),
-        }
-      : undefined;
+  const filterVariables: EntityFilter = {
+    startDate: appliedFilters.startDate || undefined,
+    endDate: appliedFilters.endDate || undefined,
+    owners: appliedFilters.owners.length > 0 ? appliedFilters.owners : undefined,
+    hasAttachments: appliedFilters.toggles.hasAttachments || undefined,
+    attributeCount: toCountRange(appliedFilters.ranges.attributes),
+    projectCount: toCountRange(appliedFilters.ranges.projects),
+  };
 
-  const { loading, error, data } = useQuery<{
+  const { loading, error, data, previousData } = useQuery<{
     entities: { entities: EntityModel[]; total: number };
     workspace: IGenericItem;
   }>(GET_ENTITIES, {
@@ -183,17 +148,6 @@ const Entities = () => {
       setWorkspaceName(data.workspace.name);
     }
   }, [data]);
-
-  // Calculate active filter count
-  useEffect(() => {
-    let count = 0;
-    if (appliedFilters.startDate) count++;
-    if (appliedFilters.endDate) count++;
-    if (appliedFilters.owners.length > 0) count += appliedFilters.owners.length;
-    if (appliedFilters.hasAttachments) count++;
-    if (appliedFilters.attributeCountRanges.length > 0) count += appliedFilters.attributeCountRanges.length;
-    setActiveFilterCount(count);
-  }, [appliedFilters]);
 
   // Update column visibility when breakpoint changes
   useEffect(() => {
@@ -320,7 +274,7 @@ const Entities = () => {
   ];
 
   return (
-    <Content isError={!_.isUndefined(error)} isLoaded={!loading}>
+    <Content isError={!_.isUndefined(error)} isLoaded={!loading || !_.isUndefined(previousData)}>
       <Flex direction={"row"} p={"1"} rounded={"md"} wrap={"wrap"} gap={"2"} minW="0" maxW="100%">
         <Flex w={"100%"} minW="0" direction={"row"} justify={"space-between"} align={"center"}>
           <Flex align={"center"} gap={"1"} w={"100%"} minW="0" ml={"0.5"}>
@@ -359,43 +313,16 @@ const Entities = () => {
           {/* Filter Section */}
           <DataTableFilters
             entityLabel={"Entity"}
-            filtersOpen={filtersOpen}
-            onFiltersOpenChange={setFiltersOpen}
-            activeFilterCount={activeFilterCount}
-            startDate={filterState.startDate}
-            endDate={filterState.endDate}
-            onStartDateChange={(value) => setFilterState({ ...filterState, startDate: value })}
-            onEndDateChange={(value) => setFilterState({ ...filterState, endDate: value })}
             owners={entityData.map((e) => e.owner)}
-            selectedOwners={filterState.owners}
-            onOwnersChange={(owners) => setFilterState({ ...filterState, owners })}
-            extraCheckbox={{
-              label: "Attachments",
-              checkboxLabel: "Has Attachments",
-              checked: filterState.hasAttachments,
-              onChange: (hasAttachments) => setFilterState({ ...filterState, hasAttachments }),
-            }}
-            countFilter={{
-              mode: "buckets",
-              label: "Attribute Count",
-              unitLabel: "attributes",
-              selected: filterState.attributeCountRanges,
-              onChange: (attributeCountRanges) => setFilterState({ ...filterState, attributeCountRanges }),
-            }}
-            onApply={() => {
-              setAppliedFilters({ ...filterState });
+            toggles={[{ key: "hasAttachments", label: "Attachments", checkboxLabel: "Has Attachments" }]}
+            ranges={[
+              { key: "attributes", label: "Attribute Count" },
+              { key: "projects", label: "Project Count" },
+            ]}
+            values={appliedFilters}
+            onApply={(values) => {
+              setAppliedFilters(values);
               setPage(0); // Reset to first page when filters change
-            }}
-            onReset={() => {
-              const clearedState = {
-                startDate: "",
-                endDate: "",
-                owners: [],
-                hasAttachments: false,
-                attributeCountRanges: [],
-              };
-              setFilterState(clearedState);
-              setAppliedFilters(clearedState);
             }}
           />
 
@@ -444,7 +371,7 @@ const Entities = () => {
                   <Icon name={"entity"} size={"lg"} color={STYLES.entity.color.icon} />
                 </EmptyState.Indicator>
                 <EmptyState.Description>
-                  {activeFilterCount > 0 ? "No entities match the selected filters" : "No Entities"}
+                  {countActiveFilters(appliedFilters) > 0 ? "No Entities match the selected filters" : "No Entities"}
                 </EmptyState.Description>
               </EmptyState.Content>
             </EmptyState.Root>
