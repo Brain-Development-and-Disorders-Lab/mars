@@ -154,7 +154,7 @@ const isModifyPartial = (
  * @param {UserWorkspacePermissions} permissions Set of User's Workspace permissions
  * @return {string[]}
  */
-export const getCollaboratorPermissionsLevel = (permissions: UserWorkspacePermissions): string[] => {
+export const getCollaboratorPermissionsLabels = (permissions: UserWorkspacePermissions): string[] => {
   const permissionsLabels = ["View"];
 
   // "Modify (All)" only shown if all Entities, Projects, and Attributes permissions enabled

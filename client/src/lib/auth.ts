@@ -21,18 +21,22 @@ export const auth = createAuthClient({
         },
         lastLogin: {
           type: "string",
+          input: false,
         },
         hasSeenWalkthrough: {
           type: "boolean",
         },
         api_keys: {
           type: "string",
+          input: false,
         },
         account_orcid: {
           type: "string",
+          input: false,
         },
         completedProfile: {
           type: "boolean",
+          input: false,
         },
         permissions: {
           type: "json",

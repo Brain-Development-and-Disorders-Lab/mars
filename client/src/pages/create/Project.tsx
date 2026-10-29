@@ -322,7 +322,7 @@ const Project = () => {
         </Button>
 
         <Tooltip
-          content={"Insufficient permissions in this Workspace"}
+          content={"You do not have permission to do this in this Workspace"}
           disabled={workspacePermissions.projects.create}
           showArrow
         >

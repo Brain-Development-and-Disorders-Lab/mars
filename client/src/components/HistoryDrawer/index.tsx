@@ -409,7 +409,7 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                                   <Icon name={"expand"} size={"xs"} />
                                 </Button>
                                 <Tooltip
-                                  content={"Insufficient permissions in this Workspace"}
+                                  content={"You do not have permission to do this in this Workspace"}
                                   disabled={props.canRestore}
                                   showArrow
                                 >

@@ -2,6 +2,7 @@ import { EmailClient } from "@azure/communication-email";
 
 // Utility functions
 import { logger } from "@lib/logger";
+import _ from "lodash";
 
 // Email configuration
 const client = new EmailClient(process.env.AZURE_COMMUNICATION_CONNECTION_STRING!);
@@ -10,6 +11,16 @@ const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS!;
 // Content variables
 const BRAND_COLOR = "#2E3192";
 const YEAR = new Date().getFullYear();
+
+/**
+ * Escape a value for safe inclusion in email HTML, every interpolated value must pass through this
+ */
+const escapeHtml = (value: string): string => _.escape(value);
+
+/**
+ * Collapse a value onto a single line for use in an email subject
+ */
+export const toSubjectText = (value: string): string => value.replace(/[\r\n]+/g, " ").trim();
 
 /**
  * Wraps content in the standard Metadatify email chrome (header, footer, border).
@@ -58,7 +69,7 @@ const ctaButton = (label: string, url: string): string => `
   <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
     <tr>
       <td style="background-color:${BRAND_COLOR};border-radius:6px;">
-        <a href="${url}" style="display:inline-block;padding:10px 24px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;">${label}</a>
+        <a href="${escapeHtml(url)}" style="display:inline-block;padding:10px 24px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;">${escapeHtml(label)}</a>
       </td>
     </tr>
   </table>`;
@@ -75,11 +86,11 @@ export const emailTemplates = {
   resetPassword: (name: string, url: string): string =>
     buildEmail(`
       <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">Reset your password</p>
-      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, we received a request to reset your password.</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${escapeHtml(name)}, we received a request to reset your password.</p>
       <p style="margin:0 0 24px;font-size:13px;color:#52525b;line-height:1.6;">Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
       ${ctaButton("Reset Password", url)}
       <p style="margin:0 0 4px;font-size:11px;color:#a1a1aa;">Or copy this link into your browser:</p>
-      <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${url}</p>
+      <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${escapeHtml(url)}</p>
       ${divider()}
       <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't request a password reset, you can safely ignore this email.</p>
     `),
@@ -87,11 +98,11 @@ export const emailTemplates = {
   verifyEmail: (name: string, url: string): string =>
     buildEmail(`
       <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">Verify your Email</p>
-      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, thank you for creating an account for Metadatify.</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${escapeHtml(name)}, thank you for creating an account for Metadatify.</p>
       <p style="margin:0 0 24px;font-size:13px;color:#52525b;line-height:1.6;">Click the button below to verify your email address. This link expires in <strong>24 hours</strong>.</p>
       ${ctaButton("Verify Email", url)}
       <p style="margin:0 0 4px;font-size:11px;color:#a1a1aa;">Or copy this link into your browser:</p>
-      <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${url}</p>
+      <p style="margin:0 0 24px;font-size:11px;color:${BRAND_COLOR};word-break:break-all;">${escapeHtml(url)}</p>
       ${divider()}
       <p style="margin:0;font-size:12px;color:#a1a1aa;">If you didn't create a Metadatify account, you can safely ignore this email.</p>
     `),
@@ -120,23 +131,23 @@ export const emailTemplates = {
       <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Description</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
         <tr><td style="padding:12px 16px;">
-          <p style="margin:0;font-size:14px;color:#18181b;white-space:pre-wrap;">${description}</p>
+          <p style="margin:0;font-size:14px;color:#18181b;white-space:pre-wrap;">${escapeHtml(description)}</p>
         </td></tr>
       </table>
 
       <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">User</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
         <tr><td style="padding:12px 16px;">
-          <p style="margin:0 0 4px;font-size:13px;color:#18181b;"><strong>${userName}</strong></p>
-          <p style="margin:0 0 4px;font-size:13px;color:#52525b;">${userEmail}</p>
-          <p style="margin:0;font-size:11px;color:#a1a1aa;">${userId}</p>
+          <p style="margin:0 0 4px;font-size:13px;color:#18181b;"><strong>${escapeHtml(userName)}</strong></p>
+          <p style="margin:0 0 4px;font-size:13px;color:#52525b;">${escapeHtml(userEmail)}</p>
+          <p style="margin:0;font-size:11px;color:#a1a1aa;">${escapeHtml(userId)}</p>
         </td></tr>
       </table>
 
       <p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Page</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
         <tr><td style="padding:12px 16px;">
-          <p style="margin:0;font-size:13px;color:#18181b;font-family:monospace;">${path}</p>
+          <p style="margin:0;font-size:13px;color:#18181b;font-family:monospace;">${escapeHtml(path)}</p>
         </td></tr>
       </table>
 
@@ -145,14 +156,14 @@ export const emailTemplates = {
           ? `<p style="margin:0 0 6px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Console Errors</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;background-color:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
         <tr><td style="padding:12px 16px;">
-          ${consoleErrors.map((e) => `<p style="margin:0 0 6px;font-size:12px;color:#b91c1c;font-family:monospace;white-space:pre-wrap;">${e}</p>`).join("")}
+          ${consoleErrors.map((error) => `<p style="margin:0 0 6px;font-size:12px;color:#b91c1c;font-family:monospace;white-space:pre-wrap;">${escapeHtml(error)}</p>`).join("")}
         </td></tr>
       </table>`
           : ""
       }
 
       ${divider()}
-      <p style="margin:0;font-size:12px;color:#a1a1aa;">Submitted ${timestamp} via Metadatify.</p>
+      <p style="margin:0;font-size:12px;color:#a1a1aa;">Submitted ${escapeHtml(timestamp)} via Metadatify.</p>
     `),
 
   workspaceCollaboratorAdded: (name: string, workspaceName: string, workspaceUrl: string): string =>
@@ -165,12 +176,12 @@ export const emailTemplates = {
         </tr>
       </table>
       <p style="margin:0 0 8px;font-size:22px;font-weight:600;color:#18181b;">You've been added to a Workspace</p>
-      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${name}, you have been added as a collaborator to a Metadatify Workspace.</p>
+      <p style="margin:0 0 24px;font-size:13px;color:#71717a;">Hi ${escapeHtml(name)}, you have been added as a collaborator to a Metadatify Workspace.</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;background-color:#f4f4f5;border-radius:6px;border:1px solid #e4e4e7;">
         <tr>
           <td style="padding:12px 16px;">
             <p style="margin:0 0 2px;font-size:11px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Workspace</p>
-            <p style="margin:0;font-size:14px;font-weight:600;color:#18181b;">${workspaceName}</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:#18181b;">${escapeHtml(workspaceName)}</p>
           </td>
         </tr>
       </table>

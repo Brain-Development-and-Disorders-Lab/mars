@@ -566,7 +566,7 @@ const Project = () => {
             </Flex>
             <Flex direction={"row"} gap={"1"} align={"center"}>
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.projects.archive}
                 showArrow
               >
@@ -613,7 +613,7 @@ const Project = () => {
           <Flex direction={"row"} gap={"2"} wrap={"wrap"}>
             {displayProjectArchived ? (
               <Tooltip
-                content={"Insufficient permissions in this Workspace"}
+                content={"You do not have permission to do this in this Workspace"}
                 disabled={workspacePermissions.projects.archive}
                 showArrow
               >
@@ -637,7 +637,7 @@ const Project = () => {
                   </Button>
                 )}
                 <Tooltip
-                  content={"Insufficient permissions in this Workspace"}
+                  content={"You do not have permission to do this in this Workspace"}
                   disabled={workspacePermissions.projects.edit}
                   showArrow
                 >
@@ -697,7 +697,7 @@ const Project = () => {
                       </Menu.Item>
                     </Tooltip>
                     <Tooltip
-                      content={"Insufficient permissions in this Workspace"}
+                      content={"You do not have permission to do this in this Workspace"}
                       disabled={workspacePermissions.projects.create}
                       showArrow
                     >

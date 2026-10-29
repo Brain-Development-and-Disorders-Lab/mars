@@ -3,6 +3,7 @@ import {
   AttributeModel,
   EntityHistory,
   EntityModel,
+  ExportFormat,
   IEntity,
   IGenericItem,
   ILink,
@@ -16,7 +17,7 @@ import { Projects } from "@models/Projects";
 
 // Custom functions
 import { getDatabase } from "@connectors/database";
-import { getIdentifier } from "@lib/util";
+import { getIdentifier, toSpreadsheet } from "@lib/util";
 
 // Generate history version IDs
 import { customAlphabet } from "nanoid";
@@ -25,8 +26,6 @@ const nanoid = customAlphabet("1234567890abcdef", 10);
 // External libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import Papa from "papaparse";
-import XLSX from "xlsx";
 import { logger } from "@lib/logger";
 
 const ENTITIES_COLLECTION = "entities"; // Collection name
@@ -312,10 +311,10 @@ export class Entities {
     return !_.isNull(entity);
   };
 
-  static existByName = async (name: string): Promise<boolean> => {
+  static existByName = async (name: string, entities: string[]): Promise<boolean> => {
     const entity = await getDatabase()
       .collection<EntityModel>(ENTITIES_COLLECTION)
-      .findOne({ name: name, archived: false });
+      .findOne({ _id: { $in: entities }, name: name, archived: false });
 
     return !_.isNull(entity);
   };
@@ -340,6 +339,7 @@ export class Entities {
       secondaryIdentifier: entity.secondaryIdentifier || { value: "", format: "" },
       timestamp: dayjs(Date.now()).toISOString(), // Add created timestamp
       ...entity, // Unpack existing IEntity fields
+      attachments: [], // Attachments are only added by uploading a file
       history: [],
     };
 
@@ -445,6 +445,11 @@ export class Entities {
         return !Entities.linkExists(link, entity.links);
       });
       for await (const link of addLinks) {
+        // Links always originate from this Entity, regardless of the `source` provided
+        link.source = {
+          _id: entity._id,
+          name: update.$set.name,
+        };
         await Entities.addLink(link);
       }
 
@@ -480,7 +485,11 @@ export class Entities {
 
     // Attachments
     if (!_.isUndefined(updated.attachments)) {
-      update.$set.attachments = updated.attachments;
+      // Only allow renaming or removing existing attachments, new files are added by uploading
+      const existingAttachments = entity.attachments.map((attachment) => attachment._id);
+      update.$set.attachments = updated.attachments.filter((attachment) =>
+        _.includes(existingAttachments, attachment._id),
+      );
     }
 
     const response = await getDatabase()
@@ -957,7 +966,7 @@ export class Entities {
    */
   static export = async (
     _id: string,
-    format: "json" | "csv" | "xlsx",
+    format: ExportFormat,
     fields?: string[],
     includeHistory = false,
   ): Promise<string> => {
@@ -1035,7 +1044,7 @@ export class Entities {
 
         return JSON.stringify(formatted, null, "  ");
       }
-    } else if (_.isEqual(format, "csv") || _.isEqual(format, "xlsx")) {
+    } else if (format === "csv" || format === "xlsx") {
       let exportFields = fields;
 
       // Headers and row for spreadsheet output
@@ -1095,15 +1104,7 @@ export class Entities {
         }
       }
 
-      if (_.isEqual(format, "xlsx")) {
-        const ws = XLSX.utils.aoa_to_sheet([headers, row]);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Export");
-        const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
-        return buffer.toString("base64");
-      }
-
-      return Papa.unparse([headers, row]);
+      return toSpreadsheet([headers, row], format);
     } else {
       return "Invalid format";
     }
@@ -1134,7 +1135,7 @@ export class Entities {
    */
   static exportMany = async (
     entities: string[],
-    format: "json" | "csv" | "xlsx",
+    format: ExportFormat,
     includeAttributes = true,
     includeHistory = false,
   ): Promise<string> => {
@@ -1208,15 +1209,7 @@ export class Entities {
       rows.push(row);
     }
 
-    if (format === "xlsx") {
-      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Export");
-      const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
-      return buffer.toString("base64");
-    }
-
-    return Papa.unparse([headers, ...rows]);
+    return toSpreadsheet([headers, ...rows], format);
   };
 
   static addAttachment = async (_id: string, attachment: IGenericItem): Promise<IResponseMessage> => {

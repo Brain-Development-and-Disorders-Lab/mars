@@ -41,7 +41,7 @@ import { auth } from "@lib/auth";
 // Utility functions and libraries
 import _ from "lodash";
 import dayjs from "dayjs";
-import { isValidEmail, ignoreAbort, isCollaborator } from "@lib/util";
+import { isValidEmail, ignoreAbort } from "@lib/util";
 
 // Variables
 import { APP_URL, STYLES } from "@variables";
@@ -130,20 +130,6 @@ const User = () => {
 
   useEffect(() => {
     if (data?.user) {
-      // If the DB has no ORCiD but better-auth has a linked account, sync it
-      if (!data.user.account_orcid) {
-        auth.listAccounts().then(({ data: accounts }) => {
-          const orcidAccount = accounts?.find((a) => a.providerId === "orcid");
-          if (orcidAccount) {
-            updateUser({
-              variables: {
-                user: { _id: user, account_orcid: orcidAccount.accountId },
-              },
-            }).then(() => refetch?.().catch(ignoreAbort));
-          }
-        });
-      }
-
       // Trim the ORCiD URL
       if (data.user.account_orcid !== "") {
         const startOrcid = data.user.account_orcid.lastIndexOf("/");
@@ -483,7 +469,7 @@ const User = () => {
           name: workspace.name,
           description: workspace.description,
           isPublic: workspace.isPublic,
-          collaborators: workspace.collaborators.filter((c) => !isCollaborator(c._id, workspace.collaborators)),
+          collaborators: workspace.collaborators.filter((c) => c._id !== user),
         },
       },
     });
@@ -517,7 +503,7 @@ const User = () => {
               name: w.name,
               description: w.description,
               isPublic: w.isPublic,
-              collaborators: w.collaborators.filter((c) => !isCollaborator(c._id, w.collaborators)),
+              collaborators: w.collaborators.filter((c) => c._id !== user),
             },
           },
         }),

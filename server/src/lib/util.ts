@@ -1,8 +1,10 @@
 // Custom types
-import { Collaborator, UserGlobalPermissions } from "@types";
+import { Collaborator, SpreadsheetFormat, UserGlobalPermissions } from "@types";
 
 // Utility libraries and functions
 import { nanoid } from "nanoid";
+import Papa from "papaparse";
+import XLSX from "xlsx";
 
 /**
  * Generate safe pseudo-random identifiers for allocation when creating
@@ -50,4 +52,19 @@ export const parseGlobalPermissions = (
 ): UserGlobalPermissions => {
   if (!permissions) return fallback;
   return typeof permissions === "string" ? JSON.parse(permissions) : permissions;
+};
+
+/**
+ * Serialise rows of export data into a spreadsheet, the first row being the headers
+ * @param {string[][]} rows Header row followed by data rows
+ * @param {SpreadsheetFormat} format Spreadsheet format to generate
+ * @return {string} CSV text, or a base64-encoded XLSX workbook
+ */
+export const toSpreadsheet = (rows: string[][], format: SpreadsheetFormat): string => {
+  if (format === "xlsx") {
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), "Export");
+    return (XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer).toString("base64");
+  }
+  return Papa.unparse(rows);
 };

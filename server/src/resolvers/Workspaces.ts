@@ -2,7 +2,7 @@ import {
   ActivityModel,
   Context,
   EntityModel,
-  IWorkspace,
+  WorkspaceCreateInput,
   ProjectModel,
   IResponseMessage,
   CollaboratorMetrics,
@@ -15,18 +15,21 @@ import { GraphQLError } from "graphql/index";
 
 // Models
 import { Activity } from "@models/Activity";
+import { Admin } from "@models/Admin";
 import { Workspaces } from "@models/Workspaces";
 import { User } from "@models/User";
 
 // Email
-import { emailTemplates, sendEmail } from "@lib/email";
+import { emailTemplates, sendEmail, toSubjectText } from "@lib/email";
 
 // Posthog
 import { PostHogClient } from "@lib/posthog";
 
 // Utility functions
-import { isCollaborator } from "@lib/util";
 import dayjs from "dayjs";
+
+// Access control
+import { assertWorkspaceAccess, assertWorkspaceUpdatePermitted, unauthorized } from "@lib/access";
 
 const CLIENT_URL = process.env.NODE_ENV === "production" ? "https://app.metadatify.com" : "http://127.0.0.1:8080";
 
@@ -39,7 +42,7 @@ export const WorkspacesResolvers = {
       // Access control
       if (workspaces.length > 0) {
         return workspaces.filter((workspace) => {
-          return _.isEqual(workspace.owner, context.user) || isCollaborator(context.user, workspace.collaborators);
+          return Workspaces.canAccess(context.user, workspace, "member");
         });
       }
 
@@ -63,20 +66,10 @@ export const WorkspacesResolvers = {
       }
 
       // Access control
-      if (
-        workspace &&
-        (workspace.isPublic ||
-          isCollaborator(context.user, workspace.collaborators) ||
-          _.isEqual(workspace.owner, context.user))
-      ) {
-        // Check if user is a Workspace owner or collaborator
+      if (Workspaces.canAccess(context.user, workspace, "read")) {
         return workspace;
       } else {
-        throw new GraphQLError("You do not have permission to access this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Workspace");
       }
     },
 
@@ -96,19 +89,11 @@ export const WorkspacesResolvers = {
       }
 
       // Access control
-      if (
-        workspace &&
-        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
-      ) {
-        // Check if user is a Workspace owner or collaborator
+      if (workspace && Workspaces.canAccess(context.user, workspace, "member")) {
         const result = await Workspaces.getEntities(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError("You do not have permission to access this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Workspace");
       }
     },
 
@@ -128,19 +113,11 @@ export const WorkspacesResolvers = {
       }
 
       // Access control
-      if (
-        workspace &&
-        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
-      ) {
-        // Check if user is a Workspace owner or collaborator
+      if (workspace && Workspaces.canAccess(context.user, workspace, "member")) {
         const result = await Workspaces.getProjects(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError("You do not have permission to access this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Workspace");
       }
     },
 
@@ -160,19 +137,11 @@ export const WorkspacesResolvers = {
       }
 
       // Access control
-      if (
-        workspace &&
-        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
-      ) {
-        // Check if user is a Workspace owner or collaborator
+      if (workspace && Workspaces.canAccess(context.user, workspace, "member")) {
         const result = await Workspaces.getActivity(args._id);
         return result.slice(0, args.limit);
       } else {
-        throw new GraphQLError("You do not have permission to access this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Workspace");
       }
     },
 
@@ -182,14 +151,8 @@ export const WorkspacesResolvers = {
       _args: Record<string, unknown>,
       context: Context,
     ): Promise<CollaboratorMetrics> => {
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      // Verify access to the Workspace
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       // Filter Activity by Workspace and then timestamps (within last 24 hours)
       const activity = await Activity.all();
@@ -214,10 +177,26 @@ export const WorkspacesResolvers = {
     // Create a new Workspace
     createWorkspace: async (
       _parent: IResolverParent,
-      args: { workspace: IWorkspace },
+      args: { workspace: WorkspaceCreateInput },
       context: Context,
     ): Promise<ResponseData<string>> => {
-      const result = await Workspaces.create(args.workspace);
+      const permissions = await Admin.getUserGlobalPermissions(context.user);
+      if (!permissions.workspaces.create) {
+        throw unauthorized("You do not have permission to create Workspaces");
+      }
+
+      // Owner and contents are set server-side, only descriptive fields are taken from the client
+      const result = await Workspaces.create({
+        name: args.workspace.name,
+        description: args.workspace.description,
+        isPublic: args.workspace.isPublic ?? false,
+        owner: context.user,
+        collaborators: args.workspace.collaborators ?? [],
+        entities: [],
+        projects: [],
+        attributes: [],
+        activity: [],
+      });
 
       // Capture event
       if (process.env.DISABLE_CAPTURE !== "true") {
@@ -238,12 +217,10 @@ export const WorkspacesResolvers = {
     ): Promise<IResponseMessage> => {
       const workspace = await Workspaces.getOne(args.workspace._id);
 
-      // Access control
-      if (
-        workspace &&
-        (isCollaborator(context.user, workspace.collaborators) || _.isEqual(workspace.owner, context.user))
-      ) {
-        // Check if user is a Workspace owner or collaborator
+      // Access control, any member may submit an update but each change requires its own permission
+      if (workspace && Workspaces.canAccess(context.user, workspace, "member")) {
+        assertWorkspaceUpdatePermitted(context, workspace, args.workspace);
+
         const result = await Workspaces.update(args.workspace);
 
         if (result.success) {
@@ -257,7 +234,7 @@ export const WorkspacesResolvers = {
                 if (collaboratorResult) {
                   await sendEmail({
                     to: collaboratorResult.email,
-                    subject: `You've been added to "${args.workspace.name}" on Metadatify`,
+                    subject: `You've been added to "${toSubjectText(args.workspace.name)}" on Metadatify`,
                     html: emailTemplates.workspaceCollaboratorAdded(
                       collaboratorResult.name,
                       args.workspace.name,
@@ -282,7 +259,7 @@ export const WorkspacesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.data);
+            await Workspaces.addActivity(workspace._id, activity.data);
           } else if (args.workspace.collaborators.length < workspace.collaborators.length) {
             const removedCollaborators = workspace.collaborators.length - args.workspace.collaborators.length;
 
@@ -300,7 +277,7 @@ export const WorkspacesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.data);
+            await Workspaces.addActivity(workspace._id, activity.data);
           }
 
           // Add Activity for other Workspace modifications
@@ -318,7 +295,7 @@ export const WorkspacesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.data);
+            await Workspaces.addActivity(workspace._id, activity.data);
           } else if (workspace.name !== args.workspace.name) {
             const activity = await Activity.create({
               timestamp: dayjs(Date.now()).toISOString(),
@@ -333,7 +310,7 @@ export const WorkspacesResolvers = {
             });
 
             // Add Activity to Workspace
-            await Workspaces.addActivity(context.workspace, activity.data);
+            await Workspaces.addActivity(workspace._id, activity.data);
           }
 
           // Capture event
@@ -347,11 +324,7 @@ export const WorkspacesResolvers = {
 
         return result;
       } else {
-        throw new GraphQLError("You do not have permission to access this Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Workspace");
       }
     },
   },

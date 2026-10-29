@@ -182,7 +182,7 @@ const DialogCreate = (props: DialogCreateProps) => {
                           content={
                             option.scope === "global"
                               ? "You do not have permission to create Workspaces"
-                              : "Insufficient permissions in this Workspace"
+                              : "You do not have permission to do this in this Workspace"
                           }
                           disabled={canCreate}
                           showArrow

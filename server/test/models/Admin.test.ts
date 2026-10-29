@@ -10,7 +10,7 @@ import { User } from "@models/User";
 import { Workspaces } from "@models/Workspaces";
 
 // Types
-import { ResponseData, UserModel, UserWorkspacePermissions } from "@types";
+import { ResponseData, UserModel, UserWorkspacePermissions, WorkspaceModel } from "@types";
 
 // Database connectivity
 import { connect, disconnect } from "@connectors/database";
@@ -116,6 +116,13 @@ describe("Admin model permissions", () => {
       expect(permissions).toEqual(DEFAULT_WORKSPACE_PERMISSIONS);
     });
 
+    it("returns no permissions for a User who is neither the owner nor a Collaborator", async () => {
+      const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
+
+      const permissions = await Admin.getUserWorkspacePermissions(OUTSIDER_ID, workspaceId);
+      expect(permissions).toEqual(DEFAULT_WORKSPACE_PERMISSIONS);
+    });
+
     it("grants the owner full permissions even without a Collaborator entry", async () => {
       const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
 
@@ -199,19 +206,47 @@ describe("Admin model permissions", () => {
   });
 
   describe("Workspace access", () => {
+    // Load a Workspace created by the test, failing if it is missing
+    const getWorkspace = async (_id: string): Promise<WorkspaceModel> => {
+      const workspace = await Workspaces.getOne(_id);
+      if (!workspace) throw new Error("Workspace not found after creation");
+      return workspace;
+    };
+
     it("grants access to the owner", async () => {
-      const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
-      expect(await Workspaces.checkAccess(OWNER_ID, workspaceId)).toBeTruthy();
+      const workspace = await getWorkspace(await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS));
+      expect(Workspaces.canAccess(OWNER_ID, workspace, "read")).toBeTruthy();
     });
 
     it("grants access to a Collaborator", async () => {
-      const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
-      expect(await Workspaces.checkAccess(COLLABORATOR_ID, workspaceId)).toBeTruthy();
+      const workspace = await getWorkspace(await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS));
+      expect(Workspaces.canAccess(COLLABORATOR_ID, workspace, "read")).toBeTruthy();
     });
 
     it("denies access to a User who is neither the owner nor a Collaborator", async () => {
-      const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
-      expect(await Workspaces.checkAccess(OUTSIDER_ID, workspaceId)).toBeFalsy();
+      const workspace = await getWorkspace(await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS));
+      expect(Workspaces.canAccess(OUTSIDER_ID, workspace, "read")).toBeFalsy();
+    });
+
+    it("grants a specific permission only when the Collaborator holds it", async () => {
+      const collaboratorPermissions = _.cloneDeep(DEFAULT_WORKSPACE_PERMISSIONS);
+      collaboratorPermissions.entities.create = true;
+      const workspace = await getWorkspace(await createWorkspace(collaboratorPermissions));
+
+      expect(Workspaces.canAccess(COLLABORATOR_ID, workspace, "entities.create")).toBeTruthy();
+      expect(Workspaces.canAccess(COLLABORATOR_ID, workspace, "entities.edit")).toBeFalsy();
+      expect(Workspaces.canAccess(OWNER_ID, workspace, "entities.edit")).toBeTruthy();
+    });
+
+    it("allows anyone to read a public Workspace, but only members to modify it", async () => {
+      const workspace = await getWorkspace(await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS));
+      await Workspaces.update({ ...workspace, isPublic: true });
+      const publicWorkspace = await getWorkspace(workspace._id);
+
+      expect(Workspaces.canAccess(OUTSIDER_ID, publicWorkspace, "read")).toBeTruthy();
+      expect(Workspaces.canAccess("", publicWorkspace, "read")).toBeTruthy();
+      expect(Workspaces.canAccess(OUTSIDER_ID, publicWorkspace, "member")).toBeFalsy();
+      expect(Workspaces.canAccess(OUTSIDER_ID, publicWorkspace, "entities.create")).toBeFalsy();
     });
   });
 });

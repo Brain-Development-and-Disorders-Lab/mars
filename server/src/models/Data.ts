@@ -28,13 +28,13 @@ import { ObjectId } from "mongodb";
 import { getAttachments } from "@connectors/database";
 import _ from "lodash";
 import { nanoid } from "nanoid";
+import { getIdentifier } from "@lib/util";
 
 // Models
 import { Activity } from "@models/Activity";
 import { Attributes } from "@models/Attributes";
 import { Counters } from "@models/Counters";
 import { Entities } from "@models/Entities";
-import { Projects } from "@models/Projects";
 import { Workspaces } from "@models/Workspaces";
 
 export class Data {
@@ -559,7 +559,11 @@ export class Data {
     }
 
     try {
-      const projectExists = await Projects.exists(project);
+      const workspace = await Workspaces.getOne(context.workspace);
+      if (_.isNull(workspace)) {
+        return { success: false, message: "Workspace does not exist" };
+      }
+      const projectExists = _.includes(workspace.projects, project);
 
       for (const rawEntity of parsed["entities"] as EntityModel[]) {
         const entity: EntityModel = {
@@ -568,13 +572,12 @@ export class Data {
           created: rawEntity.created ?? dayjs(Date.now()).toISOString(),
           timestamp: rawEntity.timestamp ?? dayjs(Date.now()).toISOString(),
           description: rawEntity.description ?? "",
-          projects: rawEntity.projects ?? [],
-          links: rawEntity.links ?? [],
+          projects: (rawEntity.projects ?? []).filter((_id) => _.includes(workspace.projects, _id)),
+          links: (rawEntity.links ?? []).filter((link) => _.includes(workspace.entities, link.target._id)),
           attachments: rawEntity.attachments ?? [],
           history: rawEntity.history ?? [],
           secondaryIdentifier: rawEntity.secondaryIdentifier ?? { value: "", format: "" },
           attributes: rawEntity.attributes ?? [],
-          // The importing party always takes ownership of imported content
           owner: context.user,
         };
 
@@ -590,8 +593,14 @@ export class Data {
           );
         }
 
+        // Entities from another Workspace are imported as new copies rather than updated in place
         const entityExists = !_.isUndefined(entity._id) && (await Entities.exists(entity._id));
-        if (entityExists) {
+        const inWorkspace = entityExists && _.includes(workspace.entities, entity._id);
+        if (entityExists && !inWorkspace) {
+          entity._id = getIdentifier("entity");
+        }
+
+        if (inWorkspace) {
           const result = await Entities.update(entity);
           if (!result.success) {
             return { success: false, message: `Error updating Entity: "${entity.name}"` };

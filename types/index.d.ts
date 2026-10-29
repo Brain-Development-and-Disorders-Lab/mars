@@ -260,6 +260,12 @@ export type CollaboratorsProps = {
   setCollaborators: (value: React.SetStateAction<Collaborator[]>) => void;
 };
 
+// `CollaboratorEmail` component props
+export type CollaboratorEmailProps = {
+  userId: string;
+  email?: string;
+};
+
 // `Linky` component props
 export type LinkyProps = {
   type: "entities" | "attributes" | "projects" | "workspaces";
@@ -457,6 +463,12 @@ export type FileName = {
   extension: string;
 };
 
+// File formats supported when exporting Entities and Projects
+export type ExportFormat = "json" | "csv" | "xlsx";
+
+// Spreadsheet subset of `ExportFormat`
+export type SpreadsheetFormat = Exclude<ExportFormat, "json">;
+
 // Utility type used for `Select` component options
 export type ISelectOption = {
   label: string;
@@ -518,9 +530,40 @@ export type IWorkspace = {
   activity: string[];
 };
 
+// Individual permission within `UserWorkspacePermissions`, derived as `category.action` paths
+export type UserWorkspacePermission = {
+  [K in keyof UserWorkspacePermissions]: `${K}.${keyof UserWorkspacePermissions[K] & string}`;
+}[keyof UserWorkspacePermissions];
+
+// General level of access to a Workspace, independent of specific permissions
+export type WorkspaceAccessLevel = "read" | "member";
+
+// Access a check requires, either a general level or a specific permission
+export type WorkspaceRequirement = WorkspaceAccessLevel | UserWorkspacePermission;
+
+// Collections of Workspace contents that can be checked for membership
+export type WorkspaceCollection = "entities" | "projects" | "attributes";
+
+// Client-supplied fields accepted when creating a Workspace
+export type WorkspaceCreateInput = {
+  name: string;
+  description: string;
+  isPublic?: boolean;
+  collaborators?: Collaborator[];
+};
+
 export type WorkspaceModel = IWorkspace & {
   _id: string;
   timestamp: string;
+};
+
+export type WorkspaceContextValue = {
+  workspace: string;
+  workspaces: WorkspaceModel[];
+  loading: boolean;
+  activateWorkspace: (workspace: string) => Promise<IResponseMessage>;
+  refreshWorkspaces: () => Promise<WorkspaceModel[]>;
+  signOut: () => Promise<void>;
 };
 
 // Secondary identifier assigned to an Entity
@@ -1541,7 +1584,6 @@ export type AdminUser = {
 };
 
 // Types to assist with test frameworks
-// A path on the client where a Workspace permission is enforced
 export type ClientPath = {
   name: string;
   verify: (page: Page, granted: boolean) => Promise<void>;

@@ -6,10 +6,9 @@ import { Context, IdentifierFormatModel, IResolverParent } from "@types";
 
 // Models
 import { Identifiers } from "@models/Identifiers";
-import { Workspaces } from "@models/Workspaces";
 
 // Access control
-import { assertWorkspaceAccess } from "@lib/access";
+import { assertWorkspaceAccess, unauthorized } from "@lib/access";
 
 // Utilities
 import _ from "lodash";
@@ -18,17 +17,7 @@ export const IdentifiersResolvers = {
   Query: {
     identifierFormat: async (_parent: IResolverParent, args: { _id: string }, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Identifier Format to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      const workspace = await assertWorkspaceAccess(context, "read");
 
       const identifierFormat = await Identifiers.getIdentifierFormat(args._id);
       if (_.isNull(identifierFormat)) {
@@ -43,26 +32,12 @@ export const IdentifiersResolvers = {
       if (_.isEqual(identifierFormat.workspace, workspace._id)) {
         return identifierFormat;
       } else {
-        throw new GraphQLError("This Identifier Format is outside the current Workspace", {
-          extensions: {
-            code: "UNAUTHORIZED",
-          },
-        });
+        throw unauthorized("You do not have permission to access this Identifier Format");
       }
     },
     identifierFormats: async (_parent: IResolverParent, _args: Record<string, unknown>, context: Context) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Identifier Format to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context, "read");
 
       return await Identifiers.getIdentifierFormats(context.workspace);
     },
@@ -74,10 +49,10 @@ export const IdentifiersResolvers = {
       context: Context,
     ) => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
+      await assertWorkspaceAccess(context, "entities.create");
 
-      // Apply create operation
-      return await Identifiers.create(args.format);
+      // Apply create operation, always within the current Workspace
+      return await Identifiers.create({ ...args.format, workspace: context.workspace });
     },
   },
 };

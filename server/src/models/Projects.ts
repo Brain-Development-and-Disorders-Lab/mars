@@ -2,14 +2,21 @@
 import { Entities } from "@models/Entities";
 
 // Custom types
-import { EntityModel, IProject, ProjectHistory, ProjectModel, IResponseMessage, ResponseData } from "@types";
+import {
+  EntityModel,
+  ExportFormat,
+  IProject,
+  ProjectHistory,
+  ProjectModel,
+  IResponseMessage,
+  ResponseData,
+} from "@types";
 
 // Utility functions and libraries
 import _ from "lodash";
 import { getDatabase } from "@connectors/database";
-import { getIdentifier } from "@lib/util";
+import { getIdentifier, toSpreadsheet } from "@lib/util";
 import dayjs from "dayjs";
-import Papa from "papaparse";
 import { logger } from "@lib/logger";
 
 // Generate history version IDs
@@ -326,13 +333,13 @@ export class Projects {
   /**
    * Generate export data for the Project
    * @param _id Project identifier
-   * @param format File format, either JSON or spreadsheet
+   * @param format File format of exported data, either JSON or spreadsheet format (CSV, XLSX)
    * @param fields Optionally specify fields to include in export
    * @returns {Promise<string>}
    */
   static export = async (
     _id: string,
-    format: "json" | "spreadsheet",
+    format: ExportFormat,
     fields?: string[],
     includeHistory = false,
   ): Promise<string> => {
@@ -346,7 +353,7 @@ export class Projects {
       delete (project as never)["history"];
     }
 
-    if (_.isEqual(format, "csv")) {
+    if (format === "csv" || format === "xlsx") {
       let exportFields = fields;
 
       // Handle spreadsheet format
@@ -374,10 +381,7 @@ export class Projects {
         }
       }
 
-      // Collate and format data as a CSV string (spreadsheet)
-      const collated = [headers, row];
-      const formatted = Papa.unparse(collated);
-      return formatted;
+      return toSpreadsheet([headers, row], format);
     } else {
       // Handle JSON format
       if (_.isUndefined(fields)) {
@@ -398,15 +402,9 @@ export class Projects {
           } else if (_.isEqual(field, "description")) {
             // "description" data field
             formatted["description"] = project.description;
-          } else if (_.startsWith(field, "entities_")) {
-            if (_.endsWith(field, "names")) {
-              // Include Entity `name` values
-              const entities = await Entities.getMany(project.entities);
-              formatted["entities"] = entities.map((entity) => entity.name);
-            } else {
-              // Include Entity `_id` values
-              formatted["entities"] = project.entities;
-            }
+          } else if (_.isEqual(field, "entities")) {
+            // Include Entity `_id` values
+            formatted["entities"] = project.entities;
           }
         }
 

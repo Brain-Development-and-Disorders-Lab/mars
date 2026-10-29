@@ -33,22 +33,16 @@ export class User {
     };
   };
 
-  static getByOrcid = async (orcid: string): Promise<ResponseData<string>> => {
-    const result = await getDatabase().collection<UserModel>(USERS_COLLECTION).findOne({ account_orcid: orcid });
-
-    // Return the User `_id`
-    if (result) {
-      return {
-        message: "User found successfully",
-        success: true,
-        data: result._id,
-      };
-    }
-    return {
-      message: "User not found",
-      success: false,
-      data: "",
-    };
+  /**
+   * Set the ORCiD iD of a User, only called with a verified better-auth ORCiD account
+   * @param _id User identifier
+   * @param orcid ORCiD iD from the linked account
+   * @return {Promise<void>}
+   */
+  static setOrcid = async (_id: string, orcid: string): Promise<void> => {
+    await getDatabase()
+      .collection<UserModel>(USERS_COLLECTION)
+      .updateOne({ _id: _id }, { $set: { account_orcid: orcid } });
   };
 
   static exists = async (_id: string): Promise<boolean> => {
@@ -133,14 +127,6 @@ export class User {
 
     if (updated.lastLogin) {
       update.$set.lastLogin = updated.lastLogin;
-    }
-
-    if (updated.api_keys) {
-      update.$set.api_keys = updated.api_keys;
-    }
-
-    if (updated.account_orcid) {
-      update.$set.account_orcid = updated.account_orcid;
     }
 
     if (!_.isUndefined(updated.hasSeenWalkthrough)) {

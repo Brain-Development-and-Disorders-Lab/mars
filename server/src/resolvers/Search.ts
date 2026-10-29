@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { GraphQLError } from "graphql";
 
 // Custom types
@@ -6,7 +5,6 @@ import { Context, EntityModel, IResolverParent, ProjectModel } from "@types";
 
 // Models
 import { Search } from "@models/Search";
-import { Workspaces } from "@models/Workspaces";
 import { AI } from "@models/AI";
 
 // Analytics
@@ -37,17 +35,7 @@ export const SearchResolvers = {
       context: Context,
     ): Promise<EntityModel[] | ProjectModel[]> => {
       // Verify access to the Workspace
-      await assertWorkspaceAccess(context);
-
-      // Retrieve the Workspace to determine which Entities to return
-      const workspace = await Workspaces.getOne(context.workspace);
-      if (_.isNull(workspace)) {
-        throw new GraphQLError("Workspace does not exist", {
-          extensions: {
-            code: "NON_EXIST",
-          },
-        });
-      }
+      await assertWorkspaceAccess(context, "read");
 
       // Use a single search query, but require specifying the type of `query`
       let results: EntityModel[] | ProjectModel[];

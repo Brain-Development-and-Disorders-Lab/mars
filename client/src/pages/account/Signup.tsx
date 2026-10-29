@@ -185,10 +185,6 @@ const Signup = () => {
         firstName,
         lastName,
         affiliation,
-        lastLogin: dayjs(Date.now()).toISOString(),
-        api_keys: JSON.stringify([]),
-        account_orcid: "",
-        completedProfile: true,
         callbackURL: `${APP_URL}/login`,
         hasSeenWalkthrough: false,
       },
@@ -241,7 +237,9 @@ const Signup = () => {
       });
       setIsLoading(false);
       if (result.data?.updateUser.success) {
-        await auth.updateUser({ completedProfile: true });
+        // Bypass the session cookie cache so the completed profile is picked up immediately
+        await auth.getSession({ query: { disableCookieCache: true } });
+        auth.$store.notify("$sessionSignal");
         posthog.capture("client.auth.signup_complete", { method: provider || "third_party" });
         navigate("/");
       } else if (result.data?.updateUser.message === "EMAIL_EXISTS") {

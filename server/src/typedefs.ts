@@ -61,42 +61,42 @@ export const typedefs = `#graphql
   }
   
   # All "Global" permissions ("features" and "workspaces")
-  # "UserFeaturesPermissions" type
-  type UserFeaturesPermissions {
+  # "UserGlobalFeaturesPermissions" type
+  type UserGlobalFeaturesPermissions {
     import: Boolean
     scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserFeaturesPermissionsInput" type
-  input UserFeaturesPermissionsInput {
+  # "UserGlobalFeaturesPermissionsInput" type
+  input UserGlobalFeaturesPermissionsInput {
     import: Boolean
     scan: Boolean
     ai: Boolean
     api: Boolean
   }
   
-  # "UserWorkspacesPermissions" type
-  type UserWorkspacesPermissions {
+  # "UserGlobalWorkspacesPermissions" type
+  type UserGlobalWorkspacesPermissions {
     create: Boolean
   }
   
-  # "UserWorkspacesPermissionsInput" type
-  input UserWorkspacesPermissionsInput {
+  # "UserGlobalWorkspacesPermissionsInput" type
+  input UserGlobalWorkspacesPermissionsInput {
     create: Boolean
   }
   
   # "UserGlobalPermissions" type
   type UserGlobalPermissions {
-    features: UserFeaturesPermissions
-    workspaces: UserWorkspacesPermissions
+    features: UserGlobalFeaturesPermissions
+    workspaces: UserGlobalWorkspacesPermissions
   }
   
   # "UserGlobalPermissionsInput" type
   input UserGlobalPermissionsInput {
-    features: UserFeaturesPermissionsInput
-    workspaces: UserWorkspacesPermissionsInput
+    features: UserGlobalFeaturesPermissionsInput
+    workspaces: UserGlobalWorkspacesPermissionsInput
   }
   
   # All "Workspace" permissions ("administration", "entities", "projects", "attributes")
@@ -176,12 +176,6 @@ export const typedefs = `#graphql
     workspace: UserWorkspacePermissions
     global: UserGlobalPermissions
   }
-  
-  # "UserCollatedPermissionsInput" type
-  input UserCollatedPermissionsInput {
-    workspace: UserWorkspacePermissionsInput
-    global: UserGlobalPermissionsInput
-  }
 
   # "AdminWorkspace" type
   type AdminWorkspace {
@@ -218,8 +212,6 @@ export const typedefs = `#graphql
     image: String
     createdAt: String
     updatedAt: String
-    api_keys: String
-    account_orcid: String
     hasSeenWalkthrough: Boolean
     completedProfile: Boolean
   }
@@ -548,12 +540,7 @@ export const typedefs = `#graphql
     name: String
     description: String
     isPublic: Boolean
-    owner: String
     collaborators: [CollaboratorInput]
-    entities: [String]
-    projects: [String]
-    attributes: [String]
-    activity: [String]
   }
 
   # "WorkspaceUpdateInput" input

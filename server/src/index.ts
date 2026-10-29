@@ -64,6 +64,9 @@ const app = express();
 // Trust exactly one hop to resolve to the real client address
 app.set("trust proxy", 1);
 
+// Security headers for every response
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // Azure App Service middleware to strip `x-forwarded-for` port
 app.use((req, _res, next) => {
   const xForwardedFor = req.headers["x-forwarded-for"];
@@ -111,10 +114,12 @@ const start = async () => {
 
   // Setup authentication helper function
   const checkSession: RequestHandler = async (req, res, next) => {
+    // Bypass the cookie cache so revoked sessions, bans, and role changes apply immediately
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
+      query: { disableCookieCache: true },
     });
-    if (session === null) {
+    if (session === null || (session.user as Record<string, unknown>).banned === true) {
       res.status(401).json({ message: `You do not have permission to access ${req.path}` });
     } else {
       res.locals.session = session;
@@ -322,8 +327,13 @@ const start = async () => {
       origin: origins,
       credentials: true,
     }),
-    express.static(__dirname + "/public"),
-    helmet(),
+    express.static(__dirname + "/public", {
+      setHeaders: (res) => {
+        res.setHeader("Content-Disposition", "attachment");
+        res.setHeader("Content-Security-Policy", "default-src 'none'; sandbox");
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      },
+    }),
   );
 
   // Open the public API endpoint
@@ -333,7 +343,6 @@ const start = async () => {
     express.json(),
     express.urlencoded({ extended: true }),
     APIRouter(),
-    helmet(),
   );
 
   // Unauthenticated public Workspace endpoint, bypasses checkSession
@@ -351,7 +360,6 @@ const start = async () => {
         userRole: "user",
       }),
     }),
-    helmet(),
   );
 
   // Configure Express and GraphQL
@@ -378,7 +386,6 @@ const start = async () => {
         };
       },
     }),
-    helmet(),
   );
 
   // Start the server
