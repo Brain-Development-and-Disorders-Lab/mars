@@ -45,8 +45,6 @@ New to Metadatify? The [Quickstart](Quickstart.md) walks you from your first log
 
 ## Questions or Enquiries
 
-<!-- TODO(henry): replace with shared contact address (keep in sync with CONTACT_EMAIL in website/src/config.ts) -->
-
 Any questions or enquiries related to the code or potential collaborations can be sent to [henry.burgess@wustl.edu](mailto:henry.burgess@wustl.edu).
 
 ## License

@@ -19,7 +19,15 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
   };
 
   return (
-    <Flex w={"100%"} direction={"column"} gap={"2"} align={"center"}>
+    <Flex
+      w={"100%"}
+      direction={"column"}
+      gap={"2"}
+      align={"center"}
+      role={"group"}
+      aria-roledescription={"carousel"}
+      aria-label={"Product screenshots"}
+    >
       <Flex w={"100%"} direction={"row"} gap={"4"} align={"center"} justify={"center"}>
         <IconButton
           aria-label={"Previous image"}
@@ -42,6 +50,9 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
               <Image
                 key={image.path}
                 src={image.path}
+                alt={`Screenshot: ${image.caption}`}
+                aria-hidden={index !== imgIndex}
+                loading={"lazy"}
                 position={"absolute"}
                 inset={"0"}
                 w={"100%"}
@@ -52,7 +63,7 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
               />
             ))}
           </Box>
-          <Text fontWeight={"semibold"} color={"text.muted"}>
+          <Text fontWeight={"semibold"} color={"text.muted"} aria-live={"polite"}>
             {props.images[imgIndex].caption}
           </Text>
         </Flex>
@@ -63,18 +74,28 @@ const Carousel = (props: { images: { path: string; caption: string }[] }) => {
           onClick={handleNextClick}
         />
       </Flex>
-      <Flex direction={"row"} justify={"space-around"} gap={"2"}>
+      <Flex direction={"row"} justify={"space-around"}>
         {props.images.map((_image, index) => (
           <Flex
+            as={"button"}
             key={`img-indicator-${index}`}
-            rounded={"full"}
-            bg={index === imgIndex ? "blue.600" : "border.default"}
-            h={"10px"}
-            w={"10px"}
+            aria-label={`Show screenshot ${index + 1} of ${props.images.length}`}
+            aria-current={index === imgIndex}
+            align={"center"}
+            justify={"center"}
+            h={"24px"}
+            w={"24px"}
             cursor={"pointer"}
-            transition={"background 0.2s ease"}
             onClick={() => setImgIndex(index)}
-          />
+          >
+            <Box
+              rounded={"full"}
+              bg={index === imgIndex ? "blue.600" : "border.default"}
+              h={"10px"}
+              w={"10px"}
+              transition={"background 0.2s ease"}
+            />
+          </Flex>
         ))}
       </Flex>
     </Flex>

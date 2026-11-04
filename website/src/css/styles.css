@@ -31,3 +31,13 @@ html {
     transform: translateX(0) skewX(0);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .bg-blob {
+    animation: none !important;
+  }
+}

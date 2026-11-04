@@ -1,6 +1,6 @@
 // React imports
 import React from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 
 // Utility imports
 import _ from "lodash";
@@ -16,8 +16,12 @@ export const render = async (): Promise<string> => {
 };
 
 // Render the application in the browser
+// Hydrates the prerendered HTML in production builds, renders from scratch in development
 if (typeof document !== "undefined") {
-  const container = document.getElementById("root");
-  const root = createRoot(container!);
-  root.render(<App />);
+  const container = document.getElementById("root")!;
+  if (container.firstElementChild) {
+    hydrateRoot(container, <App />);
+  } else {
+    createRoot(container).render(<App />);
+  }
 }

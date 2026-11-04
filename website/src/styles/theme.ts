@@ -1,4 +1,4 @@
-import { extendTheme } from "@chakra-ui/react";
+import { extendTheme, StyleFunctionProps } from "@chakra-ui/react";
 
 // Load the brand typeface
 import "@fontsource/inter/400.css";
@@ -56,5 +56,23 @@ export const theme = extendTheme({
     card: "0 1px 3px rgba(14, 33, 70, 0.06)",
     cardHover: "0 12px 28px rgba(14, 33, 70, 0.12)",
     glow: "0 8px 24px rgba(79, 131, 241, 0.35)",
+  },
+  components: {
+    Button: {
+      variants: {
+        solid: (props: StyleFunctionProps) => {
+          if (props.colorScheme !== "blue") return {};
+          return { bg: "blue.700", color: "white", _hover: { bg: "blue.800" }, _active: { bg: "blue.900" } };
+        },
+        outline: (props: StyleFunctionProps) => {
+          if (props.colorScheme !== "blue") return {};
+          return { color: "blue.700" };
+        },
+        ghost: (props: StyleFunctionProps) => {
+          if (props.colorScheme !== "blue") return {};
+          return { color: "blue.700" };
+        },
+      },
+    },
   },
 });

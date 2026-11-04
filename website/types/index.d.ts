@@ -25,6 +25,7 @@ export type IconNames =
   | "upload"
   | "cross"
   | "list"
+  | "menu"
   | "person"
   | "warning"
   | "exclamation"

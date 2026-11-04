@@ -102,8 +102,6 @@ Only needed to let users sign in with ORCiD. Register an application with [ORCiD
 | `EMAIL_FROM_ADDRESS`                    | Yes      | Address that emails are sent from                                   |
 | `ADMIN_EMAIL`                           | No       | Address that receives issue reports submitted from the web app      |
 
-<!-- TODO(henry): confirm whether the server can run without Azure Communication Services, and document an alternative if so -->
-
 ### AI features
 
 Optional. Leave `AI_PROVIDER` and `OPENAI_BASE_URL` unset to turn the AI features off. See [Analytics](Analytics.md) for what data is sent.

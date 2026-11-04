@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 // Chakra provider component
 import {
   Avatar,
+  Box,
   Button,
   ChakraProvider,
   Code,
@@ -11,6 +12,11 @@ import {
   Heading,
   Image,
   Link,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  IconButton,
   Spacer,
   Text,
   useClipboard,
@@ -32,14 +38,18 @@ import _ from "lodash";
 import { CONTACT_EMAIL, DEMO_WORKSPACE_URL } from "./config";
 
 // Images
-import favicon from "./img/Favicon.png";
-import attributeImage from "./img/Attribute.png";
-import dashboardImage from "./img/Dashboard.png";
-import entityImage from "./img/Entity.png";
-import searchImage from "./img/Search.png";
+import logo from "./img/Logo.png";
+import attributeImage from "./img/Attribute.webp";
+import dashboardImage from "./img/Dashboard.webp";
+import entityImage from "./img/Entity.webp";
+import searchImage from "./img/Search.webp";
 
 // Offset applied to anchored sections so the sticky header never covers their heading
 const SECTION_OFFSET = "96px";
+
+// Smooth scrolling, unless the visitor prefers reduced motion
+const getScrollBehavior = (): ScrollBehavior =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 
 // BibTeX entry for the Zenodo record, shown in the citation block
 const CITATION_BIBTEX = `@misc{burgess2024mars,
@@ -92,6 +102,7 @@ const App = () => {
             opacity={"10%"}
             top={"5%"}
             left={"2%"}
+            className={"bg-blob"}
             animation={"animateRight 30s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
           />
           <Flex
@@ -106,6 +117,7 @@ const App = () => {
             opacity={"10%"}
             top={"40%"}
             left={"70%"}
+            className={"bg-blob"}
             animation={"animateLeft 20s cubic-bezier(0.4, 0.65, 1.0, 0.775) infinite;"}
           />
         </Flex>
@@ -128,12 +140,13 @@ const App = () => {
           transition={"background 0.2s ease, box-shadow 0.2s ease"}
         >
           <Flex
+            as={"button"}
+            aria-label={"Metadatify, back to top"}
             gap={"2"}
             align={"center"}
-            cursor={"pointer"}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => window.scrollTo({ top: 0, behavior: getScrollBehavior() })}
           >
-            <Image src={favicon} w={"28px"} h={"28px"} rounded={"md"} />
+            <Image src={logo} alt={""} w={"28px"} h={"28px"} rounded={"md"} />
             <Heading size={"md"} color={"brand.navy"}>
               Metadatify
             </Heading>
@@ -144,7 +157,7 @@ const App = () => {
               fontWeight={"medium"}
               color={"text.muted"}
               _hover={{ color: "brand.navy" }}
-              onClick={() => featuresRef.current.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => featuresRef.current.scrollIntoView({ behavior: getScrollBehavior() })}
             >
               Features
             </Text>
@@ -153,7 +166,7 @@ const App = () => {
               fontWeight={"medium"}
               color={"text.muted"}
               _hover={{ color: "brand.navy" }}
-              onClick={() => productRef.current.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => productRef.current.scrollIntoView({ behavior: getScrollBehavior() })}
             >
               Product
             </Text>
@@ -166,22 +179,70 @@ const App = () => {
             >
               Docs
             </Link>
-            <Link href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"} isExternal>
+            <Link
+              href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"}
+              isExternal
+              aria-label={"Metadatify on GitHub"}
+            >
               <Icon name={"l_github"} color={"text.muted"} />
             </Link>
           </Flex>
-          <Button
-            as={Link}
-            href={"https://app.metadatify.com"}
-            isExternal
-            rounded={"full"}
-            size={"sm"}
-            colorScheme={"blue"}
-            rightIcon={<Icon name={"a_right"} size={"xs"} />}
-            _hover={{ textDecoration: "none" }}
-          >
-            Log In
-          </Button>
+          <Flex align={"center"} gap={"2"}>
+            <Button
+              as={Link}
+              href={"https://app.metadatify.com"}
+              isExternal
+              rounded={"full"}
+              size={"sm"}
+              colorScheme={"blue"}
+              rightIcon={<Icon name={"a_right"} size={"xs"} />}
+              _hover={{ textDecoration: "none" }}
+            >
+              Log In
+            </Button>
+            {/* Navigation menu for small screens, where the header links are hidden */}
+            <Box display={["block", "block", "none"]}>
+              <Menu placement={"bottom-end"}>
+                <MenuButton
+                  as={IconButton}
+                  aria-label={"Open navigation menu"}
+                  icon={<Icon name={"menu"} />}
+                  size={"sm"}
+                  variant={"ghost"}
+                  rounded={"full"}
+                />
+                <MenuList zIndex={200}>
+                  <MenuItem onClick={() => featuresRef.current.scrollIntoView({ behavior: getScrollBehavior() })}>
+                    Features
+                  </MenuItem>
+                  <MenuItem onClick={() => productRef.current.scrollIntoView({ behavior: getScrollBehavior() })}>
+                    Product
+                  </MenuItem>
+                  <MenuItem
+                    as={Link}
+                    href={"https://metadatify.com/docs/"}
+                    isExternal
+                    _hover={{ textDecoration: "none" }}
+                  >
+                    Documentation
+                  </MenuItem>
+                  <MenuItem
+                    as={Link}
+                    href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"}
+                    isExternal
+                    _hover={{ textDecoration: "none" }}
+                  >
+                    GitHub
+                  </MenuItem>
+                  {DEMO_WORKSPACE_URL && (
+                    <MenuItem as={Link} href={DEMO_WORKSPACE_URL} isExternal _hover={{ textDecoration: "none" }}>
+                      Explore a demo workspace
+                    </MenuItem>
+                  )}
+                </MenuList>
+              </Menu>
+            </Box>
+          </Flex>
         </Flex>
 
         {/* Page content */}
@@ -234,7 +295,7 @@ const App = () => {
                   boxShadow={"glow"}
                   transition={"transform 0.15s ease"}
                   _hover={{ transform: "translateY(-1px)" }}
-                  onClick={() => featuresRef.current.scrollIntoView({ behavior: "smooth" })}
+                  onClick={() => featuresRef.current.scrollIntoView({ behavior: getScrollBehavior() })}
                 >
                   See Features
                 </Button>
@@ -242,7 +303,7 @@ const App = () => {
                   rounded={"full"}
                   colorScheme={"blue"}
                   variant={"outline"}
-                  onClick={() => getStartedRef.current.scrollIntoView({ behavior: "smooth" })}
+                  onClick={() => getStartedRef.current.scrollIntoView({ behavior: getScrollBehavior() })}
                 >
                   Get Started
                 </Button>
@@ -288,7 +349,16 @@ const App = () => {
                   <Flex w={"10px"} h={"10px"} rounded={"full"} bg={"#FEBC2E"} />
                   <Flex w={"10px"} h={"10px"} rounded={"full"} bg={"#28C840"} />
                 </Flex>
-                <Image src={dashboardImage} w={"100%"} />
+                <Image
+                  src={dashboardImage}
+                  alt={
+                    "The Metadatify Dashboard, showing Workspace counts, recent Projects and Entities, and an activity feed"
+                  }
+                  htmlWidth={"1459"}
+                  htmlHeight={"869"}
+                  w={"100%"}
+                  h={"auto"}
+                />
               </Flex>
               <Text fontWeight={"semibold"} color={"text.subtle"} fontSize={"sm"}>
                 Metadatify Dashboard
@@ -406,7 +476,7 @@ const App = () => {
                 icon={"scan"}
                 title={"Physical Tracking"}
                 description={
-                  "Every Entity has a unique identifier compatible with USB barcode and QR code scanners. Point a scanner at a specimen label and jump straight to its metadata record."
+                  "Every Entity has a unique identifier and QR code that is printable. Point your phone at a labelled specimen and jump straight to its metadata record."
                 }
               />
               <FeatureCard
@@ -508,7 +578,7 @@ const App = () => {
             <Text maxW={"55ch"} textAlign={"center"} color={"text.muted"}>
               Metadatify is available as a managed cloud service or can be self-hosted on your own infrastructure. Not
               sure which fits your lab? Reach out to us at{" "}
-              <Link color={"blue.600"} href={`mailto:${CONTACT_EMAIL}`}>
+              <Link color={"blue.700"} textDecoration={"underline"} href={`mailto:${CONTACT_EMAIL}`}>
                 {CONTACT_EMAIL}
               </Link>
               .
@@ -541,16 +611,16 @@ const App = () => {
                 <Text>Sign in and start collating your metadata right away. No setup required.</Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link color={"blue.600"} href={"https://app.metadatify.com"} isExternal>
+                  <Link color={"blue.700"} href={"https://app.metadatify.com"} isExternal>
                     Log In
                   </Link>
-                  <Icon name={"a_right"} color={"blue.600"} />
+                  <Icon name={"a_right"} color={"blue.700"} />
                 </Flex>
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link color={"blue.600"} href={"https://metadatify.com/docs/Quickstart/"} isExternal>
+                  <Link color={"blue.700"} href={"https://metadatify.com/docs/Quickstart/"} isExternal>
                     Quickstart guide
                   </Link>
-                  <Icon name={"a_right"} color={"blue.600"} />
+                  <Icon name={"a_right"} color={"blue.700"} />
                 </Flex>
               </Flex>
               {DEMO_WORKSPACE_URL && (
@@ -577,10 +647,10 @@ const App = () => {
                   </Text>
                   <Spacer />
                   <Flex direction={"row"} gap={"1"} align={"center"}>
-                    <Link color={"blue.600"} href={DEMO_WORKSPACE_URL} isExternal>
+                    <Link color={"blue.700"} href={DEMO_WORKSPACE_URL} isExternal>
                       Explore the demo
                     </Link>
-                    <Icon name={"a_right"} color={"blue.600"} />
+                    <Icon name={"a_right"} color={"blue.700"} />
                   </Flex>
                 </Flex>
               )}
@@ -604,10 +674,10 @@ const App = () => {
                 <Text>Run Metadatify on your own hardware for full control over your data and infrastructure.</Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link color={"blue.600"} href={"https://metadatify.com/docs/"} isExternal>
+                  <Link color={"blue.700"} href={"https://metadatify.com/docs/"} isExternal>
                     Documentation
                   </Link>
-                  <Icon name={"a_right"} color={"blue.600"} />
+                  <Icon name={"a_right"} color={"blue.700"} />
                 </Flex>
               </Flex>
               <Flex
@@ -634,13 +704,13 @@ const App = () => {
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
                   <Link
-                    color={"blue.600"}
+                    color={"blue.700"}
                     href={"https://github.com/Brain-Development-and-Disorders-Lab/mars"}
                     isExternal
                   >
                     GitHub Repository
                   </Link>
-                  <Icon name={"a_right"} color={"blue.600"} />
+                  <Icon name={"a_right"} color={"blue.700"} />
                   <Spacer />
                   <Image
                     alt="GitHub Repo stars"
@@ -670,10 +740,10 @@ const App = () => {
                 </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"}>
-                  <Link color={"blue.600"} href={"https://metadatify.com/docs/"} isExternal>
+                  <Link color={"blue.700"} href={"https://metadatify.com/docs/"} isExternal>
                     Documentation
                   </Link>
-                  <Icon name={"a_right"} color={"blue.600"} />
+                  <Icon name={"a_right"} color={"blue.700"} />
                 </Flex>
               </Flex>
             </Flex>
@@ -708,7 +778,12 @@ const App = () => {
                   Burgess, H., Fievet, R., Brownell, D., &amp; Richards, L. (2024).{" "}
                   <i>MARS: An Open-Source Application for Managing and Searching Scientific Metadata</i> [Poster].
                   Zenodo.{" "}
-                  <Link color={"blue.600"} href={"https://doi.org/10.5281/zenodo.13946927"} isExternal>
+                  <Link
+                    color={"blue.700"}
+                    textDecoration={"underline"}
+                    href={"https://doi.org/10.5281/zenodo.13946927"}
+                    isExternal
+                  >
                     https://doi.org/10.5281/zenodo.13946927
                   </Link>
                 </Text>
@@ -774,12 +849,12 @@ const App = () => {
                     justify={"center"}
                     w={"160px"}
                   >
-                    <Text fontWeight={"semibold"} color={"text.faint"}>
+                    <Text fontWeight={"semibold"} color={"text.muted"}>
                       Lead Developer
                     </Text>
                     <Avatar name={"Henry Burgess"} src={"https://avatars.githubusercontent.com/u/60735885"} />
                     <Text fontWeight={"semibold"}>Henry Burgess</Text>
-                    <Link color={"blue.600"} href={"https://github.com/henryjburg"}>
+                    <Link color={"blue.700"} href={"https://github.com/henryjburg"}>
                       GitHub
                     </Link>
                   </Flex>
@@ -795,12 +870,12 @@ const App = () => {
                     justify={"center"}
                     w={"160px"}
                   >
-                    <Text fontWeight={"semibold"} color={"text.faint"}>
+                    <Text fontWeight={"semibold"} color={"text.muted"}>
                       Collaborator
                     </Text>
                     <Avatar name={"Robin Fievet"} src={"https://avatars.githubusercontent.com/u/11888851"} />
                     <Text fontWeight={"semibold"}>Robin Fievet</Text>
-                    <Link color={"blue.600"} href={"https://github.com/rfievet"}>
+                    <Link color={"blue.700"} href={"https://github.com/rfievet"}>
                       GitHub
                     </Link>
                   </Flex>
@@ -822,7 +897,7 @@ const App = () => {
             mx={"auto"}
           >
             <Flex align={"center"} gap={"2"}>
-              <Image src={favicon} w={"22px"} h={"22px"} rounded={"sm"} />
+              <Image src={logo} alt={""} w={"22px"} h={"22px"} rounded={"sm"} />
               <Text fontWeight={"bold"}>Metadatify</Text>
             </Flex>
             <Flex align={"center"} gap={"6"} wrap={"wrap"}>
@@ -864,6 +939,7 @@ const App = () => {
               use.{" "}
               <Link
                 color={"whiteAlpha.800"}
+                textDecoration={"underline"}
                 _hover={{ color: "white" }}
                 href={"https://github.com/Brain-Development-and-Disorders-Lab/mars/blob/main/LICENSE"}
                 isExternal
