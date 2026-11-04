@@ -7,23 +7,24 @@ This documentation provides an in-depth guide to Metadatify's primary features, 
 ## Documentation Contents
 
 - Getting Started:
-  - [Overview](Getting-Started)
-  - [Terminology](Terminology)
+  - [Overview](Getting-Started.md)
+  - [Terminology](Terminology.md)
 - Creating:
-  - [Overview](../creating/Creating)
-  - [Creating Entities](../creating/Creating-Entities)
-  - [Creating Projects](../creating/Creating-Projects)
-  - [Creating Attributes](../creating/Creating-Attributes)
-  - [Creating Workspaces](../creating/Creating-Workspaces)
-- [Searching Metadata](Searching)
-- [Tracking Entities](Tracking)
-- [Workspaces](Workspaces)
+  - [Overview](creating/Creating.md)
+  - [Creating Entities](creating/Creating-Entities.md)
+  - [Creating Projects](creating/Creating-Projects.md)
+  - [Creating Attributes](creating/Creating-Attributes.md)
+  - [Creating Workspaces](creating/Creating-Workspaces.md)
+- [Searching Metadata](Searching.md)
+- [Tracking Entities](Tracking.md)
+- [Workspaces](Workspaces.md)
   - [Demo Workspace](Workspaces.md#demo-workspace)
 - Users and Sharing:
-  - [User Login and Accounts](Accounts)
+  - [User Login and Accounts](Accounts.md)
 - Data Management:
-  - [Importing Data](../data_management/Importing-Data)
-  - [Exporting Data](../data_management/Exporting-Data)
+  - [Importing Data](data_management/Importing-Data.md)
+  - [Exporting Data](data_management/Exporting-Data.md)
+- [Self-Hosting](Self-Hosting.md)
 - [Analytics](Analytics.md)
 
 ## Questions or Enquiries

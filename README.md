@@ -20,7 +20,7 @@
 
 ## Documentation
 
-[Documentation](https://metadatify.com/docs/) is actively maintained that covers the concepts introduced by Metadatify and how to use the platform. Documentation for API usage and self-hosting is coming soon.
+[Documentation](https://metadatify.com/docs/) is actively maintained that covers the concepts introduced by Metadatify and how to use the platform. See [Self-Hosting](https://metadatify.com/docs/Self-Hosting/) for running Metadatify on your own infrastructure. Documentation for API usage is coming soon.
 
 ## Development
 
