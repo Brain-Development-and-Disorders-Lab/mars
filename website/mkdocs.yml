@@ -5,6 +5,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Overview: Getting-Started.md
+      - Quickstart: Quickstart.md
       - Terminology: Terminology.md
   - Creating:
       - Overview: creating/Creating.md

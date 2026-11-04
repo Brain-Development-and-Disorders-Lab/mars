@@ -29,7 +29,7 @@ import { theme } from "./styles/theme";
 import _ from "lodash";
 
 // Site configuration
-import { DEMO_WORKSPACE_URL } from "./config";
+import { CONTACT_EMAIL, DEMO_WORKSPACE_URL } from "./config";
 
 // Images
 import favicon from "./img/Favicon.png";
@@ -507,9 +507,9 @@ const App = () => {
             <Heading>Get Started</Heading>
             <Text maxW={"55ch"} textAlign={"center"} color={"text.muted"}>
               Metadatify is available as a managed cloud service or can be self-hosted on your own infrastructure. Not
-              sure which fits your lab? Reach out to{" "}
-              <Link color={"blue.600"} href={"mailto:henry.burgess@wustl.edu"}>
-                Henry Burgess
+              sure which fits your lab? Reach out to us at{" "}
+              <Link color={"blue.600"} href={`mailto:${CONTACT_EMAIL}`}>
+                {CONTACT_EMAIL}
               </Link>
               .
             </Text>
@@ -543,6 +543,12 @@ const App = () => {
                 <Flex direction={"row"} gap={"1"} align={"center"}>
                   <Link color={"blue.600"} href={"https://app.metadatify.com"} isExternal>
                     Log In
+                  </Link>
+                  <Icon name={"a_right"} color={"blue.600"} />
+                </Flex>
+                <Flex direction={"row"} gap={"1"} align={"center"}>
+                  <Link color={"blue.600"} href={"https://metadatify.com/docs/Quickstart/"} isExternal>
+                    Quickstart guide
                   </Link>
                   <Icon name={"a_right"} color={"blue.600"} />
                 </Flex>

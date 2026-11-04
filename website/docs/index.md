@@ -4,32 +4,50 @@
 
 This documentation provides an in-depth guide to Metadatify's primary features, including search, data import and export, entity tracking, and workspace management.
 
+New to Metadatify? The [Quickstart](Quickstart.md) walks you from your first login to your first Entity, Project, and search.
+
 ## Documentation Contents
 
-- Getting Started:
-  - [Overview](Getting-Started.md)
-  - [Terminology](Terminology.md)
-- Creating:
-  - [Overview](creating/Creating.md)
-  - [Creating Entities](creating/Creating-Entities.md)
-  - [Creating Projects](creating/Creating-Projects.md)
-  - [Creating Attributes](creating/Creating-Attributes.md)
-  - [Creating Workspaces](creating/Creating-Workspaces.md)
+### Getting Started
+
+- [Overview](Getting-Started.md)
+- [Quickstart](Quickstart.md)
+- [Terminology](Terminology.md)
+
+### Creating
+
+- [Overview](creating/Creating.md)
+- [Creating Entities](creating/Creating-Entities.md)
+- [Creating Projects](creating/Creating-Projects.md)
+- [Creating Attributes](creating/Creating-Attributes.md)
+- [Creating Workspaces](creating/Creating-Workspaces.md)
+
+### Using Metadatify
+
 - [Searching Metadata](Searching.md)
 - [Tracking Entities](Tracking.md)
 - [Workspaces](Workspaces.md)
-  - [Demo Workspace](Workspaces.md#demo-workspace)
-- Users and Sharing:
-  - [User Login and Accounts](Accounts.md)
-- Data Management:
-  - [Importing Data](data_management/Importing-Data.md)
-  - [Exporting Data](data_management/Exporting-Data.md)
+- [Demo Workspace](Workspaces.md#demo-workspace)
+
+### Users and Sharing
+
+- [User Login and Accounts](Accounts.md)
+
+### Data Management
+
+- [Importing Data](data_management/Importing-Data.md)
+- [Exporting Data](data_management/Exporting-Data.md)
+
+### Hosting and Data Handling
+
 - [Self-Hosting](Self-Hosting.md)
 - [Analytics](Analytics.md)
 
 ## Questions or Enquiries
 
-Any questions or enquiries related to the code or potential collaborations should be sent to [Henry Burgess](mailto:henry.burgess@wustl.edu).
+<!-- TODO(henry): replace with shared contact address (keep in sync with CONTACT_EMAIL in website/src/config.ts) -->
+
+Any questions or enquiries related to the code or potential collaborations can be sent to [henry.burgess@wustl.edu](mailto:henry.burgess@wustl.edu).
 
 ## License
 
