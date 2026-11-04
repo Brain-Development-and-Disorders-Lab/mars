@@ -1,6 +1,6 @@
 # Metadatify 🧪
 
-> Metadatify, or the Metadata Aggregation for Reproducible Science (MARS) project, is an open-source web-based tool to create, manage, and search scientific metadata.
+> Metadatify, or the Metadata Aggregation for Reproducible Science (MARS) project, is a source-available, web-based tool to create, manage, and search scientific metadata.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13946927.svg)](https://doi.org/10.5281/zenodo.13946927) ![GitHub Repo stars](https://img.shields.io/github/stars/Brain-Development-and-Disorders-Lab/mars?style=flat)
 
@@ -166,4 +166,4 @@ _This research was supported by the National Science Foundation through the ACCE
 
 **License:**
 
-See the LICENSE file for license details.
+Metadatify is source-available under a Washington University research license. The license permits royalty-free, non-commercial, non-clinical research use, excludes use with human subjects, and does not permit redistribution of the software. For commercial licensing, contact Washington University's Office of Technology Management ([otm@wustl.edu](mailto:otm@wustl.edu)). See the [LICENSE](LICENSE) file for the full terms.

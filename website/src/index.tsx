@@ -9,6 +9,15 @@ import _ from "lodash";
 import App from "./App";
 
 // Render the application
-const container = document.getElementById("root");
-const root = createRoot(container!);
-root.render(<App />);
+export const render = async (): Promise<string> => {
+  if (!import.meta.env.SSR) return "";
+  const { renderToString } = await import("react-dom/server");
+  return renderToString(<App />);
+};
+
+// Render the application in the browser
+if (typeof document !== "undefined") {
+  const container = document.getElementById("root");
+  const root = createRoot(container!);
+  root.render(<App />);
+}

@@ -1,4 +1,5 @@
 site_name: Metadatify Documentation
+site_url: https://metadatify.com/docs/
 nav:
   - Home: index.md
   - Getting Started:

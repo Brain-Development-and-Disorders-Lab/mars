@@ -15,7 +15,7 @@
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "moduleResolution": "bundler",
-    "types": ["react", "react-dom", "node"],
+    "types": ["react", "react-dom", "node", "vite/client"],
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,

@@ -476,8 +476,11 @@ const App = () => {
                 <Flex align={"center"} justify={"center"} w={"12"} h={"12"} rounded={"md"} bg={"blue.50"}>
                   <Icon name={"l_github"} size={"md"} color={"blue.600"} />
                 </Flex>
-                <Text fontWeight={"bold"}>Open Source</Text>
-                <Text>Metadatify is open source. Browse the code, file issues, or contribute on GitHub.</Text>
+                <Text fontWeight={"bold"}>Source Available</Text>
+                <Text>
+                  Metadatify's source code is on GitHub under a Washington University non-commercial research license.
+                  Browse the code, file issues, or contribute.
+                </Text>
                 <Spacer />
                 <Flex direction={"row"} gap={"1"} align={"center"} wrap={"wrap"}>
                   <Link
@@ -632,10 +635,29 @@ const App = () => {
               </Link>
             </Flex>
           </Flex>
-          <Flex borderTop={"1px"} borderColor={"whiteAlpha.200"} pt={"6"} justify={"center"}>
+          <Flex
+            direction={"column"}
+            align={"center"}
+            gap={"2"}
+            borderTop={"1px"}
+            borderColor={"whiteAlpha.200"}
+            pt={"6"}
+          >
             <Text fontSize={"sm"} color={"whiteAlpha.600"} textAlign={"center"}>
               © {new Date().getFullYear()} Metadatify. Department of Neuroscience, Washington University School of
               Medicine in St. Louis.
+            </Text>
+            <Text fontSize={"sm"} color={"whiteAlpha.600"} textAlign={"center"}>
+              Source-available under a Washington University research license for non-commercial, non-clinical research
+              use.{" "}
+              <Link
+                color={"whiteAlpha.800"}
+                _hover={{ color: "white" }}
+                href={"https://github.com/Brain-Development-and-Disorders-Lab/mars/blob/main/LICENSE"}
+                isExternal
+              >
+                View license
+              </Link>
             </Text>
           </Flex>
         </Flex>

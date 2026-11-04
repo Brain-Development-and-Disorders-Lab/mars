@@ -1,6 +1,6 @@
 # Documentation Home
 
-[Metadatify](https://metadatify.com) is an open-source web-based platform to create, manage, and search scientific metadata.
+[Metadatify](https://metadatify.com) is a source-available, web-based platform to create, manage, and search scientific metadata.
 
 This documentation provides an in-depth guide to Metadatify's primary features, including search, data import and export, entity tracking, and workspace management.
 
@@ -27,3 +27,7 @@ This documentation provides an in-depth guide to Metadatify's primary features, 
 ## Questions or Enquiries
 
 Any questions or enquiries related to the code or potential collaborations should be sent to [Henry Burgess](mailto:henry.burgess@wustl.edu).
+
+## License
+
+Metadatify is source-available under a Washington University research license. The license permits royalty-free, non-commercial, non-clinical research use, excludes use with human subjects, and does not permit redistribution of the software. For commercial licensing, contact Washington University's Office of Technology Management ([otm@wustl.edu](mailto:otm@wustl.edu)). See the [LICENSE](https://github.com/Brain-Development-and-Disorders-Lab/mars/blob/main/LICENSE) file for the full terms.
