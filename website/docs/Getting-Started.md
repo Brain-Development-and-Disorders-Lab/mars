@@ -4,7 +4,7 @@ As you get started with Metadatify, the following information will be helpful in
 
 ## Terminology
 
-Metadatify introduces terminology that is used to describe concepts across the entire platform. It is recommended you become familiar with this terminology, as it is also used throughout this documentation. You can read more about the terminology [here](../Terminology).
+Metadatify introduces terminology that is used to describe concepts across the entire platform. It is recommended you become familiar with this terminology, as it is also used throughout this documentation. You can read more about the terminology [here](Terminology.md).
 
 ## What Metadatify is
 

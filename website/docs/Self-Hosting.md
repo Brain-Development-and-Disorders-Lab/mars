@@ -15,8 +15,6 @@ Metadatify's production URLs are currently set in the source code, not in config
 | `client/src/pages/view/Workspace.tsx` | The public Workspace share link                                   |
 | `client/src/pages/view/Entity.tsx`    | The Entity share link                                             |
 
-<!-- TODO(henry): move these URLs into environment variables so self-hosting doesn't require code changes -->
-
 ## Components
 
 A Metadatify deployment has three parts:
@@ -169,10 +167,6 @@ yarn start
 - `/static`: file downloads
 - `/v1`: the REST API
 
-<!-- TODO(henry): recommend a process manager (e.g. systemd or PM2) and restart policy -->
-
-Run the server under a process manager so it restarts if it stops.
-
 ## 5. Configure and build the web app
 
 The web app reads these variables at build time from a `.env` file in the `client/` directory. All are optional.
@@ -195,8 +189,6 @@ yarn build
 The built files are in `client/dist/`. Serve them as static files from your web server. Because the app handles its own routing, configure the web server to return `index.html` for any path that doesn't match a file.
 
 ## 6. Reverse proxy and HTTPS
-
-<!-- TODO(henry): add tested reverse proxy configuration (e.g. nginx or Caddy) for the web app and API -->
 
 Put both the web app and the API server behind a reverse proxy that terminates HTTPS. The web app and API need their own hostnames, matching the URLs described in [Before you start](#before-you-start-domain-names).
 

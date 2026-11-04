@@ -6,7 +6,7 @@ Metadatify uses Workspaces to manage Entities, Projects, and Attributes amongst 
 
 A core component for managing Workspaces is the Workspace Switcher, located in the top left corner of the sidebar.
 
-![Workspace Switcher](../img/workspace_switcher.png)
+![Workspace Switcher](img/workspace_switcher.png)
 
 The Workspace Switcher displays a list of all Workspaces the user has access to. Clicking on a Workspace will switch the user to that Workspace, and the active Workspace has a green tick icon to the left of the Workspace name. The switcher has other actions including:
 
@@ -21,7 +21,7 @@ At least one Workspace must be created before any other actions can be performed
 
 To update the Workspace, click the "Edit workspace" action in the Workspace Switcher. This will navigate to the Workspace's settings page:
 
-![Edit Workspace](../img/workspace_page.png)
+![Edit Workspace](img/workspace_page.png)
 
 This page displays the Workspace's name, description, collaborators, archived metadata, and active Counters. The name and description can be updated, and collaborators can be added or removed. Archived Entities, Projects, and Attributes can be viewed or restored. To restore archived metadata, click the corresponding orange "Restore" button.
 

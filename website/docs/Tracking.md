@@ -10,7 +10,7 @@ Every Entity, regardless of the name, has a unique identifier. This identifier i
 
 The sidebar of Metadatify has a "Scan" button, under the "Tools" section. Clicking this button will open the scan dialog:
 
-![Scan Modal](../img/scan_dialog.png)
+![Scan Modal](img/scan_dialog.png)
 
 To function correctly, you will need to grant Metadatify access to your camera through the browser. It will only access the camera when the scan dialog is open.
 
@@ -26,6 +26,6 @@ Metadatify does not have a built-in label creation feature. However, the "Export
 
 The "Share" button under the yellow "Actions" button displays a dialog containing a QR code and a shareable link to the Entity:
 
-![Share Modal](../img/share_dialog.png)
+![Share Modal](img/share_dialog.png)
 
 The QR code can be scanned with a barcode scanner to quickly access the Entity. The shareable link can be used to access the Entity from any device with a web browser.
