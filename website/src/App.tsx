@@ -28,6 +28,9 @@ import { theme } from "./styles/theme";
 // Utility imports
 import _ from "lodash";
 
+// Site configuration
+import { DEMO_WORKSPACE_URL } from "./config";
+
 // Images
 import favicon from "./img/Favicon.png";
 import attributeImage from "./img/Attribute.png";
@@ -243,6 +246,20 @@ const App = () => {
                 >
                   Get Started
                 </Button>
+                {DEMO_WORKSPACE_URL && (
+                  <Button
+                    rounded={"full"}
+                    colorScheme={"blue"}
+                    variant={"outline"}
+                    as={Link}
+                    href={DEMO_WORKSPACE_URL}
+                    isExternal
+                    rightIcon={<Icon name={"a_right"} size={"xs"} />}
+                    _hover={{ textDecoration: "none" }}
+                  >
+                    Explore a demo workspace
+                  </Button>
+                )}
                 <Button
                   rounded={"full"}
                   colorScheme={"blue"}
@@ -530,6 +547,37 @@ const App = () => {
                   <Icon name={"a_right"} color={"blue.600"} />
                 </Flex>
               </Flex>
+              {DEMO_WORKSPACE_URL && (
+                <Flex
+                  direction={"column"}
+                  rounded={"md"}
+                  border={"1px"}
+                  borderColor={"border.default"}
+                  p={"4"}
+                  gap={"4"}
+                  maxW={"sm"}
+                  bg={"white"}
+                  boxShadow={"card"}
+                  transition={"transform 0.2s ease, box-shadow 0.2s ease"}
+                  _hover={{ boxShadow: "cardHover", transform: "translateY(-4px)" }}
+                >
+                  <Flex align={"center"} justify={"center"} w={"12"} h={"12"} rounded={"md"} bg={"blue.50"}>
+                    <Icon name={"workspace"} size={"md"} color={"blue.600"} />
+                  </Flex>
+                  <Text fontWeight={"bold"}>Demo Workspace</Text>
+                  <Text>
+                    Browse a read-only public Workspace without an account. View Entities, Projects, and Attributes, and
+                    try text search and the query builder.
+                  </Text>
+                  <Spacer />
+                  <Flex direction={"row"} gap={"1"} align={"center"}>
+                    <Link color={"blue.600"} href={DEMO_WORKSPACE_URL} isExternal>
+                      Explore the demo
+                    </Link>
+                    <Icon name={"a_right"} color={"blue.600"} />
+                  </Flex>
+                </Flex>
+              )}
               <Flex
                 direction={"column"}
                 rounded={"md"}

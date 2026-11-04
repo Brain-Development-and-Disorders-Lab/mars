@@ -19,6 +19,7 @@ nav:
   - Data Management:
       - Importing Data: data_management/Importing-Data.md
       - Exporting Data: data_management/Exporting-Data.md
+  - Analytics: Analytics.md
 theme:
   name: readthedocs
   favicon: /img/Favicon.png

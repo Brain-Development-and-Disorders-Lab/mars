@@ -18,11 +18,13 @@ This documentation provides an in-depth guide to Metadatify's primary features, 
 - [Searching Metadata](Searching)
 - [Tracking Entities](Tracking)
 - [Workspaces](Workspaces)
+  - [Demo Workspace](Workspaces.md#demo-workspace)
 - Users and Sharing:
   - [User Login and Accounts](Accounts)
 - Data Management:
   - [Importing Data](../data_management/Importing-Data)
   - [Exporting Data](../data_management/Exporting-Data)
+- [Analytics](Analytics.md)
 
 ## Questions or Enquiries
 
