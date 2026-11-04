@@ -2,7 +2,19 @@
 import React, { useEffect, useRef, useState } from "react";
 
 // Chakra provider component
-import { Avatar, Button, ChakraProvider, Flex, Heading, Image, Link, Spacer, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Button,
+  ChakraProvider,
+  Code,
+  Flex,
+  Heading,
+  Image,
+  Link,
+  Spacer,
+  Text,
+  useClipboard,
+} from "@chakra-ui/react";
 
 // Custom components
 import Carousel from "./components/Carousel";
@@ -26,10 +38,24 @@ import searchImage from "./img/Search.png";
 // Offset applied to anchored sections so the sticky header never covers their heading
 const SECTION_OFFSET = "96px";
 
+// BibTeX entry for the Zenodo record, shown in the citation block
+const CITATION_BIBTEX = `@misc{burgess2024mars,
+  title     = {MARS: An Open-Source Application for Managing and Searching Scientific Metadata},
+  author    = {Burgess, Henry and Fievet, Robin and Brownell, David and Richards, Linda},
+  year      = {2024},
+  publisher = {Zenodo},
+  note      = {Poster},
+  doi       = {10.5281/zenodo.13946927},
+  url       = {https://doi.org/10.5281/zenodo.13946927}
+}`;
+
 const App = () => {
   const featuresRef = useRef({} as HTMLDivElement);
   const productRef = useRef({} as HTMLDivElement);
   const getStartedRef = useRef({} as HTMLDivElement);
+
+  // Copy the BibTeX entry to the clipboard
+  const { onCopy: onCopyBibtex, hasCopied: hasCopiedBibtex } = useClipboard(CITATION_BIBTEX);
 
   // Track scroll position to raise the header off the page once content scrolls beneath it
   const [scrolled, setScrolled] = useState(false);
@@ -594,6 +620,68 @@ const App = () => {
                     Documentation
                   </Link>
                   <Icon name={"a_right"} color={"blue.600"} />
+                </Flex>
+              </Flex>
+            </Flex>
+
+            {/* Citation */}
+            <Flex
+              id={"cite"}
+              style={{ scrollMarginTop: SECTION_OFFSET }}
+              direction={"column"}
+              gap={"4"}
+              w={"100%"}
+              maxW={"3xl"}
+              pt={"8"}
+              align={"center"}
+            >
+              <Heading size={"lg"}>Cite Metadatify</Heading>
+              <Text color={"text.muted"} textAlign={"center"}>
+                If Metadatify supports your research, please cite:
+              </Text>
+              <Flex
+                direction={"column"}
+                gap={"4"}
+                w={"100%"}
+                p={["4", "6"]}
+                rounded={"xl"}
+                border={"1px"}
+                borderColor={"border.default"}
+                bg={"white"}
+                boxShadow={"card"}
+              >
+                <Text>
+                  Burgess, H., Fievet, R., Brownell, D., &amp; Richards, L. (2024).{" "}
+                  <i>MARS: An Open-Source Application for Managing and Searching Scientific Metadata</i> [Poster].
+                  Zenodo.{" "}
+                  <Link color={"blue.600"} href={"https://doi.org/10.5281/zenodo.13946927"} isExternal>
+                    https://doi.org/10.5281/zenodo.13946927
+                  </Link>
+                </Text>
+                <Code
+                  as={"pre"}
+                  display={"block"}
+                  whiteSpace={"pre-wrap"}
+                  wordBreak={"break-word"}
+                  p={"4"}
+                  rounded={"md"}
+                  bg={"surface.muted"}
+                  color={"text.default"}
+                  fontSize={"sm"}
+                  aria-label={"BibTeX citation"}
+                >
+                  {CITATION_BIBTEX}
+                </Code>
+                <Flex direction={"row"} gap={"4"} align={"center"} justify={"space-between"} wrap={"wrap"}>
+                  <Link href={"https://doi.org/10.5281/zenodo.13946927"} isExternal>
+                    <Image
+                      src={"https://zenodo.org/badge/DOI/10.5281/zenodo.13946927.svg"}
+                      alt={"DOI: 10.5281/zenodo.13946927"}
+                    />
+                  </Link>
+                  <Button size={"sm"} rounded={"full"} colorScheme={"blue"} variant={"outline"} onClick={onCopyBibtex}>
+                    {hasCopiedBibtex ? "Copied" : "Copy BibTeX"}
+                  </Button>
                 </Flex>
               </Flex>
             </Flex>
