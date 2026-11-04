@@ -253,6 +253,76 @@ const App = () => {
             </Flex>
           </Flex>
 
+          {/* Why Metadatify */}
+          <Flex
+            id={"why"}
+            style={{ scrollMarginTop: SECTION_OFFSET }}
+            direction={"column"}
+            gap={"8"}
+            py={"8"}
+            align={"center"}
+          >
+            <Flex direction={"column"} align={"center"} gap={"2"} textAlign={"center"}>
+              <Heading>Why Metadatify</Heading>
+              <Text color={"text.muted"} maxW={"5xl"}>
+                Sample and specimen metadata is often the hardest part of a lab's data to keep organized.
+              </Text>
+            </Flex>
+            <Flex
+              as={"ul"}
+              listStyleType={"none"}
+              direction={["column", "column", "row"]}
+              gap={["6", "6", "10"]}
+              w={"100%"}
+              maxW={"5xl"}
+              p={["6", "8"]}
+              rounded={"xl"}
+              border={"1px"}
+              borderColor={"border.default"}
+              bg={"white"}
+              boxShadow={"card"}
+            >
+              <Flex as={"li"} direction={"column"} gap={"3"} flex={"1"}>
+                <Flex align={"center"} justify={"center"} w={"10"} h={"10"} rounded={"md"} bg={"blue.50"}>
+                  <Icon name={"list"} color={"blue.600"} />
+                </Flex>
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Scattered across spreadsheets
+                </Text>
+                <Text color={"text.muted"}>
+                  Sample and specimen records end up in separate spreadsheets kept by different people, each with its
+                  own columns and naming. Metadatify keeps them in one shared Workspace, structured by reusable
+                  Attributes.
+                </Text>
+              </Flex>
+              <Flex as={"li"} direction={"column"} gap={"3"} flex={"1"}>
+                <Flex align={"center"} justify={"center"} w={"10"} h={"10"} rounded={"md"} bg={"blue.50"}>
+                  <Icon name={"search"} color={"blue.600"} />
+                </Flex>
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Hard to search
+                </Text>
+                <Text color={"text.muted"}>
+                  Finding every sample that matches a set of conditions means opening file after file. Metadatify
+                  searches a whole Workspace at once, in plain language or with a visual query builder.
+                </Text>
+              </Flex>
+              <Flex as={"li"} direction={"column"} gap={"3"} flex={"1"}>
+                <Flex align={"center"} justify={"center"} w={"10"} h={"10"} rounded={"md"} bg={"blue.50"}>
+                  <Icon name={"link"} color={"blue.600"} />
+                </Flex>
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  Hard to share
+                </Text>
+                <Text color={"text.muted"}>
+                  The NIH Data Management &amp; Sharing Policy and the FAIR principles call for data to be shared with
+                  metadata others can find, understand, and reuse. Consistent, structured records that export to CSV or
+                  JSON are a practical starting point.
+                </Text>
+              </Flex>
+            </Flex>
+          </Flex>
+
           {/* Core Features */}
           <Flex
             id={"product"}
