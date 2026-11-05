@@ -1324,6 +1324,8 @@ export type LinksProps = {
   viewOnly?: boolean;
   sourceName?: string;
   sourceId?: string;
+  workspace?: string;
+  isPublic?: boolean;
 };
 
 // Utility type to specify the props of `LinksGraphNode`

@@ -233,6 +233,8 @@ const DialogViewAttribute = (props: DialogViewAttributeProps) => {
                         values={values}
                         setValues={setValues}
                         permittedValues={props.permittedDataValues}
+                        workspace={props.workspace}
+                        isPublic={props.isPublic}
                       />
                     ) : (
                       <EmptyState.Root>

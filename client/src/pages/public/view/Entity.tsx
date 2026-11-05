@@ -406,7 +406,7 @@ export const Entity = () => {
                     </Text>
                   </Flex>
                 </Flex>
-                <Links links={entityLinks} setLinks={setEntityLinks} viewOnly={true} />
+                <Links links={entityLinks} setLinks={setEntityLinks} viewOnly={true} workspace={workspace} isPublic />
               </Flex>
             </Flex>
 

@@ -13,7 +13,7 @@ import { useLazyQuery } from "@apollo/client/react";
 
 // Utility functions and libraries
 import _ from "lodash";
-import { ignoreAbort } from "@lib/util";
+import { getPublicWorkspaceUrl, ignoreAbort } from "@lib/util";
 
 // Variables
 import { STYLES } from "@variables";
@@ -45,7 +45,10 @@ const Links = (props: LinksProps) => {
       }
     }
   `;
-  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, { fetchPolicy: "network-only" });
+  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, {
+    fetchPolicy: "network-only",
+    context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace ?? "") } : undefined,
+  });
 
   const uniqueEntityIds = useMemo(() => {
     const ids = new Set<string>();
@@ -143,7 +146,13 @@ const Links = (props: LinksProps) => {
                     {link.type === "child" && <Box w={"55px"} h={"2px"} bg={LINK_TYPE_ARROW_COLOR[link.type]} />}
                   </Flex>
 
-                  <Linky id={link.target._id} type={"entities"} truncate={12} />
+                  <Linky
+                    id={link.target._id}
+                    type={"entities"}
+                    truncate={12}
+                    workspace={props.workspace}
+                    isPublic={props.isPublic}
+                  />
                 </Flex>
 
                 <Flex direction={"row"} gap={"2"} ml={"auto"}>
