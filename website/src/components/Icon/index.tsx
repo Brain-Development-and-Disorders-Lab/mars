@@ -65,6 +65,9 @@ import {
   FaTrash,
   FaUpload,
   FaUser,
+  FaQuoteLeft,
+  FaRocket,
+  FaShieldHalved,
 } from "react-icons/fa6";
 
 // Existing and custom types
@@ -102,6 +105,10 @@ const SYSTEM_ICONS: Record<string, IconType> = {
   cross: FaCircleXmark,
   list: FaTableList,
   menu: FaBars,
+  book: FaBook,
+  rocket: FaRocket,
+  quote: FaQuoteLeft,
+  shield: FaShieldHalved,
   person: FaUser,
   warning: FaCircleExclamation,
   exclamation: FaCircleExclamation,

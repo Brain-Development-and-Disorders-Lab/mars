@@ -26,6 +26,10 @@ export type IconNames =
   | "cross"
   | "list"
   | "menu"
+  | "book"
+  | "rocket"
+  | "quote"
+  | "shield"
   | "person"
   | "warning"
   | "exclamation"
@@ -83,3 +87,42 @@ export type IconNames =
   | "sort"
   | "sort_up"
   | "sort_down";
+
+// Link shown with a label and destination
+export type LinkTarget = {
+  label: string;
+  href: string;
+};
+
+// FeatureShowcase component, a feature description beside a screenshot
+export type FeatureShowcaseProps = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  points: string[];
+  image: string;
+  imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
+  link: LinkTarget;
+  reverse?: boolean;
+};
+
+// PathCard component, one way to start using Metadatify with a single action
+export type PathCardProps = {
+  icon: IconNames;
+  title: string;
+  description: string;
+  action: LinkTarget;
+  primary?: boolean;
+  secondary?: LinkTarget;
+};
+
+// ResourceLink component, a compact link to a documentation page or resource
+export type ResourceLinkProps = {
+  icon: IconNames;
+  title: string;
+  description: string;
+  href: string;
+  isExternal?: boolean;
+};
