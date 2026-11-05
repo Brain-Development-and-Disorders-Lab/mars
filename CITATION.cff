@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+message: "If you use Metadatify in your research, please cite it using the preferred citation below."
+title: "Metadatify (Metadata Aggregation for Reproducible Science)"
+type: software
+authors:
+  - family-names: Burgess
+    given-names: Henry
+    affiliation: "Washington University in St. Louis School of Medicine"
+    orcid: "https://orcid.org/0000-0002-3481-952X"
+  - family-names: Fievet
+    given-names: Robin
+    affiliation: "Georgia Institute of Technology"
+version: 1.0.4
+repository-code: "https://github.com/Brain-Development-and-Disorders-Lab/mars"
+url: "https://metadatify.com"
+license-url: "https://github.com/Brain-Development-and-Disorders-Lab/mars/blob/main/LICENSE"
+abstract: "Metadatify is a source-available, web-based tool to create, manage, and search scientific metadata."
+keywords:
+  - metadata
+  - research data management
+  - FAIR
+preferred-citation:
+  type: generic
+  title: "MARS: An Open-Source Application for Managing and Searching Scientific Metadata"
+  medium: Poster
+  publisher:
+    name: Zenodo
+  year: 2024
+  date-published: 2024-10-17
+  doi: 10.5281/zenodo.13946927
+  url: "https://doi.org/10.5281/zenodo.13946927"
+  authors:
+    - family-names: Burgess
+      given-names: Henry
+      affiliation: "Washington University in St. Louis School of Medicine"
+      orcid: "https://orcid.org/0000-0002-3481-952X"
+    - family-names: Fievet
+      given-names: Robin
+      affiliation: "Georgia Institute of Technology"
+      orcid: "https://orcid.org/0009-0008-9355-5932"
+    - family-names: Brownell
+      given-names: David
+      affiliation: "Georgia Institute of Technology"
+      orcid: "https://orcid.org/0009-0004-6751-5743"
+    - family-names: Richards
+      given-names: Linda
+      affiliation: "Washington University in St. Louis School of Medicine"
+      orcid: "https://orcid.org/0000-0002-7590-7390"

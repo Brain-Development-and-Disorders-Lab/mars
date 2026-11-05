@@ -3,11 +3,72 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Metadatify</title>
-    <link rel="icon" type="image/x-icon" href="./src/img/Favicon.png" />
+    <title>Metadatify: Scientific metadata management for research labs</title>
+    <meta
+      name="description"
+      content="Metadatify is a source-available, web-based tool for research teams to create, manage, and search structured metadata for samples, specimens, and experiments."
+    />
+    <link rel="canonical" href="https://metadatify.com/" />
+    <meta name="theme-color" content="#0E2146" />
+    <link rel="icon" type="image/png" href="./src/img/Logo.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Metadatify" />
+    <meta property="og:url" content="https://metadatify.com/" />
+    <meta property="og:title" content="Metadatify: Scientific metadata management for research labs" />
+    <meta
+      property="og:description"
+      content="Create structured records for samples, specimens, and experiments. Search in plain language or with a visual query builder, and keep your whole lab in sync."
+    />
+    <meta property="og:image" content="https://metadatify.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="The Metadatify dashboard showing recent Projects, Entities and Workspace activity"
+    />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Metadatify: Scientific metadata management for research labs" />
+    <meta
+      name="twitter:description"
+      content="Create structured records for samples, specimens, and experiments. Search in plain language or with a visual query builder, and keep your whole lab in sync."
+    />
+    <meta name="twitter:image" content="https://metadatify.com/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="The Metadatify dashboard showing recent Projects, Entities and Workspace activity"
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Metadatify",
+        "alternateName": "Metadata Aggregation for Reproducible Science (MARS)",
+        "description": "A source-available, web-based tool to create, manage, and search scientific metadata.",
+        "license": "https://github.com/Brain-Development-and-Disorders-Lab/mars/blob/main/LICENSE",
+        "url": "https://metadatify.com/",
+        "image": "https://metadatify.com/og-image.png",
+        "screenshot": "https://metadatify.com/og-image.png",
+        "applicationCategory": "Research data management",
+        "operatingSystem": "Web browser",
+        "identifier": "https://doi.org/10.5281/zenodo.13946927",
+        "sameAs": [
+          "https://github.com/Brain-Development-and-Disorders-Lab/mars",
+          "https://doi.org/10.5281/zenodo.13946927"
+        ],
+        "softwareHelp": "https://metadatify.com/docs/",
+        "author": {
+          "@type": "Organization",
+          "name": "Brain Development and Disorders Lab, Washington University School of Medicine in St. Louis"
+        }
+      }
+    </script>
   </head>
   <body>
     <script type="module" src="./src/index.tsx"></script>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
   </body>
 </html>

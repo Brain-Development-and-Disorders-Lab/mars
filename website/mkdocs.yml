@@ -1,8 +1,11 @@
 site_name: Metadatify Documentation
+site_url: https://metadatify.com/docs/
+site_description: Documentation for Metadatify, a web-based tool for research teams to create, manage, and search structured scientific metadata.
 nav:
   - Home: index.md
   - Getting Started:
       - Overview: Getting-Started.md
+      - Quickstart: Quickstart.md
       - Terminology: Terminology.md
   - Creating:
       - Overview: creating/Creating.md
@@ -18,6 +21,7 @@ nav:
   - Data Management:
       - Importing Data: data_management/Importing-Data.md
       - Exporting Data: data_management/Exporting-Data.md
+  - Self-Hosting: Self-Hosting.md
+  - Analytics: Analytics.md
 theme:
   name: readthedocs
-  favicon: /img/Favicon.png

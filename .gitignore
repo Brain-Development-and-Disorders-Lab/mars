@@ -123,3 +123,4 @@ playwright-report/
 test-results/
 .playwright/
 *.webm
+dist-ssr

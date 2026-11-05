@@ -8,14 +8,14 @@ Accessible from the navigation menu, the "Create" portal provides a pathway to c
 
 For each item, the required and optional fields are specified. Further documentation can be found via the pages listed below.
 
-Creating Entities: [Documentation](../Creating-Entities)
+Creating Entities: [Documentation](Creating-Entities.md)
 
-Creating Projects: [Documentation](../Creating-Projects)
+Creating Projects: [Documentation](Creating-Projects.md)
 
-Creating Attributes: [Documentation](../Creating-Attributes)
+Creating Attributes: [Documentation](Creating-Attributes.md)
 
 ## Creating Workspaces
 
 Workspaces are managed separately to Entities, Projects, and Attributes. Workspaces are created and managed via the Switcher present at the top of the navigation menu. Further documentation can be found via the pages listed below.
 
-Creating Workspaces: [Documentation](../Creating-Workspaces)
+Creating Workspaces: [Documentation](Creating-Workspaces.md)
