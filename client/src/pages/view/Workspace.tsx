@@ -60,7 +60,6 @@ import { removeTypename } from "@lib/util";
 import { auth } from "@lib/auth";
 
 // Contexts and hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
@@ -480,8 +479,6 @@ const Workspace = () => {
     }
   };
 
-  const { isBreakpointActive } = useBreakpoint();
-
   // Utility functions for archiving or restoring Workspace contents
   const archiveEntity = async (_id: string, state: boolean) => {
     // Clone and update the local collection of Entities
@@ -888,8 +885,8 @@ const Workspace = () => {
     >
       <Flex direction={"column"}>
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} ml={"0.5"}>
-            <Breadcrumb.Root>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} ml={"0.5"} minW={0} maxW={"100%"}>
+            <Breadcrumb.Root flexShrink={0}>
               <Breadcrumb.List>
                 <Breadcrumb.Item gap={"1"}>
                   <Icon name={"workspace"} size={"xs"} color={"black"} />
@@ -898,11 +895,13 @@ const Workspace = () => {
                 <Breadcrumb.Separator />
               </Breadcrumb.List>
             </Breadcrumb.Root>
-            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
+            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"} minW={0}>
               <Icon name={"workspace"} size={"sm"} />
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {_.truncate(name, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
-              </Heading>
+              <Tooltip content={name} showArrow>
+                <Heading fontWeight={"semibold"} size={"sm"} minW={0} truncate>
+                  {name}
+                </Heading>
+              </Tooltip>
             </Flex>
           </Flex>
 

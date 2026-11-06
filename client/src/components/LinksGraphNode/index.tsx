@@ -11,9 +11,6 @@ import Tooltip from "@components/Tooltip";
 // Existing and custom types
 import { LinksGraphNodeProps } from "@types";
 
-// Utility functions and libraries
-import _ from "lodash";
-
 // Variables
 import { STYLES } from "@variables";
 
@@ -22,9 +19,9 @@ const LinksGraphNode = (props: LinksGraphNodeProps): React.JSX.Element => (
   <Flex direction={"column"} w={"100%"} h={"100%"} justify={"space-between"} gap={"1"} p={"1"}>
     <Flex align={"center"} gap={"1.5"} w={"100%"}>
       <Icon name={"entity"} size={"sm"} color={STYLES.entity.color.icon} />
-      <Tooltip content={props.name} disabled={props.name.length < 22}>
+      <Tooltip content={props.name} showArrow>
         <Text fontWeight={"semibold"} fontSize={"xs"} truncate>
-          {_.truncate(props.name, { length: 22 })}
+          {props.name}
         </Text>
       </Tooltip>
       {props.archived && (

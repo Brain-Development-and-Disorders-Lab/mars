@@ -2,18 +2,12 @@
 import React from "react";
 
 // Existing and custom components
-import { Breadcrumb, Flex, Heading, SkeletonText } from "@chakra-ui/react";
+import { Breadcrumb, Flex, Heading, SkeletonText, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { AttributeBreadcrumbProps } from "@types";
-
-// Utility functions and libraries
-import _ from "lodash";
-
-// Hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 
 // Variables
 import { STYLES } from "@variables";
@@ -26,14 +20,13 @@ const AttributeBreadcrumb = ({
   archived,
   name,
 }: AttributeBreadcrumbProps) => {
-  const { isBreakpointActive } = useBreakpoint();
-
   return (
     <Flex align={"center"} gap={"2"} ml={"0.5"} minW={0} maxW={"100%"}>
-      <Breadcrumb.Root flexShrink={0}>
-        <Breadcrumb.List>
+      <Breadcrumb.Root minW={0}>
+        <Breadcrumb.List flexWrap={"nowrap"}>
           <Breadcrumb.Item
             gap={"1"}
+            minW={0}
             onClick={onNavigateHome}
             _hover={{
               cursor: "pointer",
@@ -44,12 +37,18 @@ const AttributeBreadcrumb = ({
             {loading ? (
               <SkeletonText noOfLines={1} w={"80px"} my={"0.5"} h={"16px"} loading={loading} />
             ) : (
-              _.truncate(workspaceName, { length: isBreakpointActive("md", "down") ? 12 : 24 })
+              <Tooltip content={workspaceName} showArrow>
+                <Text minW={0} truncate>
+                  {workspaceName}
+                </Text>
+              </Tooltip>
             )}
           </Breadcrumb.Item>
-          <Breadcrumb.Separator />
+          <Breadcrumb.Separator flexShrink={0} />
           <Breadcrumb.Item
             gap={"1"}
+            flexShrink={0}
+            whiteSpace={"nowrap"}
             onClick={onNavigateAttributes}
             _hover={{
               cursor: "pointer",
@@ -59,7 +58,7 @@ const AttributeBreadcrumb = ({
             <Icon size={"xs"} name={"attribute"} color={STYLES.attribute.color.icon} />
             Attributes
           </Breadcrumb.Item>
-          <Breadcrumb.Separator />
+          <Breadcrumb.Separator flexShrink={0} />
         </Breadcrumb.List>
       </Breadcrumb.Root>
 

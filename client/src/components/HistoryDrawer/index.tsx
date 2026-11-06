@@ -349,7 +349,7 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                               align={{ base: "start", sm: "center" }}
                               justify={"space-between"}
                             >
-                              <Flex direction={"column"} gap={"0.5"} grow={"1"}>
+                              <Flex direction={"column"} gap={"0.5"} grow={"1"} minW={0} maxW={"100%"}>
                                 <Flex direction={"row"} gap={"1"} align={"center"}>
                                   <Tag.Root size={"sm"} colorPalette={"green"}>
                                     <Tag.Label fontSize={"xs"}>{version.version.slice(0, 6)}</Tag.Label>
@@ -361,15 +361,11 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                                     {dayjs(version.timestamp).fromNow()}
                                   </Text>
                                 </Flex>
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                   {version.message ? (
-                                    <Tooltip
-                                      content={version.message}
-                                      disabled={version.message.length <= 40}
-                                      showArrow
-                                    >
-                                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                                        {_.truncate(version.message, { length: 40 })}
+                                    <Tooltip content={version.message} showArrow>
+                                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} truncate>
+                                        {version.message}
                                       </Text>
                                     </Tooltip>
                                   ) : (
