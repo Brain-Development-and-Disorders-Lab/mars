@@ -83,13 +83,7 @@ export const LinkRow = (props: LinkRowProps) => {
 
       {/* Target */}
       <Flex minW={0}>
-        <Linky
-          id={props.link.target._id}
-          type={"entities"}
-          truncate={false}
-          workspace={props.workspace}
-          isPublic={props.isPublic}
-        />
+        <Linky id={props.link.target._id} type={"entities"} workspace={props.workspace} isPublic={props.isPublic} />
       </Flex>
 
       {/* Type badge and remove button */}

@@ -481,7 +481,6 @@ const Workspace = () => {
   };
 
   const { isBreakpointActive } = useBreakpoint();
-  const truncateTableText = !isBreakpointActive("md", "up");
 
   // Utility functions for archiving or restoring Workspace contents
   const archiveEntity = async (_id: string, state: boolean) => {
@@ -554,13 +553,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -621,13 +618,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -688,13 +683,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -755,13 +748,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex p={"0.5"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"counter"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -824,13 +815,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex p={"0.5"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"format"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>

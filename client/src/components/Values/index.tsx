@@ -699,9 +699,9 @@ const generateUrlTab = (url: string): ReactElement => {
               <Icon name={"warning"} size={"xs"} color={"orange.500"} />
             </Flex>
             {/* Truncated URL */}
-            <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-              <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
-                {_.truncate(url, { length: 28 })}
+            <Flex px={"2"} align={"center"} h={"100%"} bg={"white"} minW={0}>
+              <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"} truncate>
+                {url}
               </Text>
             </Flex>
           </Flex>

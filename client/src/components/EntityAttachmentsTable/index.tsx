@@ -40,8 +40,8 @@ const EntityAttachmentsTable = ({
         return (
           <Flex w={"100%"} justify={"space-between"} gap={"1"} align={"center"}>
             <Tooltip content={attachmentName} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(attachmentName, { length: 36 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                {attachmentName}
               </Text>
             </Tooltip>
             <Flex gap={"1"} align={"center"}>

@@ -39,9 +39,9 @@ const EntityAttributeNameCell = ({
 
   return (
     <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-      <Tooltip content={attribute.name} disabled={attribute.name.length < 16} showArrow>
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
-          {_.truncate(attribute.name, { length: 16 })}
+      <Tooltip content={attribute.name} showArrow>
+        <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+          {attribute.name}
         </Text>
       </Tooltip>
       <Flex direction={"row"} gap={"1"} align={"center"}>
@@ -136,9 +136,11 @@ const EntityAttributesTable = ({
           return <TagEmpty label={"Description"} />;
         }
         return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
+          <Flex minW={0}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Text fontSize={"xs"} truncate>
+                {info.getValue()}
+              </Text>
             </Tooltip>
           </Flex>
         );

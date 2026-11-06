@@ -758,7 +758,7 @@ export type LinkyProps = {
   color?: string;
   justify?: string;
   size?: string;
-  truncate?: boolean | number;
+  truncate?: number; // Fixed character limit, omit to fill the available space
   workspace?: string; // Override the active Workspace, used on unauthenticated public pages
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
 };
@@ -897,7 +897,6 @@ export type CellOwnerFieldProps = {
 // `CellDescriptionField` component props
 export type CellDescriptionFieldProps = {
   value: string | null | undefined;
-  maxLength?: number;
 };
 
 // `DataTable` component props

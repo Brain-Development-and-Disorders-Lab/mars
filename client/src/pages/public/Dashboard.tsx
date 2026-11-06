@@ -177,11 +177,11 @@ export const Dashboard = () => {
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Flex gap={"1"} align={"center"}>
+          <Tooltip content={info.getValue()} showArrow>
+            <Flex gap={"1"} align={"center"} minW={0}>
               <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                {info.getValue()}
               </Text>
             </Flex>
           </Tooltip>
@@ -218,7 +218,7 @@ export const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -250,11 +250,11 @@ export const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex gap={"1"} align={"center"} minW={0}>
                 <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -292,7 +292,7 @@ export const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -324,11 +324,11 @@ export const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex gap={"1"} align={"center"} minW={0}>
                 <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -366,7 +366,7 @@ export const Dashboard = () => {
       },
     }),
     attributeTableColumnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -581,18 +581,20 @@ export const Dashboard = () => {
                 </Flex>
               </Flex>
 
-              <Flex direction={"column"} gap={"1"} minW={"0"} maxW={"64"}>
+              <Flex direction={"column"} gap={"1"} minW={"0"}>
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Description
                 </Text>
-                <Flex>
+                <Flex minW={0}>
                   {_.isEqual(workspaceDescription, "") || _.isNull(workspaceDescription) ? (
                     <Tag.Root colorPalette={"orange"}>
                       <Tag.Label fontSize={"xs"}>No Description</Tag.Label>
                     </Tag.Root>
                   ) : (
-                    <Tooltip content={workspaceDescription} disabled={workspaceDescription.length < 64} showArrow>
-                      <Text fontSize={"xs"}>{_.truncate(workspaceDescription, { length: 64 })}</Text>
+                    <Tooltip content={workspaceDescription} showArrow>
+                      <Text fontSize={"xs"} truncate>
+                        {workspaceDescription}
+                      </Text>
                     </Tooltip>
                   )}
                 </Flex>

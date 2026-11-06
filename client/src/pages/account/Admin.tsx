@@ -132,9 +132,9 @@ const Admin = () => {
     userColumnHelper.accessor("email", {
       cell: (info) => (
         <Flex direction={"row"} gap={"2"} justify={"space-between"} w={"100%"} align={"center"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 24}>
-            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-              {_.truncate(info.getValue(), { length: 24 })}
+          <Tooltip content={info.getValue()}>
+            <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} truncate>
+              {info.getValue()}
             </Text>
           </Tooltip>
           <IconButton
@@ -247,11 +247,11 @@ const Admin = () => {
   const workspacesTableColumns = [
     workspaceColumnHelper.accessor("name", {
       cell: (info) => (
-        <Tooltip disabled={info.getValue().length < 48} content={info.getValue()} showArrow>
-          <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+        <Tooltip content={info.getValue()} showArrow>
+          <Flex direction={"row"} gap={"1"} ml={"0.5"} minW={0}>
             <Icon name={"workspace"} size={"xs"} />
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(info.getValue(), { length: 48 })}
+            <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+              {info.getValue()}
             </Text>
           </Flex>
         </Tooltip>
@@ -264,9 +264,9 @@ const Admin = () => {
         const value = info.getValue();
         if (value) {
           return (
-            <Tooltip content={value} disabled={!value || value.length < 48} showArrow>
-              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                {_.truncate(value, { length: 48 })}
+            <Tooltip content={value} disabled={!value} showArrow>
+              <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} truncate>
+                {value}
               </Text>
             </Tooltip>
           );

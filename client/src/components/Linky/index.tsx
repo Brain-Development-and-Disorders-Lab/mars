@@ -25,8 +25,6 @@ import { getPublicWorkspaceUrl, getValueTypeIconProps } from "@lib/util";
 // Variables
 import { STYLES } from "@variables";
 
-const DEFAULT_LINKY_LABEL_LENGTH = 16; // Default number of shown characters
-
 // Singular display name for each Linky type, used in fallback and error labels
 const TYPE_LABEL: Record<LinkyType, string> = {
   entities: "Entity",
@@ -77,12 +75,11 @@ const NAVIGATOR_ITEM_STYLE: Partial<Record<LinkyType, { icon: IconNames; color: 
 const NAVIGATOR_PREVIEW_COUNT = 2;
 
 /**
- * Apply Linky's truncation rules to a label
+ * Cap the label at a fixed number of characters when requested
  */
 const truncateLabel = (label: string, truncate: LinkyProps["truncate"]): string => {
-  if (truncate === false) return label;
-  const length = _.isNumber(truncate) ? truncate : DEFAULT_LINKY_LABEL_LENGTH;
-  return _.truncate(label, { length });
+  if (!_.isNumber(truncate)) return label;
+  return _.truncate(label, { length: truncate });
 };
 
 const Linky = (props: LinkyProps) => {
@@ -229,7 +226,6 @@ const Linky = (props: LinkyProps) => {
     tooltipLabel = linkyData.name;
   }
   const linkLabel = truncateLabel(displayName, props.truncate);
-  const canShrink = props.truncate === false;
   const showDeleted = _.isNull(linkyData);
   const showArchived = linkyData?.archived ?? false;
   const navigatorDescription = linkyData?.description ?? "";
@@ -277,7 +273,7 @@ const Linky = (props: LinkyProps) => {
           rounded={"md"}
           overflow={"hidden"}
           cursor={"not-allowed"}
-          flexShrink={canShrink ? 1 : 0}
+          flexShrink={1}
           minW={0}
           maxW={"100%"}
         >
@@ -315,7 +311,7 @@ const Linky = (props: LinkyProps) => {
               overflow={"hidden"}
               cursor={"pointer"}
               onClick={onClickHandler}
-              flexShrink={canShrink ? 1 : 0}
+              flexShrink={1}
               minW={0}
               maxW={"100%"}
               _hover={{
@@ -392,12 +388,14 @@ const Linky = (props: LinkyProps) => {
                   <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
                     Description
                   </Text>
-                  <Flex>
+                  <Flex minW={0}>
                     {_.isUndefined(navigatorDescription) || navigatorDescription === "" ? (
                       <TagEmpty label={"Description"} />
                     ) : (
-                      <Tooltip disabled={navigatorDescription.length < 32} content={navigatorDescription}>
-                        <Text fontSize={"xs"}>{_.truncate(navigatorDescription, { length: 32 })}</Text>
+                      <Tooltip content={navigatorDescription}>
+                        <Text fontSize={"xs"} truncate>
+                          {navigatorDescription}
+                        </Text>
                       </Tooltip>
                     )}
                   </Flex>

@@ -321,11 +321,11 @@ const Search = () => {
       searchResultColumnHelper.accessor("name", {
         cell: (info) => (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                 <Icon name={"entity"} color={STYLES.entity.color.default} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -353,9 +353,9 @@ const Search = () => {
             return <TagEmpty label={"Description"} />;
           }
           return (
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 64}>
-              <Text fontSize={"xs"} lineClamp={1}>
-                {_.truncate(info.getValue(), { length: 64 })}
+            <Tooltip content={info.getValue()}>
+              <Text fontSize={"xs"} truncate>
+                {info.getValue()}
               </Text>
             </Tooltip>
           );

@@ -29,8 +29,8 @@ const EntityBreadcrumb = ({
   const { isBreakpointActive } = useBreakpoint();
 
   return (
-    <Flex align={"center"} gap={"2"} ml={"0.5"}>
-      <Breadcrumb.Root>
+    <Flex align={"center"} gap={"2"} ml={"0.5"} minW={0} maxW={"100%"}>
+      <Breadcrumb.Root flexShrink={0}>
         <Breadcrumb.List>
           <Breadcrumb.Item
             gap={"1"}
@@ -63,10 +63,11 @@ const EntityBreadcrumb = ({
         </Breadcrumb.List>
       </Breadcrumb.Root>
 
-      <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"}>
+      <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} minW={0}>
         <Flex
           id={"entityNameTag"}
           align={"center"}
+          minW={0}
           gap={"1"}
           p={"1"}
           border={"2px solid"}
@@ -76,8 +77,8 @@ const EntityBreadcrumb = ({
         >
           <Icon name={"entity"} size={"sm"} color={archived ? "gray.500" : STYLES.entity.color.icon} />
           <Tooltip content={`${archived ? "Archived: " : ""}${name}`} showArrow>
-            <Heading fontWeight={"semibold"} size={"sm"}>
-              {_.truncate(name, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
+            <Heading fontWeight={"semibold"} size={"sm"} minW={0} truncate>
+              {name}
             </Heading>
           </Tooltip>
           {archived && <Icon name={"archive"} size={"sm"} color={"text.subtle"} />}

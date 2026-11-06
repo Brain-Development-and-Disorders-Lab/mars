@@ -4,6 +4,7 @@ import React, { useState } from "react";
 // Components
 import { Button, EmptyState, Flex, Text } from "@chakra-ui/react";
 import { createColumnHelper } from "@tanstack/react-table";
+import { CellDescriptionField } from "@components/DataTable/DataTableCell";
 import DialogAddAttribute from "@components/DialogAddAttribute";
 import { TagEmpty, TagValue } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
@@ -11,7 +12,6 @@ import { Information } from "@components/Label";
 import DialogViewAttribute from "@components/DialogViewAttribute";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
-import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { AttributeModel, AttributeNameCellProps, DialogImportEntityMappingStepProps } from "@types";
@@ -110,13 +110,7 @@ const DialogImportEntityMappingStep = ({
         if (_.isEqual(info.getValue(), "") || _.isNull(info.getValue())) {
           return <TagEmpty label={"Description"} />;
         }
-        return (
-          <Flex>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
+        return <CellDescriptionField value={info.getValue()} />;
       },
       header: "Description",
     }),

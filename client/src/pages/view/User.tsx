@@ -32,7 +32,6 @@ import { gql } from "@apollo/client";
 import { useLazyQuery, useMutation, useQuery } from "@apollo/client/react";
 
 // Hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 import { usePermissions } from "@hooks/usePermissions";
 
 // Authentication
@@ -47,8 +46,6 @@ import { isValidEmail, ignoreAbort } from "@lib/util";
 import { APP_URL, STYLES } from "@variables";
 
 const User = () => {
-  const { isBreakpointActive } = useBreakpoint();
-
   // Permissions
   const { globalPermissions } = usePermissions();
 
@@ -452,8 +449,6 @@ const User = () => {
     }
   };
 
-  const truncateTableText = !isBreakpointActive("md", "up");
-
   /**
    * Utility function to remove current user from Workspace
    * @param {string} _id Workspace identifier to remove the current user from
@@ -619,12 +614,10 @@ const User = () => {
       cell: (info) => {
         return (
           <Tooltip content={info.getValue()} showArrow>
-            <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+            <Flex direction={"row"} gap={"1"} ml={"0.5"} minW={0}>
               <Icon name={"workspace"} size={"xs"} />
-              <Text fontSize={"xs"}>
-                {_.truncate(info.getValue(), {
-                  length: truncateTableText ? 24 : 36,
-                })}
+              <Text fontSize={"xs"} truncate>
+                {info.getValue()}
               </Text>
             </Flex>
           </Tooltip>
