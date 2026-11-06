@@ -35,29 +35,25 @@ const TYPE_LABEL: Record<LinkyType, string> = {
   workspaces: "Workspace",
 };
 
-// Icon name, badge background, border, and icon color for each Linky type
-const TYPE_STYLE: Record<LinkyType, { icon: IconNames; badgeBg: string; badgeBorder: string; iconColor: string }> = {
+// Icon name, archived badge border, and badge color for each Linky type
+const TYPE_STYLE: Record<LinkyType, { icon: IconNames; badgeBorder: string; iconColor: string }> = {
   entities: {
     icon: "entity",
-    badgeBg: STYLES.entity.color.light,
     badgeBorder: STYLES.entity.color.border,
     iconColor: STYLES.entity.color.icon,
   },
   projects: {
     icon: "project",
-    badgeBg: STYLES.project.color.light,
     badgeBorder: STYLES.project.color.border,
     iconColor: STYLES.project.color.icon,
   },
   attributes: {
     icon: "attribute",
-    badgeBg: STYLES.attribute.color.light,
     badgeBorder: STYLES.attribute.color.border,
     iconColor: STYLES.attribute.color.icon,
   },
   workspaces: {
     icon: "workspace",
-    badgeBg: "gray.300",
     badgeBorder: "gray.300",
     iconColor: "gray.700",
   },
@@ -233,6 +229,7 @@ const Linky = (props: LinkyProps) => {
     tooltipLabel = linkyData.name;
   }
   const linkLabel = truncateLabel(displayName, props.truncate);
+  const canShrink = props.truncate === false;
   const showDeleted = _.isNull(linkyData);
   const showArchived = linkyData?.archived ?? false;
   const navigatorDescription = linkyData?.description ?? "";
@@ -248,7 +245,7 @@ const Linky = (props: LinkyProps) => {
     }
   };
 
-  const { icon, badgeBg, badgeBorder, iconColor } = TYPE_STYLE[props.type];
+  const { icon, badgeBorder, iconColor } = TYPE_STYLE[props.type];
   const navigatorLabel = NAVIGATOR_LABEL[props.type];
 
   /**
@@ -280,7 +277,9 @@ const Linky = (props: LinkyProps) => {
           rounded={"md"}
           overflow={"hidden"}
           cursor={"not-allowed"}
-          flexShrink={0}
+          flexShrink={canShrink ? 1 : 0}
+          minW={0}
+          maxW={"100%"}
         >
           {/* Warning badge */}
           <Flex
@@ -289,14 +288,15 @@ const Linky = (props: LinkyProps) => {
             bg={"status.warning.subtle"}
             px={"1.5"}
             h={"100%"}
+            flexShrink={0}
             borderRight={"1px solid"}
             borderColor={"orange.200"}
           >
             <Icon name={"warning"} size={"xs"} color={"orange.500"} />
           </Flex>
           {/* Deleted label */}
-          <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-            <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"}>
+          <Flex px={"2"} align={"center"} h={"100%"} minW={0} bg={"white"}>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={"text.subtle"} truncate>
               {linkLabel}
             </Text>
           </Flex>
@@ -315,7 +315,9 @@ const Linky = (props: LinkyProps) => {
               overflow={"hidden"}
               cursor={"pointer"}
               onClick={onClickHandler}
-              flexShrink={0}
+              flexShrink={canShrink ? 1 : 0}
+              minW={0}
+              maxW={"100%"}
               _hover={{
                 borderColor: iconColor,
                 boxShadow: `0 0 0 1px ${iconColor}4D`,
@@ -325,17 +327,18 @@ const Linky = (props: LinkyProps) => {
               <Flex
                 align={"center"}
                 justify={"center"}
-                bg={showArchived ? STYLES.card.bg : badgeBg}
+                bg={showArchived ? STYLES.card.bg : iconColor}
                 px={"1.5"}
                 h={"100%"}
+                flexShrink={0}
                 borderRight={"1px solid"}
-                borderColor={badgeBorder}
+                borderColor={showArchived ? badgeBorder : iconColor}
               >
-                <Icon name={icon} size={"xs"} color={showArchived ? "gray.500" : iconColor} />
+                <Icon name={icon} size={"xs"} color={showArchived ? "gray.500" : "white"} />
               </Flex>
               {/* Name */}
-              <Flex px={"2"} align={"center"} h={"100%"} bg={"white"}>
-                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"}>
+              <Flex px={"2"} align={"center"} h={"100%"} minW={0} bg={"white"}>
+                <Text fontSize={"xs"} fontWeight={"medium"} color={"gray.700"} truncate>
                   {linkLabel}
                 </Text>
               </Flex>
@@ -347,6 +350,7 @@ const Linky = (props: LinkyProps) => {
                   bg={STYLES.card.bg}
                   px={"1.5"}
                   h={"100%"}
+                  flexShrink={0}
                   borderLeft={"1px solid"}
                   borderColor={"gray.100"}
                 >
