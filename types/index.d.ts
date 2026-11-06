@@ -1328,6 +1328,16 @@ export type LinksProps = {
   isPublic?: boolean;
 };
 
+// `LinkRow` component props
+export type LinkRowProps = {
+  link: ILink;
+  sourceName: string;
+  onRemove?: () => void;
+  isLast?: boolean;
+  workspace?: string;
+  isPublic?: boolean;
+};
+
 // Utility type to specify the props of `LinksGraphNode`
 export type LinksGraphNodeProps = LinksGraphNodeInput & {
   onView: (id: string) => void;
