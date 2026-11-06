@@ -37,8 +37,8 @@ export const LINK_TYPE_PALETTE: Record<LinkType, string> = {
 };
 
 // Styling variables
-const LIST_COLUMNS_NARROW = "fit-content(40%) 72px minmax(0, 1fr)";
-const LIST_COLUMNS_WIDE = "fit-content(35%) 120px minmax(0, 1fr) auto";
+const LIST_COLUMNS_NARROW = "fit-content(35%) clamp(32px, 15%, 72px) minmax(0, 1fr)";
+const LIST_COLUMNS_WIDE = "fit-content(30%) clamp(40px, 12%, 120px) minmax(0, 1fr) auto";
 const LIST_WIDE_BREAKPOINT = "520px";
 export const LINK_LIST_CONTAINER_CSS = { containerType: "inline-size" };
 export const LINK_LIST_GRID_CSS = {
