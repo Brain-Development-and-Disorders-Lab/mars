@@ -165,7 +165,7 @@ const User = () => {
   `;
   const [updateUser, { loading: userUpdateLoading, error: userUpdateError }] = useMutation<{
     updateUser: IResponseMessage;
-  }>(UPDATE_USER);
+  }>(UPDATE_USER, { refetchQueries: ["GetActorUser"] });
 
   // Mutation to revoke an API key
   const REVOKE_KEY = gql`
@@ -808,13 +808,15 @@ const User = () => {
                 >
                   Avatar
                 </Text>
-                <TagActor
-                  key={staticName}
-                  identifier={`${userModel._id}`}
-                  fallback={"Unknown User"}
-                  size={"md"}
-                  avatarOnly
-                />
+                <Flex>
+                  <TagActor
+                    key={staticName}
+                    identifier={`${userModel._id}`}
+                    fallback={"Unknown User"}
+                    size={"md"}
+                    variant={"avatar"}
+                  />
+                </Flex>
               </Flex>
 
               {/* Name */}

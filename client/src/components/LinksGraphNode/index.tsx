@@ -34,9 +34,7 @@ const LinksGraphNode = (props: LinksGraphNodeProps): React.JSX.Element => (
     {props.owner && (
       <Flex align={"center"} gap={"1"}>
         <Icon name={"person"} size={"xs"} color={"text.subtle"} />
-        <Flex ml={"-1.5"}>
-          <TagActor identifier={props.owner} fallback={"Unknown"} size={"sm"} inlineNoAvatar />
-        </Flex>
+        <TagActor identifier={props.owner} fallback={"Unknown"} size={"sm"} variant={"name"} />
       </Flex>
     )}
 

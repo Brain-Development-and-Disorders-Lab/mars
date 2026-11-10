@@ -221,7 +221,7 @@ const Workspace = () => {
     }
   `;
   const [updateWorkspace, { loading: workspaceUpdateLoading, error: workspaceUpdateError }] =
-    useMutation<IResponseMessage>(UPDATE_WORKSPACE);
+    useMutation<IResponseMessage>(UPDATE_WORKSPACE, { refetchQueries: ["GetActorWorkspace"] });
 
   // State for Workspace editing
   const [editing, setEditing] = useState(false);

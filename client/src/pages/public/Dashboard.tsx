@@ -229,7 +229,6 @@ export const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.attributes}
-          max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
           renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -303,7 +302,6 @@ export const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.entities}
-          max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
           renderTag={(entity) => <Linky type={"entities"} id={entity} workspace={id} isPublic />}
@@ -377,7 +375,6 @@ export const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.values}
-          max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
           renderTag={(value) => <TagValue value={value} />}
@@ -448,7 +445,7 @@ export const Dashboard = () => {
                 <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color} ml={"0.5"}>
                   Created
                 </Text>
-                <TagTimestamp timestamp={workspaceCreated} />
+                <TagTimestamp timestamp={workspaceCreated} size={"md"} />
               </Flex>
 
               <Flex direction={"column"} gap={"1"}>

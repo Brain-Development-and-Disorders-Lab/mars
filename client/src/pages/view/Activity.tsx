@@ -249,7 +249,7 @@ const Activity = () => {
             </Text>
           );
         }
-        return <TagActor identifier={actor} fallback={"Unknown User"} size={"sm"} inline />;
+        return <TagActor identifier={actor} fallback={"Unknown User"} size={"sm"} variant={"inline"} />;
       },
       header: "User",
       enableHiding: true,

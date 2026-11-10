@@ -118,7 +118,7 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
               return (
                 <Flex direction={"row"} width={"100%"} gap={"2"} key={`activity-${activity._id}`} align={"center"}>
                   {activity.actor ? (
-                    <TagActor identifier={activity.actor} fallback={"Unknown User"} size={"sm"} avatarOnly />
+                    <TagActor identifier={activity.actor} fallback={"Unknown User"} size={"sm"} variant={"avatar"} />
                   ) : (
                     <Avatar.Root size={"xs"} colorPalette={"blue"}>
                       <Avatar.Fallback name={"Unknown"} />

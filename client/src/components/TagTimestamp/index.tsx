@@ -28,7 +28,7 @@ const TagTimestamp = (props: TagTimestampProps) => {
       <Flex
         direction={"row"}
         align={"center"}
-        h={"52px"}
+        h={STYLES.tag.height[props.size ?? "sm"]}
         w={"fit-content"}
         border={STYLES.border.style}
         borderColor={"blue.200"}
@@ -51,7 +51,7 @@ const TagTimestamp = (props: TagTimestampProps) => {
         </Flex>
 
         {/* Timestamp label */}
-        <Flex direction={"column"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
+        <Flex direction={"column"} px={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {dateString}
           </Text>

@@ -370,7 +370,6 @@ const Search = () => {
         cell: (info) => (
           <FieldTagList
             items={info.row.original.attributes}
-            max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -412,7 +411,7 @@ const Search = () => {
       }),
       searchResultColumnHelper.accessor("owner", {
         cell: (info) => {
-          return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+          return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} variant={"inline"} />;
         },
         header: "Owner",
       }),

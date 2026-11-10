@@ -275,7 +275,6 @@ export const Search = () => {
         cell: (info) => (
           <FieldTagList
             items={info.row.original.attributes}
-            max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -324,7 +323,7 @@ export const Search = () => {
               size={"sm"}
               workspace={workspace}
               isPublic
-              inline
+              variant={"inline"}
             />
           );
         },

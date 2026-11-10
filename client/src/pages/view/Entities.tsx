@@ -205,7 +205,6 @@ const Entities = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.attributes}
-          max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
           renderTag={(attribute) => <TagAttribute attribute={attribute} />}

@@ -300,7 +300,6 @@ const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.attributes}
-          max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
           renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -375,7 +374,6 @@ const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.entities}
-          max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
           renderTag={(entity) => <Linky type={"entities"} id={entity} />}

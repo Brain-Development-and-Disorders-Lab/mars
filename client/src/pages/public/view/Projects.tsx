@@ -171,7 +171,6 @@ export const Projects = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.entities}
-          max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
           renderTag={(entity) => <Linky type={"entities"} id={entity} workspace={id} isPublic />}

@@ -92,7 +92,7 @@ const DataTableFilters = ({
                   size={"sm"}
                   workspace={workspace}
                   isPublic={isPublic}
-                  inline
+                  variant={"inline"}
                 />
               </Checkbox.Label>
             </Checkbox.Root>

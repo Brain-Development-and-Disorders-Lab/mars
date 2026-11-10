@@ -764,20 +764,75 @@ export type LinkyProps = {
 };
 
 // `TagActor` component props
+// Avatar gradient color tokens
+export type AvatarGradient = {
+  from: string;
+  to: string;
+};
+
+// `TagActor` presentation variants
+export type TagActorVariant = "avatar" | "name" | "inline" | "card";
+
 export type TagActorProps = {
   identifier: string;
   fallback: string;
   size: "sm" | "md";
-  inline?: boolean;
-  inlineNoAvatar?: boolean;
-  avatarOnly?: boolean;
+  variant?: TagActorVariant; // Defaults to "card"
   workspace?: string; // Override the active Workspace, used on unauthenticated public pages
   isPublic?: boolean; // Route the underlying query to the public Workspace endpoint
+};
+
+// Relationship of an actor to the Workspace
+export type ActorRole = "owner" | "collaborator" | "none";
+
+// `useActor` hook options
+export type UseActorOptions = {
+  identifier: string;
+  fallback: string;
+  workspace: string;
+  isPublic?: boolean;
+};
+
+// Resolved actor details returned by `useActor`
+export type ActorDetails = {
+  identifier: string;
+  label: string; // Full display name, or the fallback while loading or missing
+  affiliation: string;
+  email: string; // Empty when the server withholds it
+  image: string;
+  orcid: string; // Bare ORCiD
+  orcidUrl: string;
+  role: ActorRole;
+  isMember: boolean;
+  loading: boolean;
+};
+
+// `useActor` query results
+export type ActorUserQueryResult = {
+  user: Partial<UserModel> | null;
+};
+export type ActorWorkspaceQueryResult = {
+  workspace: Pick<WorkspaceModel, "_id" | "owner" | "collaborators"> | null;
+};
+
+// `TagActor` internal component props
+export type ActorAvatarProps = {
+  actor: ActorDetails;
+  size: "2xs" | "xs" | "sm" | "md" | "lg";
+};
+export type ActorHoverCardProps = {
+  actor: ActorDetails;
+  children: React.ReactElement;
+};
+export type ActorDetailRowProps = {
+  label: string;
+  children: React.ReactNode;
 };
 
 // `TagVisibility` component props
 export type TagVisibilityProps = {
   isPublic: boolean;
+  size?: "sm" | "md"; // Matches `TagActor` card heights, defaults to "sm"
   setIsPublic?: (value: React.SetStateAction<boolean>) => void;
   disabled?: boolean; // Disable changing the visibility
   isInherited?: boolean; // Specify if this visibility is inherited
@@ -786,6 +841,7 @@ export type TagVisibilityProps = {
 // `TagTimestamp` component props
 export type TagTimestampProps = {
   timestamp: string;
+  size?: "sm" | "md"; // Matches `TagActor` card heights, defaults to "sm"
   description?: string;
 };
 
@@ -810,9 +866,9 @@ export type TagAttributeProps = {
 // `FieldTagList` component props, renders up to `max` `TagField`s followed by an "and N more" summary
 export type FieldTagListProps = {
   items: any[];
-  max: number;
   getKey: (item: any) => string;
   renderTag: (item: any) => React.ReactNode;
+  max?: number;
   emptyLabel?: string; // When set, an `TagEmpty` is shown in place of an empty list
 };
 

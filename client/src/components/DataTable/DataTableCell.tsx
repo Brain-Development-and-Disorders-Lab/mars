@@ -37,7 +37,7 @@ export const CellOwnerField = (props: CellOwnerFieldProps) => (
     identifier={props.value}
     fallback={"Unknown User"}
     size={"sm"}
-    inline
+    variant={"inline"}
     workspace={props.workspace}
     isPublic={props.isPublic}
   />

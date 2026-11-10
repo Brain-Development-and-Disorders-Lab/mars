@@ -1,174 +1,246 @@
 // React
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 // Existing and custom components
-import { Avatar, Badge, Flex, Skeleton, SkeletonText, Text } from "@chakra-ui/react";
-import Tooltip from "@components/Tooltip";
+import { Avatar, Badge, Flex, HoverCard, Portal, Separator, Skeleton, Text } from "@chakra-ui/react";
 
 // Existing and custom types
-import { TagActorProps, UserModel, WorkspaceModel } from "@types";
+import {
+  ActorAvatarProps,
+  ActorDetailRowProps,
+  ActorDetails,
+  ActorHoverCardProps,
+  ActorRole,
+  TagActorProps,
+} from "@types";
 
 // Utility functions and libraries
-import _ from "lodash";
-import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
-import { getPublicWorkspaceUrl } from "@lib/util";
+import { getAvatarGradient } from "@lib/util";
 
 // Custom hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
+import { useActor } from "@hooks/useActor";
 import { useWorkspace } from "@hooks/useWorkspace";
 
 // Variables
 import { STYLES } from "@variables";
 
-const DEFAULT_ACTOR_LABEL_LENGTH = 20; // Default number of shown characters
+const ROLE_LABELS: Record<ActorRole, string> = {
+  owner: "Owner",
+  collaborator: "Collaborator",
+  none: "Not a member",
+};
+
+const ROLE_PALETTES: Record<ActorRole, string> = {
+  owner: "blue",
+  collaborator: "gray",
+  none: "orange",
+};
+
+// Font and hover colors for hover card anchors
+const DETAIL_LINK_STYLES = {
+  fontSize: "xs",
+  color: "blue.600",
+  textDecoration: "none",
+  truncate: true,
+  _hover: { color: "blue.800", textDecoration: "underline" },
+};
+
+// Name color, muted for non-members once loaded
+const getNameColor = (actor: ActorDetails) => (actor.loading || actor.isMember ? "gray.700" : "gray.500");
+
+// Avatar with the User image when set, otherwise gradient initials, gray for non-members
+const ActorAvatar = (props: ActorAvatarProps) => {
+  const getColorProps = () => {
+    if (props.actor.loading) {
+      return { colorPalette: "gray" };
+    }
+    if (!props.actor.isMember) {
+      return { colorPalette: "gray", borderWidth: "1px", borderStyle: "dashed", borderColor: "gray.400" };
+    }
+    const gradient = getAvatarGradient(props.actor.identifier || props.actor.label);
+    return { bgGradient: "to-br", gradientFrom: gradient.from, gradientTo: gradient.to, color: "white" };
+  };
+
+  return (
+    <Avatar.Root size={props.size} flexShrink={0} {...getColorProps()}>
+      <Avatar.Fallback name={props.actor.loading ? "" : props.actor.label} fontWeight={"bold"} />
+      {props.actor.image && <Avatar.Image src={props.actor.image} />}
+    </Avatar.Root>
+  );
+};
+
+// Labelled row within the hover card
+const ActorDetailRow = (props: ActorDetailRowProps) => (
+  <Flex direction={"row"} align={"center"} justify={"space-between"} gap={"3"} minW={"0"}>
+    <Text fontSize={"xs"} color={"gray.500"} flexShrink={0}>
+      {props.label}
+    </Text>
+    <Flex minW={"0"} justify={"flex-end"}>
+      {props.children}
+    </Flex>
+  </Flex>
+);
+
+// Hover card with the full actor details
+const ActorHoverCard = (props: ActorHoverCardProps) => (
+  <HoverCard.Root openDelay={400} closeDelay={100} positioning={{ placement: "top" }} lazyMount unmountOnExit>
+    <HoverCard.Trigger asChild>{props.children}</HoverCard.Trigger>
+    <Portal>
+      <HoverCard.Positioner>
+        <HoverCard.Content w={"2xs"} p={"3"}>
+          <HoverCard.Arrow />
+          <Flex direction={"column"} gap={"3"}>
+            <Flex direction={"row"} align={"center"} gap={"3"} minW={"0"}>
+              <ActorAvatar actor={props.actor} size={"md"} />
+              <Text fontSize={"sm"} fontWeight={"semibold"} color={"gray.700"} truncate>
+                {props.actor.label}
+              </Text>
+            </Flex>
+
+            <Separator />
+
+            <Flex direction={"column"} gap={"1.5"}>
+              <ActorDetailRow label={"Role"}>
+                <Badge size={"sm"} colorPalette={ROLE_PALETTES[props.actor.role]}>
+                  {ROLE_LABELS[props.actor.role]}
+                </Badge>
+              </ActorDetailRow>
+              {props.actor.affiliation && (
+                <ActorDetailRow label={"Affiliation"}>
+                  <Text fontSize={"xs"} color={"gray.700"} truncate>
+                    {props.actor.affiliation}
+                  </Text>
+                </ActorDetailRow>
+              )}
+              {props.actor.orcid && (
+                <ActorDetailRow label={"ORCiD"}>
+                  <Text asChild {...DETAIL_LINK_STYLES}>
+                    <a href={props.actor.orcidUrl} target={"_blank"} rel={"noreferrer"}>
+                      {props.actor.orcid}
+                    </a>
+                  </Text>
+                </ActorDetailRow>
+              )}
+              {props.actor.email && (
+                <ActorDetailRow label={"Email"}>
+                  <Text asChild {...DETAIL_LINK_STYLES}>
+                    <a href={`mailto:${props.actor.email}`}>{props.actor.email}</a>
+                  </Text>
+                </ActorDetailRow>
+              )}
+            </Flex>
+          </Flex>
+        </HoverCard.Content>
+      </HoverCard.Positioner>
+    </Portal>
+  </HoverCard.Root>
+);
 
 const TagActor = (props: TagActorProps) => {
-  // Component state
-  const [actorLabel, setActorLabel] = useState(props.fallback);
-  const [actorOrcid, setActorOrcid] = useState("");
-
   // Workspace state, overridden on unauthenticated public pages
   const { workspace: activeWorkspace } = useWorkspace();
   const workspace = props.workspace ?? activeWorkspace;
 
-  // Breakpoint state
-  const { isBreakpointActive } = useBreakpoint();
-
-  // Avatar color information
-  const colorPalette = ["red", "blue", "green", "yellow", "purple", "orange"];
-  const pickPalette = (name: string) => {
-    const index = name.charCodeAt(0) % colorPalette.length;
-    return colorPalette[index];
-  };
-  const [isWorkspaceMember, setIsWorkspaceMember] = useState(false);
-
-  // GraphQL operations
-  const GET_USER = gql`
-    query GetUser($_id: String, $workspace: String) {
-      user(_id: $_id) {
-        _id
-        name
-        firstName
-        lastName
-        account_orcid
-      }
-      workspace(_id: $workspace) {
-        _id
-        owner
-        collaborators {
-          _id
-        }
-      }
-    }
-  `;
-  const { loading, data } = useQuery<{ user: Partial<UserModel>; workspace: WorkspaceModel }>(GET_USER, {
-    variables: {
-      _id: props.identifier,
-      workspace: workspace,
-    },
-    // Send this query to the public Workspace endpoint when rendered on a public page
-    context: props.isPublic ? { uri: getPublicWorkspaceUrl(workspace) } : undefined,
-    skip: !props.identifier || props.identifier.trim() === "",
-    fetchPolicy: "network-only",
-    errorPolicy: "all",
+  const actor = useActor({
+    identifier: props.identifier,
+    fallback: props.fallback,
+    workspace,
+    isPublic: props.isPublic,
   });
 
-  useEffect(() => {
-    if (data?.user) {
-      setActorLabel(
-        _.truncate(`${data.user.firstName} ${data.user.lastName}`, {
-          length: DEFAULT_ACTOR_LABEL_LENGTH,
-        }),
-      );
+  const variant = props.variant ?? "card";
+  const isSmall = props.size === "sm";
 
-      // Extract additional account information if specified
-      if (data.user.account_orcid && data.user.account_orcid !== "") {
-        const startOrcid = data.user.account_orcid.lastIndexOf("/");
-        setActorOrcid(data.user.account_orcid.substring(startOrcid + 1));
-      }
-    }
-
-    if (data?.workspace) {
-      const collaboratorIds = data.workspace.collaborators.map((collaborator) => collaborator._id);
-      setIsWorkspaceMember(_.includes(collaboratorIds, props.identifier) || props.identifier === data.workspace.owner);
-    }
-  }, [data]);
-
-  // If avatarOnly is true, show only the avatar
-  if (props.avatarOnly) {
+  // Just the avatar
+  if (variant === "avatar") {
     return (
-      <Tooltip content={isWorkspaceMember ? actorLabel : "Not a member of this Workspace"} showArrow>
-        <Avatar.Root
-          size={props.inline ? "2xs" : props.size === "sm" ? "xs" : "sm"}
-          key={actorLabel}
-          colorPalette={loading || !isWorkspaceMember ? "gray" : pickPalette(actorLabel)}
-        >
-          <Avatar.Fallback name={loading ? "" : actorLabel} />
-        </Avatar.Root>
-      </Tooltip>
+      <ActorHoverCard actor={actor}>
+        <Flex flexShrink={0} cursor={"default"}>
+          <ActorAvatar actor={actor} size={isSmall ? "xs" : "sm"} />
+        </Flex>
+      </ActorHoverCard>
     );
   }
 
-  return props.inline || props.inlineNoAvatar ? (
-    <Tooltip content={"Not a member of this Workspace"} disabled={isWorkspaceMember} showArrow>
-      <Flex direction={"row"} gap={"0.5"} align={"center"} w={"fit-content"}>
-        {(_.isUndefined(props.inlineNoAvatar) || !props.inlineNoAvatar) && (
-          <Avatar.Root
-            size={"2xs"}
-            key={actorLabel}
-            colorPalette={loading || !isWorkspaceMember ? "gray" : pickPalette(actorLabel)}
-          >
-            <Avatar.Fallback name={loading ? "" : actorLabel} />
-          </Avatar.Root>
-        )}
-        <Skeleton asChild loading={loading} w={"120px"}>
-          <Badge fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"}>
-            {!loading && actorLabel}
-          </Badge>
-        </Skeleton>
-      </Flex>
-    </Tooltip>
-  ) : (
-    <Tooltip content={"Not a member of this Workspace"} disabled={isWorkspaceMember} showArrow>
+  // Just the name
+  if (variant === "name") {
+    return (
+      <ActorHoverCard actor={actor}>
+        <Flex minW={"0"} maxW={"full"} w={"fit-content"} cursor={"default"}>
+          <Skeleton loading={actor.loading} asChild>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={getNameColor(actor)} truncate>
+              {actor.label}
+            </Text>
+          </Skeleton>
+        </Flex>
+      </ActorHoverCard>
+    );
+  }
+
+  // Compact avatar and name pill, for tables and lists
+  if (variant === "inline") {
+    return (
+      <ActorHoverCard actor={actor}>
+        <Flex
+          direction={"row"}
+          align={"center"}
+          gap={"1.5"}
+          p={"0.5"}
+          pr={"2"}
+          rounded={"full"}
+          bg={"bg.muted"}
+          minW={"0"}
+          maxW={"full"}
+          w={"fit-content"}
+          cursor={"default"}
+        >
+          <ActorAvatar actor={actor} size={"2xs"} />
+          <Skeleton loading={actor.loading} asChild>
+            <Text fontSize={"xs"} fontWeight={"medium"} color={getNameColor(actor)} truncate>
+              {actor.label}
+            </Text>
+          </Skeleton>
+        </Flex>
+      </ActorHoverCard>
+    );
+  }
+
+  // Full card with the ORCID as a secondary line, other details live in the hover card
+  const secondary = actor.orcid;
+
+  return (
+    <ActorHoverCard actor={actor}>
       <Flex
         direction={"row"}
-        gap={"2"}
         align={"center"}
-        justify={"space-around"}
-        p={props.size === "sm" ? "1" : "2"}
+        gap={"2"}
+        h={STYLES.tag.height[props.size]}
+        px={isSmall ? "1.5" : "2"}
+        pr={"3"}
         rounded={"md"}
         border={STYLES.border.style}
         borderColor={STYLES.border.color}
-        bg={isWorkspaceMember ? "white" : "surface.card"}
-        minW={"120px"}
+        bg={actor.loading || actor.isMember ? "white" : "surface.card"}
+        minW={"0"}
+        maxW={"240px"}
         w={"fit-content"}
-        maxW={"200px"}
-        h={"52px"}
+        cursor={"default"}
       >
-        <Avatar.Root
-          size={props.size === "sm" ? "xs" : "sm"}
-          key={actorLabel}
-          colorPalette={loading || !isWorkspaceMember ? "gray" : pickPalette(actorLabel)}
-        >
-          <Avatar.Fallback name={loading ? "" : actorLabel} />
-        </Avatar.Root>
-        <SkeletonText loading={loading} w={"100%"} noOfLines={actorOrcid !== "" ? 2 : 1} gap={"2"} asChild>
-          <Flex w={"100%"} align={"left"}>
-            <Flex direction={"column"} gap={"0.5"} align={"left"} w={"100%"} justify={"center"}>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"gray.700"} ml={"0.5"}>
-                {actorLabel}
+        <ActorAvatar actor={actor} size={isSmall ? "xs" : "sm"} />
+        <Skeleton loading={actor.loading} asChild>
+          <Flex direction={"column"} gap={"0.5"} minW={"0"}>
+            <Text fontSize={"xs"} fontWeight={"semibold"} color={getNameColor(actor)} truncate>
+              {actor.label}
+            </Text>
+            {secondary && (
+              <Text fontSize={"2xs"} color={"gray.500"} truncate>
+                {secondary}
               </Text>
-              {isBreakpointActive("xl", "up") && actorOrcid !== "" && (
-                <Badge fontSize={"2xs"} fontWeight={"semibold"} variant={"subtle"}>
-                  {actorOrcid}
-                </Badge>
-              )}
-            </Flex>
+            )}
           </Flex>
-        </SkeletonText>
+        </Skeleton>
       </Flex>
-    </Tooltip>
+    </ActorHoverCard>
   );
 };
 

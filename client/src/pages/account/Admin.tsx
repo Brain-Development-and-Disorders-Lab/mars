@@ -278,7 +278,9 @@ const Admin = () => {
       meta: { minWidth: 300 } as ColumnMeta,
     }),
     workspaceColumnHelper.accessor("owner", {
-      cell: (info) => <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />,
+      cell: (info) => (
+        <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} variant={"inline"} />
+      ),
       header: "Owner",
       meta: { minWidth: 160 } as ColumnMeta,
     }),

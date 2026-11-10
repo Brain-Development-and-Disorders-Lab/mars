@@ -102,7 +102,6 @@ const ProjectEntitiesTable = ({
         return (
           <FieldTagList
             items={attributes}
-            max={2}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}

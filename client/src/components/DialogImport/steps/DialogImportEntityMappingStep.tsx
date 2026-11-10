@@ -118,7 +118,6 @@ const DialogImportEntityMappingStep = ({
       cell: (info) => (
         <FieldTagList
           items={info.row.original.values}
-          max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
           renderTag={(value) => <TagValue value={value} />}

@@ -4,6 +4,7 @@ import _ from "lodash";
 // Custom types
 import {
   AttributeModel,
+  AvatarGradient,
   Collaborator,
   CountRange,
   DataTableFilterAccessors,
@@ -806,4 +807,30 @@ export const filterTableData = <T>(
     if (values.owners.length > 0 && !values.owners.includes(accessors.owner(row))) return false;
     return Object.entries(accessors.counts).every(([key, count]) => isInRange(count(row), values.ranges[key]));
   });
+};
+
+/**
+ * Pick a stable two-color avatar gradient by hashing the whole key
+ * @param {string} key a stable identifier, such as a user `_id`
+ * @returns {AvatarGradient}
+ */
+export const getAvatarGradient = (key: string): AvatarGradient => {
+  // Chakra palettes in hue order so neighbors blend, excluding gray which marks non-members
+  const AVATAR_PALETTES = ["red", "orange", "yellow", "green", "teal", "cyan", "blue", "purple", "pink"];
+  const AVATAR_OFFSETS = [-2, -1, 1, 2];
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) | 0;
+  }
+  hash = Math.abs(hash);
+
+  // Second color is a near neighbor of the first, wrapping around the list
+  const fromIndex = hash % AVATAR_PALETTES.length;
+  const offset = AVATAR_OFFSETS[Math.floor(hash / AVATAR_PALETTES.length) % AVATAR_OFFSETS.length];
+  const toIndex = (fromIndex + offset + AVATAR_PALETTES.length) % AVATAR_PALETTES.length;
+
+  return {
+    from: `${AVATAR_PALETTES[fromIndex]}.400`,
+    to: `${AVATAR_PALETTES[toIndex]}.500`,
+  };
 };

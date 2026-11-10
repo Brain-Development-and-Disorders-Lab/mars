@@ -1,5 +1,6 @@
 // Target functions
 import {
+  getAvatarGradient,
   getBaseIdentifierFormatHelperText,
   getCustomIdentifierFormatHelperText,
   isValidBaseIdentifierFormat,
@@ -216,5 +217,53 @@ describe("getCustomIdentifierFormatHelperText", () => {
     const helperText = getCustomIdentifierFormatHelperText(format);
     expect(helperText).toContain("A-Z");
     expect(helperText).not.toContain("a-z");
+  });
+});
+
+describe("getAvatarGradient", () => {
+  // Mirrors the hue order in `getAvatarGradient`
+  const PALETTES = ["red", "orange", "yellow", "green", "teal", "cyan", "blue", "purple", "pink"];
+  const KEYS = ["user-1", "user-2", "6512f0a9c3e4b2d1a8f7e6d5", "a", "", "Jane Doe", "zzzzzzzzzzzzzzzzzzzzzzzz"];
+
+  // Split a "palette.shade" token into its parts
+  const parseToken = (token: string) => {
+    const [palette, shade] = token.split(".");
+    return { palette, shade };
+  };
+
+  it("returns the same gradient for the same key", () => {
+    expect(getAvatarGradient("user-1")).toEqual(getAvatarGradient("user-1"));
+  });
+
+  it("uses the 400 and 500 shades of known palettes", () => {
+    for (const key of KEYS) {
+      const { from, to } = getAvatarGradient(key);
+      expect(PALETTES).toContain(parseToken(from).palette);
+      expect(PALETTES).toContain(parseToken(to).palette);
+      expect(parseToken(from).shade).toBe("400");
+      expect(parseToken(to).shade).toBe("500");
+    }
+  });
+
+  it("pairs each color with a different neighbor at most two hues away", () => {
+    for (const key of KEYS) {
+      const { from, to } = getAvatarGradient(key);
+      const fromIndex = PALETTES.indexOf(parseToken(from).palette);
+      const toIndex = PALETTES.indexOf(parseToken(to).palette);
+      const distance = Math.abs(fromIndex - toIndex);
+      const wrappedDistance = Math.min(distance, PALETTES.length - distance);
+      expect(wrappedDistance).toBeGreaterThanOrEqual(1);
+      expect(wrappedDistance).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it("spreads different keys across more than one gradient", () => {
+    const gradients = new Set(
+      Array.from({ length: 50 }, (_, i) => {
+        const { from, to } = getAvatarGradient(`user-${i}`);
+        return `${from}-${to}`;
+      }),
+    );
+    expect(gradients.size).toBeGreaterThan(10);
   });
 });

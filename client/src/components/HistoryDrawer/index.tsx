@@ -78,7 +78,6 @@ const HistoryDetails = (props: {
           </Text>
           <FieldTagList
             items={version.attributes}
-            max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -100,7 +99,6 @@ const HistoryDetails = (props: {
           </Text>
           <FieldTagList
             items={version.attachments}
-            max={3}
             emptyLabel={"Attachments"}
             getKey={(attachment) => attachment._id}
             renderTag={(attachment) => (
@@ -134,7 +132,6 @@ const HistoryDetails = (props: {
         </Text>
         <FieldTagList
           items={version.entities}
-          max={3}
           emptyLabel={"Entities"}
           getKey={(entityId) => entityId}
           renderTag={(entityId) => <Linky type={"entities"} id={entityId} size={"xs"} />}
@@ -159,7 +156,6 @@ const HistoryDetails = (props: {
       </Text>
       <FieldTagList
         items={version.values}
-        max={2}
         emptyLabel={"Values"}
         getKey={(value) => value._id}
         renderTag={(value) => <TagValue value={value} />}
