@@ -186,9 +186,9 @@ export const getCollaboratorPermissionsLabels = (permissions: UserWorkspacePermi
 };
 
 /**
- * Check if an ORCID is a valid format
- * @param {string} orcid the ORCID to check
- * @returns {boolean}
+ * Return corresponding icon and color based on the `IValueType` to be displayed
+ * @param {IValueType | undefined} type
+ * @return {{ name: IconNames; color: string }}
  */
 export const getValueTypeIconProps = (type: IValueType | undefined): { name: IconNames; color: string } => {
   switch (type) {

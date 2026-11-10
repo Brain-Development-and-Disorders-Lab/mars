@@ -83,7 +83,7 @@ export const useActor = (options: UseActorOptions): ActorDetails => {
   const fullName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
   const label = fullName || user?.name || options.fallback;
 
-  // ORCID is stored as a full URL, keep the bare ID for display
+  // ORCiD is stored as a full URL, keep the bare ID for display
   const orcidRaw = user?.account_orcid ?? "";
   const orcid = orcidRaw.substring(orcidRaw.lastIndexOf("/") + 1);
   const orcidUrl = orcidRaw.startsWith("http") ? orcidRaw : `https://orcid.org/${orcid}`;

@@ -205,7 +205,7 @@ const TagActor = (props: TagActorProps) => {
     );
   }
 
-  // Full card with the ORCID as a secondary line, other details live in the hover card
+  // Full card with the ORCiD as a secondary line, other details live in the hover card
   const secondary = actor.orcid;
 
   return (
