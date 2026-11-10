@@ -38,7 +38,7 @@ export const FilterCheckbox = ({ label, checked, onChange }: FilterCheckboxProps
     onCheckedChange={(details) => onChange(details.checked as boolean)}
   >
     <Checkbox.HiddenInput />
-    <Checkbox.Control />
+    <Checkbox.Control background={checked ? "blue.600" : "white"} />
     <Checkbox.Label fontSize={"xs"}>{label}</Checkbox.Label>
   </Checkbox.Root>
 );
