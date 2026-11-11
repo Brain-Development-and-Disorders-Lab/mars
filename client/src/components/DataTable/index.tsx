@@ -975,6 +975,7 @@ const DataTable = (props: DataTableProps) => {
                     <Flex
                       key={row.id}
                       id={row.id}
+                      data-testid={"data-table-row"}
                       gap={0}
                       w={props.fill !== false ? "100%" : `${totalMinWidth}px`}
                       borderBottom={rowIndex < rows.length - 1 ? "1px solid" : "none"}
