@@ -6,9 +6,9 @@ export default defineConfig({
   testDir: "./test/integration",
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
-  globalTimeout: process.env.CI ? 10 * 60 * 1000 : undefined,
+  globalTimeout: process.env.CI ? 3 * 60 * 1000 : undefined,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 4 : undefined,
   reporter: [["html", { open: "never" }]],
   use: {
     baseURL: "http://127.0.0.1:8080",
@@ -37,7 +37,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "yarn start",
+    // CI serves the prebuilt `build:test` bundle instead of the dev server
+    command: process.env.CI ? "yarn start:preview" : "yarn start",
     url: "http://127.0.0.1:8080",
     reuseExistingServer: true,
     timeout: 120 * 1000,
