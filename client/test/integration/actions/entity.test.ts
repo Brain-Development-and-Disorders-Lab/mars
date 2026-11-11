@@ -37,9 +37,9 @@ test.describe("Entity", () => {
       await page.locator("#entityNameInput").fill("1-Entity-Details (Updated)");
       await saveAndWait(page);
 
-      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Upd...");
+      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Updated)");
       await page.reload({ waitUntil: "networkidle" });
-      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Upd...");
+      await expect(page.locator("#entityNameTag")).toContainText("1-Entity-Details (Updated)");
     });
 
     test("should be able to update the Entity description", async ({ page }) => {

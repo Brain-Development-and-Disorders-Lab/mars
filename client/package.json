@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --fix",
     "test:components": "vitest components/",
     "test:lib": "vitest lib/",
-    "test:ui": "playwright test"
+    "test:integration": "playwright test"
   },
   "dependencies": {
     "@apollo/client": "^4.0.0",

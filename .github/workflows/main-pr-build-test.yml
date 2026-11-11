@@ -262,7 +262,7 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: client
-        run: yarn test:ui
+        run: yarn test:integration
 
       - name: Upload Playwright test results
         if: failure()
