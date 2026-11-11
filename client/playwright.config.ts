@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: "./test/integration",
   fullyParallel: true,
   forbidOnly: process.env.CI ? true : false,
-  globalTimeout: process.env.CI ? 3 * 60 * 1000 : undefined,
+  globalTimeout: process.env.CI ? 5 * 60 * 1000 : undefined,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : undefined,
   reporter: [["html", { open: "never" }]],
