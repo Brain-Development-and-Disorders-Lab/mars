@@ -133,11 +133,11 @@ export const Projects = () => {
     columnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Flex gap={"1"} align={"center"}>
+          <Tooltip content={info.getValue()} showArrow>
+            <Flex gap={"1"} align={"center"} minW={0}>
               <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                {info.getValue()}
               </Text>
             </Flex>
           </Tooltip>
@@ -160,7 +160,7 @@ export const Projects = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -171,7 +171,6 @@ export const Projects = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.entities}
-          max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
           renderTag={(entity) => <Linky type={"entities"} id={entity} workspace={id} isPublic />}

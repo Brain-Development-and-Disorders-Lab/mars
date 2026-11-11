@@ -3,13 +3,13 @@ import React from "react";
 
 // Existing and custom components
 import { Button, EmptyState, Flex, SkeletonText, Text } from "@chakra-ui/react";
+import { CellDescriptionField } from "@components/DataTable/DataTableCell";
 import { createColumnHelper } from "@tanstack/react-table";
 import { TagAttribute, TagEmpty } from "@components/TagField";
 import FieldTagList from "@components/FieldTagList";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { DataTableAction, ProjectEntitiesTableProps, ProjectEntityTableRow } from "@types";
@@ -45,6 +45,7 @@ const ProjectEntitiesTable = ({
               <Button
                 size="2xs"
                 mx={"1"}
+                flexShrink={0}
                 variant="subtle"
                 colorPalette="red"
                 aria-label={"Remove Entity"}
@@ -57,6 +58,7 @@ const ProjectEntitiesTable = ({
               <Button
                 size="2xs"
                 mx={"1"}
+                flexShrink={0}
                 variant="subtle"
                 colorPalette="gray"
                 aria-label={"View Entity"}
@@ -83,13 +85,7 @@ const ProjectEntitiesTable = ({
         if (_.isEqual(description, "")) {
           return <TagEmpty label={"Description"} />;
         }
-        return (
-          <Flex>
-            <Tooltip content={description} disabled={description.length < 64} showArrow>
-              <Text fontSize={"xs"}>{_.truncate(description, { length: 64 })}</Text>
-            </Tooltip>
-          </Flex>
-        );
+        return <CellDescriptionField value={description} />;
       },
       header: "Description",
       enableHiding: true,
@@ -106,7 +102,6 @@ const ProjectEntitiesTable = ({
         return (
           <FieldTagList
             items={attributes}
-            max={2}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}

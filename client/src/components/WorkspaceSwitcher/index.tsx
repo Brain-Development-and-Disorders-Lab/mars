@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { IGenericItem } from "@types";
 
 // Utility functions and libraries
-import _ from "lodash";
 import { ignoreAbort } from "@lib/util";
 
 // Hooks
@@ -136,6 +135,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
         onEscapeKeyDown={() => setOpen(false)}
         onInteractOutside={() => setOpen(false)}
         size={"sm"}
+        positioning={{ sameWidth: true }}
       >
         <Menu.Trigger asChild>
           <Button
@@ -153,8 +153,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
           >
             <Flex direction={"row"} gap={"1"} align={"center"} p={"1"} w={"100%"} ml={"0.5"}>
               <Icon name={"workspace"} size={"xs"} color={"nav.text"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"}>
-                {_.truncate(label, { length: 22 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} mt={"0.5"} truncate>
+                {label}
               </Text>
               <Spacer />
               <Flex mr={"1"}>
@@ -164,8 +164,8 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
           </Button>
         </Menu.Trigger>
 
-        <Menu.Positioner w={"100%"} rounded={"md"}>
-          <Menu.Content bg={"white"}>
+        <Menu.Positioner rounded={"md"}>
+          <Menu.Content bg={"white"} w={"100%"} minW={0}>
             <Menu.ItemGroup>
               <Menu.ItemGroupLabel p={"0"}>
                 <Flex direction={"row"} gap={"1"} p={"1"} align={"center"}>
@@ -188,7 +188,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
               ) : (
                 <ScrollArea.Root maxH={"100px"}>
                   <ScrollArea.Viewport>
-                    <ScrollArea.Content>
+                    <ScrollArea.Content style={{ minWidth: 0 }}>
                       {workspaces.map((accessible) => {
                         return (
                           <Menu.Item
@@ -206,7 +206,9 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                                 content={`${workspace === accessible._id ? "Active: " : "Switch to: "} ${accessible.name}`}
                                 showArrow
                               >
-                                <Text fontSize={"xs"}>{_.truncate(accessible.name, { length: 24 })}</Text>
+                                <Text fontSize={"xs"} truncate>
+                                  {accessible.name}
+                                </Text>
                               </Tooltip>
 
                               <Spacer />

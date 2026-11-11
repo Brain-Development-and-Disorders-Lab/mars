@@ -32,11 +32,11 @@ const CreateEntityAttributeNameCell = ({
 
   return (
     <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-      <Tooltip content={attribute.name} disabled={attribute.name.length < 16} showArrow>
-        <Flex direction={"row"} gap={"1"} ml={"0.5"}>
+      <Tooltip content={attribute.name} showArrow>
+        <Flex direction={"row"} gap={"1"} ml={"0.5"} minW={0}>
           <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
-          <Text fontSize={"xs"} fontWeight={"semibold"}>
-            {_.truncate(attribute.name, { length: 16 })}
+          <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+            {attribute.name}
           </Text>
         </Flex>
       </Tooltip>
@@ -105,8 +105,10 @@ const CreateEntityAttributesTable = ({
           return <TagEmpty label={"Description"} />;
         }
         return (
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 32} showArrow>
-            <Text fontSize={"xs"}>{_.truncate(info.getValue(), { length: 32 })}</Text>
+          <Tooltip content={info.getValue()} showArrow>
+            <Text fontSize={"xs"} truncate>
+              {info.getValue()}
+            </Text>
           </Tooltip>
         );
       },
@@ -116,7 +118,6 @@ const CreateEntityAttributesTable = ({
       cell: (info) => (
         <FieldTagList
           items={info.row.original.values}
-          max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
           renderTag={(value) => <TagValue value={value} />}

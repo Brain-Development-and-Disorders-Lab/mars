@@ -446,7 +446,7 @@ const DialogExport = (props: DialogExportProps) => {
                                 <Text fontSize={"xs"} fontWeight={"semibold"}>
                                   Owner:
                                 </Text>
-                                <TagActor identifier={entity.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                                <TagActor identifier={entity.owner} variant={"name"} fallback={""} size={"sm"} />
                               </Flex>
                             </Checkbox.Label>
                           </Checkbox.Root>
@@ -671,7 +671,7 @@ const DialogExport = (props: DialogExportProps) => {
                               <Text fontSize={"xs"} fontWeight={"semibold"}>
                                 Owner:
                               </Text>
-                              <TagActor identifier={project.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                              <TagActor identifier={project.owner} variant={"name"} fallback={""} size={"sm"} />
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>
@@ -812,7 +812,7 @@ const DialogExport = (props: DialogExportProps) => {
                               <Text fontSize={"xs"} fontWeight={"semibold"}>
                                 Owner:
                               </Text>
-                              <TagActor identifier={attribute.owner} inlineNoAvatar fallback={""} size={"sm"} />
+                              <TagActor identifier={attribute.owner} variant={"name"} fallback={""} size={"sm"} />
                             </Flex>
                           </Checkbox.Label>
                         </Checkbox.Root>

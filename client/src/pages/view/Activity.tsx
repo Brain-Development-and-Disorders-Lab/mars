@@ -223,11 +223,11 @@ const Activity = () => {
           );
         } else {
           return (
-            <Tooltip content={target.name} disabled={target.name.length < 32}>
-              <Flex direction={"row"} gap={"1"} align={"center"}>
+            <Tooltip content={target.name}>
+              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                 <Icon name={"workspace"} size={"xs"} />
-                <Text fontWeight={"semibold"} fontSize={"xs"}>
-                  {_.truncate(target.name, { length: 32 })}
+                <Text fontWeight={"semibold"} fontSize={"xs"} truncate>
+                  {target.name}
                 </Text>
               </Flex>
             </Tooltip>
@@ -249,7 +249,7 @@ const Activity = () => {
             </Text>
           );
         }
-        return <TagActor identifier={actor} fallback={"Unknown User"} size={"sm"} inline />;
+        return <TagActor identifier={actor} fallback={"Unknown User"} size={"sm"} variant={"inline"} />;
       },
       header: "User",
       enableHiding: true,

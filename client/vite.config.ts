@@ -14,6 +14,11 @@ export default defineConfig({
     host: "127.0.0.1",
     port: 8080,
   },
+  preview: {
+    host: "127.0.0.1",
+    port: 8080,
+    strictPort: true,
+  },
   test: {
     globals: true,
     environment: "jsdom",

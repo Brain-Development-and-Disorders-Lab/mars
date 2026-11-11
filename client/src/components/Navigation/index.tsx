@@ -133,9 +133,9 @@ const Navigation = (props: NavigationProps) => {
                   Public Workspace
                 </Text>
               </Flex>
-              <Tooltip content={workspaceName} disabled={workspaceName.length <= 24} showArrow>
-                <Text fontSize={"xs"} textAlign={"center"}>
-                  {_.truncate(workspaceName, { length: 24 })}
+              <Tooltip content={workspaceName} showArrow>
+                <Text fontSize={"xs"} textAlign={"center"} truncate>
+                  {workspaceName}
                 </Text>
               </Tooltip>
             </Flex>

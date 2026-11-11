@@ -31,12 +31,12 @@ const DialogImportReviewTable = ({
   const columns = [
     columnHelper.accessor("name", {
       cell: (info) => (
-        <Flex>
-          <Tooltip content={info.getValue()} showArrow disabled={info.getValue().length < 30}>
-            <Flex direction={"row"} gap={"1"} ml={"1"}>
+        <Flex minW={0}>
+          <Tooltip content={info.getValue()} showArrow>
+            <Flex direction={"row"} gap={"1"} ml={"1"} minW={0}>
               <Icon name={icon} color={iconColor} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 30 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                {info.getValue()}
               </Text>
             </Flex>
           </Tooltip>

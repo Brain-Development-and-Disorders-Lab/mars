@@ -3,7 +3,6 @@ import React from "react";
 // Testing imports
 import { screen } from "@testing-library/react";
 import { render } from "../render";
-import { vi } from "vitest";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { InMemoryCache } from "@apollo/client";
 import { gql } from "@apollo/client";
@@ -38,20 +37,18 @@ const createTestCache = () => {
   });
 };
 
-// Mock useBreakpoint hook
-vi.mock("../../src/hooks/useBreakpoint", () => ({
-  useBreakpoint: () => ({
-    isBreakpointActive: vi.fn(() => false),
-  }),
-}));
-
-// Define the actual GraphQL query
-const GET_USER = gql`
-  query GetUser($_id: String) {
+// Matches the authenticated query in `useActor`
+const GET_ACTOR_USER = gql`
+  query GetActorUser($_id: String) {
     user(_id: $_id) {
       _id
+      name
       firstName
       lastName
+      image
+      account_orcid
+      affiliation
+      email
     }
   }
 `;
@@ -59,7 +56,7 @@ const GET_USER = gql`
 // Mock GraphQL query
 const mockDefaultUserQuery = {
   request: {
-    query: GET_USER,
+    query: GET_ACTOR_USER,
     variables: { _id: "test-orcid" },
   },
   result: {
@@ -67,8 +64,13 @@ const mockDefaultUserQuery = {
       user: {
         __typename: "User",
         _id: "test-orcid",
+        name: "John Doe",
         firstName: "John",
         lastName: "Doe",
+        image: "",
+        account_orcid: "",
+        affiliation: "",
+        email: "",
       },
     },
   },
@@ -97,12 +99,27 @@ describe("TagActor Component", () => {
     });
 
     it("renders inline variant", () => {
-      renderActorTag({ inline: true, identifier: "" });
+      renderActorTag({ variant: "inline", identifier: "" });
       expect(screen.getByText("Test User")).toBeTruthy();
     });
 
+    it("renders name variant", () => {
+      renderActorTag({ variant: "name", identifier: "" });
+      expect(screen.getByText("Test User")).toBeTruthy();
+    });
+
+    it("renders the full name once loaded", async () => {
+      renderActorTag();
+      expect(await screen.findByText("John Doe")).toBeTruthy();
+    });
+
+    it("renders initials in the avatar variant once loaded", async () => {
+      renderActorTag({ variant: "avatar" });
+      expect(await screen.findByText("JD")).toBeTruthy();
+    });
+
     it("renders avatar only variant", () => {
-      const { container } = renderActorTag({ avatarOnly: true });
+      const { container } = renderActorTag({ variant: "avatar" });
       expect(container.firstChild).toBeTruthy();
     });
   });

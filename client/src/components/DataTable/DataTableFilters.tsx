@@ -84,7 +84,7 @@ const DataTableFilters = ({
               }
             >
               <Checkbox.HiddenInput />
-              <Checkbox.Control />
+              <Checkbox.Control background={draft.owners.includes(owner) ? "blue.600" : "white"} />
               <Checkbox.Label fontSize={"xs"}>
                 <TagActor
                   identifier={owner}
@@ -92,7 +92,7 @@ const DataTableFilters = ({
                   size={"sm"}
                   workspace={workspace}
                   isPublic={isPublic}
-                  inline
+                  variant={"inline"}
                 />
               </Checkbox.Label>
             </Checkbox.Root>

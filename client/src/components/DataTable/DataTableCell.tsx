@@ -11,7 +11,6 @@ import Tooltip from "@components/Tooltip";
 import { CellCreatedFieldProps, CellGenericProps, CellDescriptionFieldProps, CellOwnerFieldProps } from "@types";
 
 // Utility functions and libraries
-import _ from "lodash";
 import dayjs from "dayjs";
 
 // Variables
@@ -38,19 +37,20 @@ export const CellOwnerField = (props: CellOwnerFieldProps) => (
     identifier={props.value}
     fallback={"Unknown User"}
     size={"sm"}
-    inline
+    variant={"inline"}
     workspace={props.workspace}
     isPublic={props.isPublic}
   />
 );
 
 export const CellDescriptionField = (props: CellDescriptionFieldProps) => {
-  const maxLength = props.maxLength ?? 64;
   if (!props.value) return <TagEmpty label={"Description"} />;
   return (
-    <Flex>
-      <Tooltip content={props.value} disabled={props.value.length < maxLength} showArrow>
-        <Text fontSize={"xs"}>{_.truncate(props.value, { length: maxLength })}</Text>
+    <Flex minW={0}>
+      <Tooltip content={props.value} showArrow>
+        <Text fontSize={"xs"} truncate>
+          {props.value}
+        </Text>
       </Tooltip>
     </Flex>
   );

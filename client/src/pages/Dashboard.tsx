@@ -248,11 +248,11 @@ const Dashboard = () => {
     entityTableColumnHelper.accessor("name", {
       cell: (info) => (
         <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-          <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-            <Flex gap={"1"} align={"center"}>
+          <Tooltip content={info.getValue()} showArrow>
+            <Flex gap={"1"} align={"center"} minW={0}>
               <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
-              <Text fontSize={"xs"} fontWeight={"semibold"}>
-                {_.truncate(info.getValue(), { length: 48 })}
+              <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                {info.getValue()}
               </Text>
             </Flex>
           </Tooltip>
@@ -289,7 +289,7 @@ const Dashboard = () => {
       },
     }),
     entityTableColumnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -300,7 +300,6 @@ const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.attributes}
-          max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
           renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -322,11 +321,11 @@ const Dashboard = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex gap={"1"} align={"center"} minW={0}>
                 <Icon name={"project"} color={STYLES.project.color.icon} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -364,7 +363,7 @@ const Dashboard = () => {
       },
     }),
     projectTableColumnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -375,7 +374,6 @@ const Dashboard = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.entities}
-          max={1}
           emptyLabel={"Entities"}
           getKey={(entity) => entity}
           renderTag={(entity) => <Linky type={"entities"} id={entity} />}

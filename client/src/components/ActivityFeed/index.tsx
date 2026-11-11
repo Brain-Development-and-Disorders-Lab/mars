@@ -118,13 +118,13 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
               return (
                 <Flex direction={"row"} width={"100%"} gap={"2"} key={`activity-${activity._id}`} align={"center"}>
                   {activity.actor ? (
-                    <TagActor identifier={activity.actor} fallback={"Unknown User"} size={"sm"} avatarOnly />
+                    <TagActor identifier={activity.actor} fallback={"Unknown User"} size={"sm"} variant={"avatar"} />
                   ) : (
                     <Avatar.Root size={"xs"} colorPalette={"blue"}>
                       <Avatar.Fallback name={"Unknown"} />
                     </Avatar.Root>
                   )}
-                  <Flex direction={"column"} w={"100%"} gap={"0.5"}>
+                  <Flex direction={"column"} w={"100%"} gap={"0.5"} minW={0}>
                     <Flex direction={"row"} w={"100%"} gap={"1"} justify={"space-between"}>
                       <Text fontSize={"xs"}>
                         {activity.details}
@@ -137,14 +137,13 @@ const ActivityFeed = ({ activities: activitiesProp, feedLimit = 5 }: ActivityFee
                         color={"text.subtle"}
                       />
                     </Flex>
-                    <Flex>
+                    <Flex minW={0}>
                       <Linky
                         id={activity.target._id}
                         type={activity.target.type}
                         fallback={activity.target.name}
                         justify={"left"}
                         size={"xs"}
-                        truncate={20}
                       />
                     </Flex>
                   </Flex>

@@ -282,60 +282,9 @@ export const openItemFromTable = async (
   const table = page.getByTestId("data-table-scroll-container");
   await table.waitFor({ state: "visible", timeout: 5000 });
 
-  // Wait for table to be populated - check that at least one view button exists
-  const buttons = table.locator(`button[aria-label="${viewButtonLabel}"]`);
-  await buttons.first().waitFor({ state: "visible", timeout: 5000 });
-
-  // Wait for network to be idle to ensure all data is loaded
-  await page.waitForLoadState("networkidle");
-
-  // Wait for the item name to appear
-  const textLocator = table.locator(`text=${itemName}`).first();
-  try {
-    await textLocator.waitFor({ state: "visible", timeout: 5000 });
-  } catch {
-    // If item not found, provide helpful error message
-    const allItems = await table.locator("text").allTextContents();
-    throw new Error(`Item "${itemName}" not found in table. Available items: ${allItems.slice(0, 5).join(", ")}...`);
-  }
-
-  // Find buttons with the correct aria-label
-  const count = await buttons.count();
-
-  if (count === 0) {
-    throw new Error(`No button with aria-label "${viewButtonLabel}" found in table`);
-  }
-
-  // If multiple buttons, find the one closest to the text by Y coordinate
-  if (count > 1) {
-    const textBox = await textLocator.boundingBox();
-    if (!textBox) {
-      throw new Error(`Text "${itemName}" not found or not visible`);
-    }
-
-    let closestBtn = null;
-    let minDistance = Infinity;
-
-    for (let i = 0; i < count; i++) {
-      const btn = buttons.nth(i);
-      const btnBox = await btn.boundingBox().catch(() => null);
-      if (btnBox) {
-        const distance = Math.abs(textBox.y - btnBox.y);
-        if (distance < 50 && distance < minDistance) {
-          minDistance = distance;
-          closestBtn = btn;
-        }
-      }
-    }
-
-    if (!closestBtn) {
-      throw new Error(`Could not find button "${viewButtonLabel}" in row containing "${itemName}"`);
-    }
-
-    await closestBtn.click();
-  } else {
-    await buttons.first().click();
-  }
+  // Click the view button in the row whose name matches exactly
+  const row = table.getByTestId("data-table-row").filter({ has: page.getByText(itemName, { exact: true }) });
+  await row.getByRole("button", { name: viewButtonLabel, exact: true }).click();
 
   // Wait for the client-side route transition to the detail page to finish
   const urlSegment =

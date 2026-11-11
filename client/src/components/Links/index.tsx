@@ -1,11 +1,11 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { Button, EmptyState, Flex, Text, Tag, Box } from "@chakra-ui/react";
+import { Box, Button, EmptyState, Flex, Grid, Tag, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import Tooltip from "@components/Tooltip";
 
 // Custom and existing types
-import { IconNames, IGenericItem, ILink, LinksProps, LinkType } from "@types";
+import { IconNames, IGenericItem, ILink, LinkRowProps, LinksProps, LinkType } from "@types";
 
 // GraphQL
 import { gql } from "@apollo/client";
@@ -36,6 +36,85 @@ export const LINK_TYPE_PALETTE: Record<LinkType, string> = {
   general: "purple",
 };
 
+// Styling variables
+const LIST_COLUMNS_NARROW = "fit-content(35%) clamp(32px, 15%, 72px) minmax(0, 1fr)";
+const LIST_COLUMNS_WIDE = "fit-content(30%) clamp(40px, 12%, 120px) minmax(0, 1fr) auto";
+const LIST_WIDE_BREAKPOINT = "520px";
+export const LINK_LIST_CONTAINER_CSS = { containerType: "inline-size" };
+export const LINK_LIST_GRID_CSS = {
+  gridTemplateColumns: LIST_COLUMNS_NARROW,
+  columnGap: "3",
+  [`@container (min-width: ${LIST_WIDE_BREAKPOINT})`]: { gridTemplateColumns: LIST_COLUMNS_WIDE },
+};
+
+/**
+ * Single Link row, a subgrid of the list grid so the arrows line up across rows
+ * @param props LinkRowProps
+ */
+export const LinkRow = (props: LinkRowProps) => {
+  const color = LINK_TYPE_ARROW_COLOR[props.link.type];
+
+  return (
+    <Grid
+      templateColumns={"subgrid"}
+      gridColumn={"1 / -1"}
+      alignItems={"center"}
+      rowGap={"1"}
+      px={"2"}
+      py={"1.5"}
+      bg={"white"}
+      borderBottom={props.isLast ? "none" : "1px solid"}
+      borderColor={"border.subtle"}
+      _hover={{ bg: "gray.25" }}
+    >
+      {/* Source */}
+      <Tooltip content={props.sourceName} showArrow>
+        <Text fontSize={"xs"} fontWeight={"semibold"} minW={0} truncate>
+          {props.sourceName}
+        </Text>
+      </Tooltip>
+
+      {/* Arrow, fills its fixed width column */}
+      <Flex direction={"row"} align={"center"}>
+        {props.link.type !== "child" && <Box flex={"1"} h={"2px"} bg={color} />}
+        <Icon name={LINK_TYPE_ARROW_ICON[props.link.type]} size={"xs"} color={color} />
+        {props.link.type !== "parent" && <Box flex={"1"} h={"2px"} bg={color} />}
+      </Flex>
+
+      {/* Target */}
+      <Flex minW={0}>
+        <Linky id={props.link.target._id} type={"entities"} workspace={props.workspace} isPublic={props.isPublic} />
+      </Flex>
+
+      {/* Type badge and remove button */}
+      <Flex
+        direction={"row"}
+        gap={"2"}
+        justify={"flex-start"}
+        gridColumn={"1 / -1"}
+        css={{ [`@container (min-width: ${LIST_WIDE_BREAKPOINT})`]: { gridColumn: "auto" } }}
+      >
+        <Tag.Root size={"sm"} colorPalette={LINK_TYPE_PALETTE[props.link.type]} minW={"64px"} justifyContent={"center"}>
+          <Tag.Label fontSize={"xs"}>{_.capitalize(props.link.type)}</Tag.Label>
+        </Tag.Root>
+
+        {props.onRemove && (
+          <Button
+            size={"2xs"}
+            variant={"subtle"}
+            colorPalette={"red"}
+            aria-label={"Remove Link"}
+            onClick={props.onRemove}
+          >
+            Remove
+            <Icon name={"delete"} size={"xs"} />
+          </Button>
+        )}
+      </Flex>
+    </Grid>
+  );
+};
+
 const Links = (props: LinksProps) => {
   const GET_ENTITY_NAME = gql`
     query GetEntityName($_id: String) {
@@ -45,10 +124,11 @@ const Links = (props: LinksProps) => {
       }
     }
   `;
-  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, {
-    fetchPolicy: "network-only",
-    context: props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace ?? "") } : undefined,
-  });
+  const [getEntityName] = useLazyQuery<{ entity: IGenericItem }>(GET_ENTITY_NAME, { fetchPolicy: "network-only" });
+  const queryContext = useMemo(
+    () => (props.isPublic ? { uri: getPublicWorkspaceUrl(props.workspace ?? "") } : undefined),
+    [props.isPublic, props.workspace],
+  );
 
   const uniqueEntityIds = useMemo(() => {
     const ids = new Set<string>();
@@ -69,7 +149,7 @@ const Links = (props: LinksProps) => {
       await Promise.all(
         uniqueEntityIds.map(async (entityId) => {
           try {
-            const { data } = await getEntityName({ variables: { _id: entityId } });
+            const { data } = await getEntityName({ variables: { _id: entityId }, context: queryContext });
             if (data?.entity && isMounted) {
               nameMap[entityId] = data.entity.name;
             }
@@ -90,7 +170,7 @@ const Links = (props: LinksProps) => {
     return () => {
       isMounted = false;
     };
-  }, [uniqueEntityIds, getEntityName, props.links]);
+  }, [uniqueEntityIds, getEntityName, props.links, queryContext]);
 
   const linkIsEqual = (a: ILink, b: ILink): boolean =>
     _.isEqual(a.source._id, b.source._id) && _.isEqual(a.target._id, b.target._id) && _.isEqual(a.type, b.type);
@@ -108,76 +188,21 @@ const Links = (props: LinksProps) => {
           borderColor={STYLES.border.color}
           rounded={"md"}
           overflow={"hidden"}
+          css={LINK_LIST_CONTAINER_CSS}
         >
-          {props.links.map((link, index) => {
-            const sourceName = entityNames[link.source._id] || link.source.name;
-            return (
-              <Flex
+          <Grid css={LINK_LIST_GRID_CSS}>
+            {props.links.map((link, index) => (
+              <LinkRow
                 key={`${link.source._id}-${link.target._id}-${link.type}-${index}`}
-                direction={"row"}
-                align={"center"}
-                gap={"2"}
-                px={"2"}
-                py={"1.5"}
-                borderBottom={index < props.links.length - 1 ? "1px solid" : "none"}
-                borderColor={"border.subtle"}
-                bg={"white"}
-                _hover={{ bg: "gray.25" }}
-                wrap={"wrap"}
-              >
-                {/* Source, arrow, and target as one unit so the badge wraps below, never between them */}
-                <Flex direction={"row"} align={"center"} gap={"2"}>
-                  <Tooltip content={sourceName} disabled={sourceName.length < 24} showArrow>
-                    <Text fontSize={"xs"} fontWeight={"semibold"}>
-                      {_.truncate(sourceName, { length: 24 })}
-                    </Text>
-                  </Tooltip>
-
-                  {/* Link arrow */}
-                  <Flex direction={"row"} gap={"0"} align={"center"}>
-                    {link.type === "parent" && <Box w={"55px"} h={"2px"} bg={LINK_TYPE_ARROW_COLOR[link.type]} />}
-
-                    {link.type === "general" && <Box w={"27.5px"} h={"2px"} bg={LINK_TYPE_ARROW_COLOR[link.type]} />}
-
-                    <Icon name={LINK_TYPE_ARROW_ICON[link.type]} size={"xs"} color={LINK_TYPE_ARROW_COLOR[link.type]} />
-
-                    {link.type === "general" && <Box w={"27.5px"} h={"2px"} bg={LINK_TYPE_ARROW_COLOR[link.type]} />}
-
-                    {link.type === "child" && <Box w={"55px"} h={"2px"} bg={LINK_TYPE_ARROW_COLOR[link.type]} />}
-                  </Flex>
-
-                  <Linky
-                    id={link.target._id}
-                    type={"entities"}
-                    truncate={12}
-                    workspace={props.workspace}
-                    isPublic={props.isPublic}
-                  />
-                </Flex>
-
-                <Flex direction={"row"} gap={"2"} ml={"auto"}>
-                  {/* Type badge */}
-                  <Tag.Root size={"sm"} colorPalette={LINK_TYPE_PALETTE[link.type]}>
-                    <Tag.Label fontSize={"xs"}>{_.capitalize(link.type)}</Tag.Label>
-                  </Tag.Root>
-
-                  {/* Remove */}
-                  {!props.viewOnly && (
-                    <Button
-                      size={"2xs"}
-                      variant={"subtle"}
-                      colorPalette={"red"}
-                      aria-label={"Remove Link"}
-                      onClick={() => removeLink(link)}
-                    >
-                      Remove
-                      <Icon name={"delete"} size={"xs"} />
-                    </Button>
-                  )}
-                </Flex>
-              </Flex>
-            );
-          })}
+                link={link}
+                sourceName={entityNames[link.source._id] || link.source.name}
+                onRemove={props.viewOnly ? undefined : () => removeLink(link)}
+                isLast={index === props.links.length - 1}
+                workspace={props.workspace}
+                isPublic={props.isPublic}
+              />
+            ))}
+          </Grid>
         </Flex>
       ) : (
         <Flex justify={"center"} align={"center"} minH={"120px"}>

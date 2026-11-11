@@ -38,6 +38,12 @@ export const STYLES = {
   card: {
     bg: "#FFFFFF",
   },
+  tag: {
+    height: {
+      sm: "46px",
+      md: "54px",
+    },
+  },
   dialog: {
     header: {
       bg: "#F3F6FA",

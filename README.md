@@ -140,7 +140,7 @@ An example `.env` file is shown below:
 CONNECTION_STRING=mongodb://<username>:<password>@localhost:27017/
 ```
 
-Once the `.env` file has been configured, run `yarn test:ui` in the `/client` directory to run all Playwright tests. Ensure the server is running, otherwise the tests will fail.
+Once the `.env` file has been configured, run `yarn test:integration` in the `/client` directory to run all Playwright tests. Ensure the server is running, otherwise the tests will fail.
 
 ### Testing - Server
 

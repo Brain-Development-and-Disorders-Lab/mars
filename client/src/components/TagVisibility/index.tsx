@@ -42,7 +42,7 @@ const TagVisibility = (props: TagVisibilityProps) => {
     <Flex
       direction={"row"}
       align={"center"}
-      h={"52px"}
+      h={STYLES.tag.height[props.size ?? "sm"]}
       w={"fit-content"}
       border={STYLES.border.style}
       borderColor={"green.200"}
@@ -64,7 +64,7 @@ const TagVisibility = (props: TagVisibilityProps) => {
         <Icon name={props.isPublic ? "l_globus" : "lock"} size={"xs"} color={"green.500"} />
       </Flex>
 
-      <Flex direction={"row"} p={"2"} gap={"0.5"} align={"start"} justify={"center"} h={"100%"} bg={"white"}>
+      <Flex direction={"row"} px={"2"} gap={"0.5"} align={"center"} justify={"center"} h={"100%"} bg={"white"}>
         <Flex direction={"column"} gap={"0"} alignSelf={"center"}>
           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.font.secondaryHeader.color}>
             {props.isPublic ? "Public" : "Private"}

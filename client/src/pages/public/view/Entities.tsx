@@ -165,11 +165,11 @@ export const Entities = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex gap={"1"} align={"center"} minW={0}>
                 <Icon name={"entity"} color={STYLES.entity.color.icon} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -193,7 +193,7 @@ export const Entities = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -204,7 +204,6 @@ export const Entities = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.attributes}
-          max={1}
           emptyLabel={"Attributes"}
           getKey={(attribute) => attribute._id}
           renderTag={(attribute) => <TagAttribute attribute={attribute} />}

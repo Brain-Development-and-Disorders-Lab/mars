@@ -156,7 +156,7 @@ const columns = [
   }),
   columnHelper.accessor("owner", {
     cell: (info) => {
-      return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} inline />;
+      return <TagActor identifier={info.getValue()} fallback={"Unknown User"} size={"sm"} variant={"inline"} />;
     },
     header: "Owner",
     enableHiding: true,

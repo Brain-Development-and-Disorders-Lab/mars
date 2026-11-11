@@ -10,8 +10,10 @@
   },
   "scripts": {
     "start": "vite",
+    "start:preview": "vite preview",
     "start:storybook": "storybook dev -p 6006 --no-open",
     "build": "vite build",
+    "build:test": "NODE_ENV=development vite build --mode development",
     "clean": "rm -rf dist/ playwright-report/ test-results/ debug-storybook.log",
     "format:check": "prettier . --check",
     "format:fix": "prettier . --write",
@@ -19,7 +21,7 @@
     "lint:fix": "eslint . --fix",
     "test:components": "vitest components/",
     "test:lib": "vitest lib/",
-    "test:ui": "playwright test"
+    "test:integration": "playwright test"
   },
   "dependencies": {
     "@apollo/client": "^4.0.0",

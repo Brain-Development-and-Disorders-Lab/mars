@@ -22,7 +22,6 @@ import { gql } from "@apollo/client";
 
 // Utility functions
 import { formatValueForDisplay, getValueTypeIconProps, isValueEqual } from "@lib/util";
-import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
@@ -34,26 +33,26 @@ const renderValueData = (value: IValue) => {
   if (value.type === "entity" || value.type === "select") {
     const { name, color } = getValueTypeIconProps(value.type);
     return (
-      <Flex direction={"row"} gap={"1"} align={"center"}>
+      <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
         <Icon name={name} color={color} size={"xs"} />
-        <Text fontSize={"xs"} fontWeight={"semibold"}>
+        <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
           {label}
         </Text>
         {secondary && (
-          <Text fontSize={"xs"}>
-            {_.truncate(secondary, {
-              length: 24,
-            })}
-          </Text>
+          <Tooltip content={secondary} showArrow>
+            <Text fontSize={"xs"} truncate>
+              {secondary}
+            </Text>
+          </Tooltip>
         )}
       </Flex>
     );
   }
 
   return (
-    <Tooltip disabled={label.length < 24} content={label} showArrow>
-      <Text fontSize={"xs"} fontWeight={"semibold"}>
-        {_.truncate(label, { length: 24 })}
+    <Tooltip content={label} showArrow>
+      <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+        {label}
       </Text>
     </Tooltip>
   );
@@ -265,6 +264,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
       p={"2"}
       rounded={"md"}
       w={"50%"}
+      minW={0}
       h={"100%"}
       border={STYLES.border.style}
       borderColor={STYLES.border.color}
@@ -293,9 +293,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
             <Text fontSize={"xs"} color={"text.subtle"}>
               Current Entity:
             </Text>
-            <Tooltip disabled={props.currentValue.length < 24} content={props.currentValue} showArrow>
-              <Text fontSize={"xs"} fontWeight={"semibold"} color={"status.warning.emphasized"}>
-                {_.truncate(props.currentValue, { length: 24 })}
+            <Tooltip content={props.currentValue} showArrow>
+              <Text fontSize={"xs"} fontWeight={"semibold"} color={"status.warning.emphasized"} truncate>
+                {props.currentValue}
               </Text>
             </Tooltip>
 
@@ -308,9 +308,9 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
           <Text fontSize={"xs"} color={"text.subtle"}>
             Attribute:
           </Text>
-          <Tooltip disabled={props.originalValue.length < 24} content={props.originalValue} showArrow>
-            <Text fontSize={"xs"} fontWeight={"semibold"}>
-              {_.truncate(props.originalValue, { length: 24 })}
+          <Tooltip content={props.originalValue} showArrow>
+            <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+              {props.originalValue}
             </Text>
           </Tooltip>
 
@@ -415,7 +415,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
         scrollBehavior={"inside"}
         placement={"center"}
         onOpenChange={(event) => props.setOpen(event.open)}
-        size={"lg"}
+        size={"xl"}
         closeOnEscape
         closeOnInteractOutside
       >
@@ -507,11 +507,12 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                       Values
                     </Text>
 
-                    <Flex direction={"row"} gap={"2"} align={"stretch"}>
+                    <Flex direction={{ base: "column", md: "row" }} gap={"2"} align={"stretch"}>
                       {/* Left Column: Entity Attribute */}
                       <Flex
                         direction={"column"}
-                        w={"50%"}
+                        w={{ base: "100%", md: "50%" }}
+                        minW={0}
                         p={"2"}
                         rounded={"md"}
                         border={"1px solid"}
@@ -522,9 +523,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.entity.color.icon}>
                             Current Entity
                           </Text>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            {props.entityName}: {props.modifiedAttribute.name}
-                          </Text>
+                          <Tooltip content={`${props.entityName}: ${props.modifiedAttribute.name}`} showArrow>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                              {props.entityName}: {props.modifiedAttribute.name}
+                            </Text>
+                          </Tooltip>
                         </Flex>
 
                         <DialogCompareAttributeCollapsible
@@ -551,7 +554,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               rounded={"sm"}
                               justify={"space-between"}
                             >
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
@@ -560,9 +563,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   color={getValueTypeIconProps(entity.type).color}
                                   size={"xs"}
                                 />
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {entity.name}
-                                </Text>
+                                <Tooltip content={entity.name} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                    {entity.name}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                             </Flex>
                           ))}
@@ -592,7 +597,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               borderLeft={"3px"}
                               borderLeftColor={"orange.400"}
                             >
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
@@ -601,9 +606,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   color={getValueTypeIconProps(entity.type).color}
                                   size={"xs"}
                                 />
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {entity.name}
-                                </Text>
+                                <Tooltip content={entity.name} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                    {entity.name}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                               <Flex direction={"row"} gap={"1"} align={"center"}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
@@ -652,7 +659,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               rounded={"sm"}
                               justify={"space-between"}
                             >
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
@@ -661,9 +668,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   color={getValueTypeIconProps(value.type).color}
                                   size={"xs"}
                                 />
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {value.name}
-                                </Text>
+                                <Tooltip content={value.name} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                    {value.name}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                               <Checkbox.Root
                                 size={"xs"}
@@ -680,12 +689,15 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                         </DialogCompareAttributeCollapsible>
                       </Flex>
 
-                      <Icon name={"a_both"} size={"xs"} />
+                      <Flex align={"center"} justify={"center"} transform={{ base: "rotate(90deg)", md: "none" }}>
+                        <Icon name={"a_both"} size={"xs"} />
+                      </Flex>
 
                       {/* Right Column: Attribute Attribute */}
                       <Flex
                         direction={"column"}
-                        w={"50%"}
+                        w={{ base: "100%", md: "50%" }}
+                        minW={0}
                         p={"2"}
                         rounded={"md"}
                         border={STYLES.border.style}
@@ -696,9 +708,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                           <Text fontSize={"xs"} fontWeight={"semibold"} color={STYLES.attribute.color.icon}>
                             Attribute
                           </Text>
-                          <Text fontSize={"xs"} fontWeight={"semibold"}>
-                            {originalAttribute.name}
-                          </Text>
+                          <Tooltip content={originalAttribute.name} showArrow>
+                            <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                              {originalAttribute.name}
+                            </Text>
+                          </Tooltip>
                         </Flex>
 
                         <DialogCompareAttributeCollapsible
@@ -725,7 +739,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               rounded={"sm"}
                               justify={"space-between"}
                             >
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
@@ -734,9 +748,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   color={getValueTypeIconProps(original.type).color}
                                   size={"xs"}
                                 />
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {original.name}
-                                </Text>
+                                <Tooltip content={original.name} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                    {original.name}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                             </Flex>
                           ))}
@@ -767,7 +783,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               borderLeftColor={"orange.400"}
                             >
                               <Flex direction={"row"} justify={"space-between"} gap={"0.5"}>
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                   <Text fontSize={"xs"} color={"text.subtle"}>
                                     Value:
                                   </Text>
@@ -776,9 +792,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                     color={getValueTypeIconProps(original.type).color}
                                     size={"xs"}
                                   />
-                                  <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                    {original.name}
-                                  </Text>
+                                  <Tooltip content={original.name} showArrow>
+                                    <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                      {original.name}
+                                    </Text>
+                                  </Tooltip>
                                 </Flex>
                                 <Checkbox.Root
                                   size={"xs"}
@@ -838,7 +856,7 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                               rounded={"sm"}
                               justify={"space-between"}
                             >
-                              <Flex direction={"row"} gap={"1"} align={"center"}>
+                              <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                 <Text fontSize={"xs"} color={"text.subtle"}>
                                   Value:
                                 </Text>
@@ -847,9 +865,11 @@ const DialogCompareAttribute = (props: DialogCompareAttributeProps) => {
                                   color={getValueTypeIconProps(value.type).color}
                                   size={"xs"}
                                 />
-                                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                                  {value.name}
-                                </Text>
+                                <Tooltip content={value.name} showArrow>
+                                  <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                                    {value.name}
+                                  </Text>
+                                </Tooltip>
                               </Flex>
                               <Checkbox.Root
                                 size={"xs"}

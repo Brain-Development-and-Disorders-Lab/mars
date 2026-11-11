@@ -7,7 +7,6 @@ import { Cell } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { DataTableAction, EntityProjectsTableProps } from "@types";
@@ -33,16 +32,7 @@ const EntityProjectsTable = ({
         const projectId = info.getValue();
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={projectId} disabled={projectId.length < 32} showArrow>
-              <Linky
-                id={projectId}
-                type={"projects"}
-                size={"xs"}
-                truncate={false}
-                workspace={workspace}
-                isPublic={isPublic}
-              />
-            </Tooltip>
+            <Linky id={projectId} type={"projects"} size={"xs"} workspace={workspace} isPublic={isPublic} />
             {editing && onRemove ? (
               <Button
                 size="2xs"

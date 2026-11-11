@@ -38,9 +38,6 @@ window["IntersectionObserver"] = IntersectionObserverMock;
 window.Element.prototype.scrollTo = () => {};
 window.Element.prototype.scrollIntoView = () => {};
 
-// requestAnimationFrame mock
-window.requestAnimationFrame = (cb) => setTimeout(cb, 1000 / 60);
-
 // URL object mock
 window.URL.createObjectURL = () => "https://i.pravatar.cc/300";
 window.URL.revokeObjectURL = () => {};

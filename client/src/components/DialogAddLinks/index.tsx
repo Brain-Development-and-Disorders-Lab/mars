@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 
 // Existing and custom components
-import { Button, CloseButton, Dialog, Flex, Input, Portal, Spacer, Tag, Text } from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Flex, Grid, Input, Portal, Spacer, Text } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
 import SelectSearch from "@components/SelectSearch";
-import Tooltip from "@components/Tooltip";
 import { toaster } from "@components/Toast";
 
 // Custom types
@@ -17,7 +16,14 @@ import _ from "lodash";
 
 // Variables
 import { STYLES } from "@variables";
-import { LINK_TYPE_ARROW_COLOR, LINK_TYPE_ARROW_ICON, LINK_TYPE_PALETTE } from "@components/Links";
+import {
+  LINK_LIST_CONTAINER_CSS,
+  LINK_LIST_GRID_CSS,
+  LINK_TYPE_ARROW_COLOR,
+  LINK_TYPE_ARROW_ICON,
+  LINK_TYPE_PALETTE,
+  LinkRow,
+} from "@components/Links";
 
 const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, onAdd }: DialogAddLinksProps) => {
   const [staged, setStaged] = useState<ILink[]>([]);
@@ -258,48 +264,20 @@ const DialogAddLinks = ({ open, onClose, sourceId, sourceName, existingLinks, on
                   border={STYLES.border.style}
                   borderColor={STYLES.border.color}
                   overflow={"hidden"}
+                  css={LINK_LIST_CONTAINER_CSS}
                 >
                   {staged.length > 0 ? (
-                    staged.map((rel, index) => (
-                      <Flex
-                        key={`staged-${index}`}
-                        direction={"row"}
-                        align={"center"}
-                        gap={"2"}
-                        px={"2"}
-                        py={"1.5"}
-                        borderBottom={index < staged.length - 1 ? "1px solid" : "none"}
-                        borderColor={"border.subtle"}
-                        bg={"white"}
-                      >
-                        <Tooltip content={rel.source.name} disabled={rel.source.name.length < 18} showArrow>
-                          <Text fontSize={"xs"} fontWeight={"semibold"} flexShrink={0} maxW={"120px"} truncate>
-                            {_.truncate(rel.source.name, { length: 18 })}
-                          </Text>
-                        </Tooltip>
-                        <Icon
-                          name={LINK_TYPE_ARROW_ICON[rel.type]}
-                          size={"xs"}
-                          color={LINK_TYPE_ARROW_COLOR[rel.type]}
+                    <Grid css={LINK_LIST_GRID_CSS}>
+                      {staged.map((rel, index) => (
+                        <LinkRow
+                          key={`staged-${index}`}
+                          link={rel}
+                          sourceName={rel.source.name}
+                          onRemove={() => setStaged(staged.filter((_, i) => i !== index))}
+                          isLast={index === staged.length - 1}
                         />
-                        <Flex flex={"1"} minW={0}>
-                          <Linky id={rel.target._id} type={"entities"} truncate={18} />
-                        </Flex>
-                        <Tag.Root size={"sm"} colorPalette={LINK_TYPE_PALETTE[rel.type]} flexShrink={0}>
-                          <Tag.Label fontSize={"xs"}>{_.capitalize(rel.type)}</Tag.Label>
-                        </Tag.Root>
-                        <Button
-                          size={"2xs"}
-                          variant={"subtle"}
-                          colorPalette={"red"}
-                          flexShrink={0}
-                          onClick={() => setStaged(staged.filter((_, i) => i !== index))}
-                        >
-                          Remove
-                          <Icon name={"delete"} size={"xs"} />
-                        </Button>
-                      </Flex>
-                    ))
+                      ))}
+                    </Grid>
                   ) : (
                     <Flex
                       direction={"column"}

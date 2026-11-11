@@ -7,7 +7,6 @@ import { createColumnHelper } from "@tanstack/react-table";
 import DataTable from "@components/DataTable";
 import Icon from "@components/Icon";
 import Linky from "@components/Linky";
-import Tooltip from "@components/Tooltip";
 
 // Existing and custom types
 import { AttributeUsage, AttributeUsageTableProps } from "@types";
@@ -27,9 +26,7 @@ const AttributeUsageTable = ({ attributeUsage, onViewEntity, workspace, isPublic
         const entityId = info.cell.getValue();
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={entityId} disabled={entityId.length < 20} showArrow>
-              <Linky id={entityId} type={"entities"} size={"xs"} workspace={workspace} isPublic={isPublic} />
-            </Tooltip>
+            <Linky id={entityId} type={"entities"} size={"xs"} workspace={workspace} isPublic={isPublic} />
 
             <Button
               size="2xs"

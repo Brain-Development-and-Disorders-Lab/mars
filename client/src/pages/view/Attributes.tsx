@@ -143,11 +143,11 @@ const Attributes = () => {
       cell: (info) => {
         return (
           <Flex align={"center"} justify={"space-between"} gap={"1"} w={"100%"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 48} showArrow>
-              <Flex gap={"1"} align={"center"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex gap={"1"} align={"center"} minW={0}>
                 <Icon name={"attribute"} color={STYLES.attribute.color.icon} size={"xs"} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), { length: 48 })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -171,7 +171,7 @@ const Attributes = () => {
       },
     }),
     columnHelper.accessor("description", {
-      cell: (info) => <CellDescriptionField value={info.getValue()} maxLength={48} />,
+      cell: (info) => <CellDescriptionField value={info.getValue()} />,
       header: "Description",
       enableHiding: true,
       meta: {
@@ -182,7 +182,6 @@ const Attributes = () => {
       cell: (info) => (
         <FieldTagList
           items={info.row.original.values}
-          max={2}
           emptyLabel={"Values"}
           getKey={(value) => value._id}
           renderTag={(value) => <TagValue value={value} />}

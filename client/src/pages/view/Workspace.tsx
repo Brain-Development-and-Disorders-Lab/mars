@@ -60,7 +60,6 @@ import { removeTypename } from "@lib/util";
 import { auth } from "@lib/auth";
 
 // Contexts and hooks
-import { useBreakpoint } from "@hooks/useBreakpoint";
 import { usePermissions } from "@hooks/usePermissions";
 import { useWorkspace } from "@hooks/useWorkspace";
 
@@ -222,7 +221,7 @@ const Workspace = () => {
     }
   `;
   const [updateWorkspace, { loading: workspaceUpdateLoading, error: workspaceUpdateError }] =
-    useMutation<IResponseMessage>(UPDATE_WORKSPACE);
+    useMutation<IResponseMessage>(UPDATE_WORKSPACE, { refetchQueries: ["GetActorWorkspace"] });
 
   // State for Workspace editing
   const [editing, setEditing] = useState(false);
@@ -480,9 +479,6 @@ const Workspace = () => {
     }
   };
 
-  const { isBreakpointActive } = useBreakpoint();
-  const truncateTableText = !isBreakpointActive("md", "up");
-
   // Utility functions for archiving or restoring Workspace contents
   const archiveEntity = async (_id: string, state: boolean) => {
     // Clone and update the local collection of Entities
@@ -554,13 +550,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"entity"} size={"xs"} color={STYLES.entity.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -621,13 +615,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"project"} size={"xs"} color={STYLES.project.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -688,13 +680,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex w={"100%"} justify={"space-between"} p={"0.5"} gap={"2"} align={"center"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"attribute"} size={"xs"} color={STYLES.attribute.color.icon} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -755,13 +745,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex p={"0.5"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"counter"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -824,13 +812,11 @@ const Workspace = () => {
       cell: (info) => {
         return (
           <Flex p={"0.5"}>
-            <Tooltip content={info.getValue()} disabled={info.getValue().length < 24} showArrow>
-              <Flex direction={"row"} gap={"1"}>
+            <Tooltip content={info.getValue()} showArrow>
+              <Flex direction={"row"} gap={"1"} minW={0}>
                 <Icon name={"format"} size={"xs"} color={STYLES.font.secondaryHeader.color} />
-                <Text fontSize={"xs"} fontWeight={"semibold"}>
-                  {_.truncate(info.getValue(), {
-                    length: truncateTableText ? 12 : 24,
-                  })}
+                <Text fontSize={"xs"} fontWeight={"semibold"} truncate>
+                  {info.getValue()}
                 </Text>
               </Flex>
             </Tooltip>
@@ -899,8 +885,8 @@ const Workspace = () => {
     >
       <Flex direction={"column"}>
         <Flex gap={"2"} p={"1"} direction={"row"} justify={"space-between"} align={"center"} wrap={"wrap"}>
-          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} ml={"0.5"}>
-            <Breadcrumb.Root>
+          <Flex direction={"row"} gap={"2"} align={"center"} p={"0"} m={"0"} ml={"0.5"} minW={0} maxW={"100%"}>
+            <Breadcrumb.Root flexShrink={0}>
               <Breadcrumb.List>
                 <Breadcrumb.Item gap={"1"}>
                   <Icon name={"workspace"} size={"xs"} color={"black"} />
@@ -909,11 +895,13 @@ const Workspace = () => {
                 <Breadcrumb.Separator />
               </Breadcrumb.List>
             </Breadcrumb.Root>
-            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"}>
+            <Flex align={"center"} gap={"1"} p={"1"} border={"2px solid"} rounded={"md"} minW={0}>
               <Icon name={"workspace"} size={"sm"} />
-              <Heading fontWeight={"semibold"} size={"sm"}>
-                {_.truncate(name, { length: isBreakpointActive("md", "down") ? 12 : 24 })}
-              </Heading>
+              <Tooltip content={name} showArrow>
+                <Heading fontWeight={"semibold"} size={"sm"} minW={0} truncate>
+                  {name}
+                </Heading>
+              </Tooltip>
             </Flex>
           </Flex>
 

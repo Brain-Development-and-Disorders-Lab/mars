@@ -78,7 +78,6 @@ const HistoryDetails = (props: {
           </Text>
           <FieldTagList
             items={version.attributes}
-            max={1}
             emptyLabel={"Attributes"}
             getKey={(attribute) => attribute._id}
             renderTag={(attribute) => <TagAttribute attribute={attribute} />}
@@ -100,7 +99,6 @@ const HistoryDetails = (props: {
           </Text>
           <FieldTagList
             items={version.attachments}
-            max={3}
             emptyLabel={"Attachments"}
             getKey={(attachment) => attachment._id}
             renderTag={(attachment) => (
@@ -134,7 +132,6 @@ const HistoryDetails = (props: {
         </Text>
         <FieldTagList
           items={version.entities}
-          max={3}
           emptyLabel={"Entities"}
           getKey={(entityId) => entityId}
           renderTag={(entityId) => <Linky type={"entities"} id={entityId} size={"xs"} />}
@@ -159,7 +156,6 @@ const HistoryDetails = (props: {
       </Text>
       <FieldTagList
         items={version.values}
-        max={2}
         emptyLabel={"Values"}
         getKey={(value) => value._id}
         renderTag={(value) => <TagValue value={value} />}
@@ -349,7 +345,7 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                               align={{ base: "start", sm: "center" }}
                               justify={"space-between"}
                             >
-                              <Flex direction={"column"} gap={"0.5"} grow={"1"}>
+                              <Flex direction={"column"} gap={"0.5"} grow={"1"} minW={0} maxW={"100%"}>
                                 <Flex direction={"row"} gap={"1"} align={"center"}>
                                   <Tag.Root size={"sm"} colorPalette={"green"}>
                                     <Tag.Label fontSize={"xs"}>{version.version.slice(0, 6)}</Tag.Label>
@@ -361,15 +357,11 @@ const HistoryDrawer = (props: HistoryDrawerProps) => {
                                     {dayjs(version.timestamp).fromNow()}
                                   </Text>
                                 </Flex>
-                                <Flex direction={"row"} gap={"1"} align={"center"}>
+                                <Flex direction={"row"} gap={"1"} align={"center"} minW={0}>
                                   {version.message ? (
-                                    <Tooltip
-                                      content={version.message}
-                                      disabled={version.message.length <= 40}
-                                      showArrow
-                                    >
-                                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color}>
-                                        {_.truncate(version.message, { length: 40 })}
+                                    <Tooltip content={version.message} showArrow>
+                                      <Text fontSize={"xs"} color={STYLES.font.secondaryHeader.color} truncate>
+                                        {version.message}
                                       </Text>
                                     </Tooltip>
                                   ) : (

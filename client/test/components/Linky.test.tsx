@@ -105,7 +105,7 @@ const mockLongNameEntityQuery = {
     data: {
       entity: {
         __typename: "Entity",
-        _id: "test-id",
+        _id: "test-id-long-name",
         name: "Test Entity Long Name",
         description: "Test Description",
         attributes: [
@@ -171,24 +171,46 @@ describe("Linky Component", () => {
   });
 
   describe("Truncation", () => {
-    it("truncates by default", async () => {
+    it("renders the full name by default", async () => {
       renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name" });
-      await waitFor(() => {
-        expect(screen.getAllByText("Test Entity L...")[0]).toBeTruthy();
-      });
-    });
-
-    it("does not truncate when truncate is false", async () => {
-      renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name", truncate: false });
       await waitFor(() => {
         expect(screen.getAllByText("Test Entity Long Name")[0]).toBeTruthy();
       });
+      expect(screen.queryByText(/\.\.\.$/)).toBeNull();
     });
 
-    it("truncates to custom length", async () => {
-      renderLinky({ truncate: 10 });
+    it("truncates to a fixed length when truncate is set", async () => {
+      renderLinky({ id: "test-id-long-name", fallback: "Test Entity Long Name", truncate: 10 });
+      // Length includes the trailing ellipsis
       await waitFor(() => {
         expect(screen.getByText("Test En...")).toBeTruthy();
+      });
+    });
+
+    it("leaves names within the fixed length unchanged", async () => {
+      renderLinky({ truncate: 20 });
+      await waitFor(() => {
+        expect(screen.getAllByText("Test Entity")[0]).toBeTruthy();
+      });
+      expect(screen.queryByText(/\.\.\.$/)).toBeNull();
+    });
+
+    it("truncates the fallback when the item is inaccessible", async () => {
+      const errorMock = {
+        ...mockDefaultEntityQuery,
+        result: {
+          errors: [{ message: "Not found" }],
+        },
+      };
+
+      render(
+        <MockedProvider mocks={[errorMock]} cache={createTestCache()}>
+          <Linky id={"test-id"} type={"entities"} fallback={"Fallback Entity Name"} truncate={10} />
+        </MockedProvider>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Fallbac...")).toBeTruthy();
       });
     });
   });
@@ -278,7 +300,7 @@ describe("Linky Component", () => {
 
       // Initially shows loading, then shows truncated fallback when query returns no data
       await waitFor(() => {
-        expect(screen.getByText("Missing ID Fa...")).toBeTruthy();
+        expect(screen.getByText("Missing ID Fallback")).toBeTruthy();
       });
     });
   });
