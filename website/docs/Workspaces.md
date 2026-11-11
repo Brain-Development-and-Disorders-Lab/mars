@@ -53,6 +53,6 @@ Public Workspaces are read-only. Visitors without an account can't:
 
 The demo Workspace is a public Workspace you can explore without creating an account.
 
-**Open the demo Workspace:** _link coming soon_
+**Open the demo Workspace:** [Metadatify Demo Lab](https://app.metadatify.com/public/wZjnBbHQLM)
 
 To use the full set of features, [log in or create an account](https://app.metadatify.com) and create your own Workspace. See [Getting Started](Getting-Started.md) for an overview.
