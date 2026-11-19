@@ -39,6 +39,10 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   workspaces: {
     create: true,
   },
+  account: {
+    edit: true,
+    report: true,
+  },
 };
 
 // Predefined Secondary Identifier formats, always present in the Select

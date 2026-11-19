@@ -289,6 +289,10 @@ export type UserGlobalPermissions = {
   workspaces: {
     create: boolean;
   };
+  account: {
+    edit: boolean;
+    report: boolean;
+  };
 };
 
 // User's Workspace and global permissions combined
@@ -300,6 +304,9 @@ export type UserCollatedPermissions = {
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
+
+// User role, set manually in the database. "preview" accounts are read-only
+export type UserRole = "admin" | "user" | "preview";
 
 // User fields, excluding the assigned ID
 export type IUser = {
@@ -314,7 +321,7 @@ export type IUser = {
   updatedAt: string; // better-auth: Last updated
   lastLogin: string; // better-auth: Timestamp of last login
   api_keys: string; // better-auth: Stored as a JSON string
-  role: string; // better-auth: "user" or "admin"
+  role: UserRole; // better-auth: Role of the User
   banned: boolean; // better-auth: Overarching access status
   permissions: UserGlobalPermissions; // Global permissions such as AI search or API access
   account_orcid: string; // ORCiD if connected
@@ -520,7 +527,7 @@ export type AdminUser = {
   _id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   workspaces: number;
   permissions: UserGlobalPermissions;
   banned: boolean;
@@ -546,7 +553,7 @@ export type IResolverParent = Record<string, any>;
 export type Context = {
   user: string;
   workspace: string;
-  userRole: string;
+  userRole: UserRole;
 };
 
 // API key data
@@ -1695,6 +1702,13 @@ export type IconNames =
 // ---------------------------------------------------------------------------
 // Test helpers
 // ---------------------------------------------------------------------------
+
+// Overrides for a User created during integration testing
+export type TestUserOptions = {
+  email?: string;
+  name?: string;
+  role?: UserRole;
+};
 
 // Client route and the check verifying access to it
 export type ClientPath = {

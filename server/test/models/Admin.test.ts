@@ -5,7 +5,12 @@ import "dotenv/config";
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 
 // Models under test
-import { Admin, DEFAULT_GLOBAL_PERMISSIONS, DEFAULT_WORKSPACE_PERMISSIONS } from "@models/Admin";
+import {
+  Admin,
+  DEFAULT_GLOBAL_PERMISSIONS,
+  DEFAULT_WORKSPACE_PERMISSIONS,
+  PREVIEW_GLOBAL_PERMISSIONS,
+} from "@models/Admin";
 import { User } from "@models/User";
 import { Workspaces } from "@models/Workspaces";
 
@@ -202,6 +207,45 @@ describe("Admin model permissions", () => {
       const collated = await Admin.getUserCollatedPermissions(OWNER_ID, workspaceId);
       expect(collated.workspace.entities.create).toBeTruthy();
       expect(collated.workspace.administration.edit).toBeTruthy();
+    });
+  });
+
+  describe("Preview permissions", () => {
+    it("grants account permissions to a standard User regardless of stored permissions", async () => {
+      await User.create(buildUser(OWNER_ID));
+      const stored = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);
+      stored.account.edit = false;
+      stored.account.report = false;
+      await Admin.setUserGlobalPermissions(OWNER_ID, stored);
+
+      const permissions = await Admin.getUserGlobalPermissions(OWNER_ID);
+      expect(permissions.account).toEqual(DEFAULT_GLOBAL_PERMISSIONS.account);
+    });
+
+    it("denies every Global permission to a preview User regardless of stored permissions", async () => {
+      await User.create({ ...buildUser(COLLABORATOR_ID), role: "preview" });
+      const global = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);
+      global.features.api = true;
+      await Admin.setUserGlobalPermissions(COLLABORATOR_ID, global);
+
+      const permissions = await Admin.getUserGlobalPermissions(COLLABORATOR_ID);
+      expect(permissions).toEqual(PREVIEW_GLOBAL_PERMISSIONS);
+    });
+
+    it("denies every Workspace permission to a preview User who owns the Workspace", async () => {
+      await User.create({ ...buildUser(OWNER_ID), role: "preview" });
+      const workspaceId = await createWorkspace(DEFAULT_WORKSPACE_PERMISSIONS);
+
+      const collated = await Admin.getUserCollatedPermissions(OWNER_ID, workspaceId);
+      expect(collated.workspace).toEqual(DEFAULT_WORKSPACE_PERMISSIONS);
+      expect(collated.global).toEqual(PREVIEW_GLOBAL_PERMISSIONS);
+    });
+
+    it("denies Workspace creation to a preview User without an active Workspace", async () => {
+      await User.create({ ...buildUser(COLLABORATOR_ID), role: "preview" });
+
+      const collated = await Admin.getUserCollatedPermissions(COLLABORATOR_ID, "");
+      expect(collated.global.workspaces.create).toBeFalsy();
     });
   });
 

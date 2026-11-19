@@ -72,6 +72,17 @@ export class API {
       };
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
+    } else if (apiUser.role === "preview") {
+      audit("api_key.rejected", apiUser._id, { path: request.params.path, reason: "preview_account" });
+      const responseData: APIData<object> = {
+        path: request.params.path,
+        version: API_VERSION,
+        status: "unauthorized",
+        message: "API access not permitted",
+        data: {},
+      };
+      response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
+      return null;
     } else if (_.isUndefined(apiUser.features.api) || apiUser.features.api === false) {
       audit("api_key.rejected", apiUser._id, { path: request.params.path, reason: "api_access_disabled" });
       const responseData: APIData<object> = {

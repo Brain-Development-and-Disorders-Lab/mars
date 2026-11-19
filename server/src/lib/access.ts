@@ -9,7 +9,8 @@ import {
 } from "@types";
 
 // Utility libraries and functions
-import { GraphQLError } from "graphql";
+import { GraphQLError, OperationDefinitionNode } from "graphql";
+import type { ApolloServerPlugin } from "@apollo/server";
 import _ from "lodash";
 
 // Models
@@ -36,6 +37,52 @@ export const assertAdmin = (context: Context): void => {
   if (context.userRole !== "admin") {
     throw unauthorized("You do not have permission to access this resource");
   }
+};
+
+// Root Query fields that write data or incur costs, blocked for preview Users
+export const PREVIEW_BLOCKED_QUERY_FIELDS = [
+  "generateKey",
+  "translateSearch",
+  "suggestColumnMapping",
+  "suggestAttribute",
+];
+
+/**
+ * Verify a GraphQL operation is read-only when requested by a preview User, throwing a `GraphQLError` otherwise
+ * @param {Context} context Request context containing the User role
+ * @param {OperationDefinitionNode} operation Resolved GraphQL operation
+ */
+export const assertPreviewOperationPermitted = (context: Context, operation: OperationDefinitionNode): void => {
+  if (context.userRole !== "preview") return;
+
+  // Only "query" operations are permitted
+  if (operation.operation !== "query") {
+    throw new GraphQLError("Preview accounts are read-only", {
+      extensions: { code: "FORBIDDEN" },
+    });
+  }
+
+  // Root fragments are rejected since their fields cannot be checked here
+  for (const selection of operation.selectionSet.selections) {
+    if (selection.kind !== "Field" || _.includes(PREVIEW_BLOCKED_QUERY_FIELDS, selection.name.value)) {
+      throw new GraphQLError("This field is not available to preview accounts", {
+        extensions: { code: "FORBIDDEN" },
+      });
+    }
+  }
+};
+
+// Applies `assertPreviewOperationPermitted` to every authenticated GraphQL request
+export const previewAccessPlugin: ApolloServerPlugin<Context> = {
+  async requestDidStart() {
+    return {
+      async didResolveOperation({ operation, contextValue }) {
+        if (operation) {
+          assertPreviewOperationPermitted(contextValue, operation);
+        }
+      },
+    };
+  },
 };
 
 /**

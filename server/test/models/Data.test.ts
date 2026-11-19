@@ -34,7 +34,7 @@ const mockFile = (contents: string, mimetype: string, filename: string): IFile =
 const testContext: Context = {
   user: TEST_USER,
   workspace: TEST_WORKSPACE,
-  userRole: "owner",
+  userRole: "user",
 };
 
 const baseColumnMapping = (overrides: Partial<IColumnMapping> = {}): IColumnMapping => ({

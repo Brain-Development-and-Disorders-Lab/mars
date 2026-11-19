@@ -87,6 +87,27 @@ export const DEFAULT_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
   workspaces: {
     create: true,
   },
+  account: {
+    edit: true,
+    report: true,
+  },
+};
+
+// Preview Users are denied every global permission
+export const PREVIEW_GLOBAL_PERMISSIONS: UserGlobalPermissions = {
+  features: {
+    import: false,
+    scan: false,
+    ai: false,
+    api: false,
+  },
+  workspaces: {
+    create: false,
+  },
+  account: {
+    edit: false,
+    report: false,
+  },
 };
 
 export class Admin {
@@ -125,7 +146,7 @@ export class Admin {
         }
       }
 
-      const userPermissions = parseGlobalPermissions(user.permissions, DEFAULT_GLOBAL_PERMISSIONS);
+      const userPermissions = Admin.resolveGlobalPermissions(user);
       const permissions: UserGlobalPermissions = {
         features: {
           ai: userPermissions.features.ai,
@@ -135,6 +156,10 @@ export class Admin {
         },
         workspaces: {
           create: userPermissions.workspaces.create,
+        },
+        account: {
+          edit: userPermissions.account.edit,
+          report: userPermissions.account.report,
         },
       };
 
@@ -175,7 +200,24 @@ export class Admin {
       return DEFAULT_GLOBAL_PERMISSIONS;
     }
 
-    return parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS);
+    return Admin.resolveGlobalPermissions(userResult);
+  };
+
+  /**
+   * Resolve the global permissions a User holds, the single source of truth for global permissions
+   * @param {UserModel} user Target User
+   * @return {UserGlobalPermissions} No permissions for preview Users, stored permissions with full account
+   * permissions for everyone else
+   */
+  static resolveGlobalPermissions = (user: UserModel): UserGlobalPermissions => {
+    if (user.role === "preview") {
+      return PREVIEW_GLOBAL_PERMISSIONS;
+    }
+
+    return {
+      ...parseGlobalPermissions(user.permissions, DEFAULT_GLOBAL_PERMISSIONS),
+      account: DEFAULT_GLOBAL_PERMISSIONS.account,
+    };
   };
 
   static setUserGlobalPermissions = async (
@@ -330,6 +372,14 @@ export class Admin {
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
       .findOne({ _id: workspace });
 
+    // Preview Users see every Workspace as read-only, including any they own
+    if (userResult?.role === "preview") {
+      return {
+        workspace: DEFAULT_WORKSPACE_PERMISSIONS,
+        global: PREVIEW_GLOBAL_PERMISSIONS,
+      };
+    }
+
     // Check that both the User and Workspace were located, if not return default permissions
     if (!userResult || !workspaceResult) {
       return {
@@ -340,7 +390,7 @@ export class Admin {
 
     return {
       workspace: Admin.resolveWorkspacePermissions(_id, workspaceResult),
-      global: parseGlobalPermissions(userResult.permissions, DEFAULT_GLOBAL_PERMISSIONS),
+      global: Admin.resolveGlobalPermissions(userResult),
     };
   };
 
