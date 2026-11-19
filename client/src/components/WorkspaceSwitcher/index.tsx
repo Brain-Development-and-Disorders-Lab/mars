@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Dialog, Flex, Menu, ScrollArea, Spacer, Spinner, Text, useDisclosure } from "@chakra-ui/react";
+import { Button, Dialog, Flex, Menu, ScrollArea, Spacer, Spinner, Tag, Text, useDisclosure } from "@chakra-ui/react";
 import Icon from "@components/Icon";
 import Tooltip from "@components/Tooltip";
 
@@ -56,9 +56,10 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [open]);
 
-  // Admin visibility
+  // Role visibility
   const { data: session } = auth.useSession();
   const isAdmin = session?.user?.role === "admin";
+  const isPreview = session?.user?.role === "preview";
 
   /**
    * Handle selecting a Workspace from the drop-down
@@ -157,6 +158,11 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
                 {label}
               </Text>
               <Spacer />
+              {isPreview && (
+                <Tag.Root colorPalette={"orange"} size={"sm"}>
+                  <Tag.Label>Preview</Tag.Label>
+                </Tag.Root>
+              )}
               <Flex mr={"1"}>
                 <Icon name={open ? "c_up" : "c_down"} size={"xs"} color={"nav.text"} />
               </Flex>

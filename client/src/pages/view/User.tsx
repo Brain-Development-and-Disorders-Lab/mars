@@ -47,7 +47,8 @@ import { APP_URL, STYLES } from "@variables";
 
 const User = () => {
   // Permissions
-  const { globalPermissions } = usePermissions();
+  const { globalPermissions, loading: permissionsLoading } = usePermissions();
+  const canEditAccount = !permissionsLoading && globalPermissions.account.edit;
 
   // Authentication and user
   const { data: session, error: sessionErrorState } = auth.useSession();
@@ -127,13 +128,9 @@ const User = () => {
 
   useEffect(() => {
     if (data?.user) {
-      // Trim the ORCiD URL
-      if (data.user.account_orcid !== "") {
-        const startOrcid = data.user.account_orcid.lastIndexOf("/");
-        setUserOrcid(data.user.account_orcid.substring(startOrcid + 1));
-      } else {
-        setUserOrcid(data.user.account_orcid);
-      }
+      // Trim the ORCiD URL, the field is null for Users created before it existed
+      const orcid = data.user.account_orcid ?? "";
+      setUserOrcid(orcid.substring(orcid.lastIndexOf("/") + 1));
 
       setUserModel(data.user);
       setUserFirstName(data.user.firstName);
@@ -727,7 +724,23 @@ const User = () => {
               </Flex>
             )}
 
-            {userModel.role !== "admin" && (
+            {userModel.role === "preview" && (
+              <Flex
+                align={"center"}
+                gap={"1"}
+                p={"1"}
+                border={"2px solid"}
+                borderColor={"orange.700"}
+                bg={"orange.100"}
+                rounded={"md"}
+              >
+                <Heading fontWeight={"semibold"} size={"sm"} color={"orange.700"}>
+                  Preview Account
+                </Heading>
+              </Flex>
+            )}
+
+            {userModel.role === "user" && (
               <Flex
                 align={"center"}
                 gap={"1"}
@@ -743,7 +756,7 @@ const User = () => {
               </Flex>
             )}
           </Flex>
-          {editing ? (
+          {canEditAccount && editing && (
             <Flex direction={"row"} align={"center"} gap={"2"}>
               <Button size={"xs"} rounded={"md"} colorPalette={"red"} onClick={() => handleCancelClick()}>
                 Cancel
@@ -762,7 +775,8 @@ const User = () => {
                 <Icon name={"check"} size={"xs"} />
               </Button>
             </Flex>
-          ) : (
+          )}
+          {canEditAccount && !editing && (
             <Button
               size={"xs"}
               rounded={"md"}
@@ -924,7 +938,7 @@ const User = () => {
                       </Field.ErrorText>
                     )}
                   </Field.Root>
-                  {!emailVerified && !sentVerification && (
+                  {!emailVerified && !sentVerification && canEditAccount && (
                     <Flex>
                       <Button
                         size={"2xs"}
@@ -1007,7 +1021,7 @@ const User = () => {
                   <Tag.Root colorPalette={userOrcid ? "green" : "gray"}>
                     <Tag.Label>{userOrcid || "Not Connected"}</Tag.Label>
                   </Tag.Root>
-                  {!userOrcid && (
+                  {!userOrcid && canEditAccount && (
                     <Button
                       size={"2xs"}
                       rounded={"md"}

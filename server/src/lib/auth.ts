@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
 import { admin } from "better-auth/plugins/admin";
+import { APIError, createAuthMiddleware, getAuthoritativeSessionFromCtx } from "better-auth/api";
 
 // Models
 import { User } from "@models/User";
@@ -22,6 +23,9 @@ import { DEFAULT_GLOBAL_PERMISSIONS } from "@models/Admin";
 
 // Email domain assigned to ORCiD signups until their profile is completed
 const ORCID_PLACEHOLDER_DOMAIN = "@orcid.placeholder";
+
+// Auth routes preview Users may call, every other route is denied
+const PREVIEW_ALLOWED_PATHS = ["/get-session", "/sign-in/email", "/sign-out"];
 
 /**
  * Get ORCiD OAuth configuration based on environment
@@ -139,6 +143,17 @@ export const auth = betterAuth({
       // Read-only and polled frequently by the client
       "/get-session": { window: 60, max: 300 },
     },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (PREVIEW_ALLOWED_PATHS.includes(ctx.path)) return;
+
+      // Read the session from the database so role changes apply immediately
+      const session = await getAuthoritativeSessionFromCtx(ctx);
+      if (session?.user.role === "preview") {
+        throw new APIError("FORBIDDEN", { message: "Preview accounts are read-only" });
+      }
+    }),
   },
   databaseHooks: {
     user: {

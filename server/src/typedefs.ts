@@ -77,10 +77,17 @@ export const typedefs = `#graphql
     create: Boolean
   }
 
+  # "UserGlobalAccountPermissions" type, derived from the User role so there is no input
+  type UserGlobalAccountPermissions {
+    edit: Boolean
+    report: Boolean
+  }
+
   # "UserGlobalPermissions" type
   type UserGlobalPermissions {
     features: UserGlobalFeaturesPermissions
     workspaces: UserGlobalWorkspacesPermissions
+    account: UserGlobalAccountPermissions
   }
 
   # "UserGlobalPermissionsInput" input

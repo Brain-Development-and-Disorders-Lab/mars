@@ -1,0 +1,138 @@
+// Playwright imports
+import { expect } from "@playwright/test";
+
+// Test helper functions
+import { createTestAPIKey, createTestUser, createTestWorkspace, getUniqueName } from "../helpers/global.helpers";
+import { test } from "../helpers/permissions.helpers";
+
+// Server models, used to seed the preview User with every Workspace permission
+import { OWNER_WORKSPACE_PERMISSIONS } from "../../../../server/src/models/Admin";
+
+// Server and client origins
+const API_URL = "http://127.0.0.1:8000";
+const APP_URL = "http://127.0.0.1:8080";
+
+// Auth routes that change account details, each must be rejected for preview Users
+const BLOCKED_AUTH_ROUTES = [
+  "/update-user",
+  "/change-password",
+  "/change-email",
+  "/delete-user",
+  "/link-social",
+  "/unlink-account",
+  "/revoke-sessions",
+];
+
+test.describe.configure({ timeout: 60_000 });
+
+test.describe("Preview accounts", () => {
+  let owner = "";
+  let preview = "";
+  let workspaceId = "";
+
+  // Preview User holds every Workspace permission, which the role must override
+  test.beforeEach(async ({ context, collaboratorPage }) => {
+    owner = await createTestUser(context, { name: "Test Owner" });
+    preview = await createTestUser(collaboratorPage.context(), {
+      email: `${getUniqueName("preview").replace(/\s+/g, "-").toLowerCase()}@test.com`,
+      name: "Test Preview",
+      role: "preview",
+    });
+    workspaceId = await createTestWorkspace(getUniqueName("Preview Workspace"), owner, [
+      { _id: preview, permissions: OWNER_WORKSPACE_PERMISSIONS },
+    ]);
+
+    await collaboratorPage.goto("/");
+    await collaboratorPage.waitForLoadState("networkidle");
+  });
+
+  test("profile page is read-only", async ({ collaboratorPage }) => {
+    await collaboratorPage.goto("/profile");
+    await expect(collaboratorPage.getByText("Preview Account")).toBeVisible();
+    await expect(collaboratorPage.getByRole("button", { name: "Edit", exact: true })).toHaveCount(0);
+    await expect(collaboratorPage.getByRole("button", { name: "Connect ORCiD" })).toHaveCount(0);
+  });
+
+  test("issues cannot be reported", async ({ collaboratorPage }) => {
+    await expect(collaboratorPage.locator("#navBugButtonDesktop")).toBeDisabled();
+  });
+
+  test("Workspace cannot be edited", async ({ collaboratorPage }) => {
+    await collaboratorPage.goto(`/workspaces/${workspaceId}`);
+    await expect(collaboratorPage.getByRole("button", { name: "Edit", exact: true })).toBeDisabled();
+  });
+
+  test("GraphQL queries are permitted and mutations are rejected", async ({ collaboratorPage }) => {
+    const headers = { "Content-Type": "application/json", workspace: workspaceId, Origin: APP_URL };
+
+    const query = await collaboratorPage.request.post(`${API_URL}/`, {
+      headers,
+      data: { query: "query { workspaces { _id } }" },
+    });
+    const queryBody = await query.json();
+    expect(queryBody.errors).toBeUndefined();
+    expect(queryBody.data.workspaces.length).toBeGreaterThan(0);
+
+    const mutation = await collaboratorPage.request.post(`${API_URL}/`, {
+      headers,
+      data: { query: 'mutation { revokeKey(key: "none") { success } }' },
+    });
+    const mutationBody = await mutation.json();
+    expect(mutationBody.errors[0].extensions.code).toBe("FORBIDDEN");
+  });
+
+  test("administration data is rejected", async ({ collaboratorPage }) => {
+    const response = await collaboratorPage.request.post(`${API_URL}/`, {
+      headers: { "Content-Type": "application/json", Origin: APP_URL },
+      data: { query: "query { adminUsers { _id } }" },
+    });
+    const body = await response.json();
+    expect(body.errors[0].extensions.code).toBe("UNAUTHORIZED");
+  });
+
+  test("account changes are rejected by the auth server", async ({ collaboratorPage }) => {
+    for (const route of BLOCKED_AUTH_ROUTES) {
+      const response = await collaboratorPage.request.post(`${API_URL}/auth${route}`, {
+        headers: { "Content-Type": "application/json", Origin: APP_URL },
+        data: {},
+      });
+      expect(response.status(), route).toBe(403);
+    }
+  });
+
+  test("session routes remain available", async ({ collaboratorPage }) => {
+    const session = await collaboratorPage.request.get(`${API_URL}/auth/get-session`, {
+      headers: { Origin: APP_URL },
+    });
+    expect(session.status()).toBe(200);
+    expect((await session.json()).user.id).toBe(preview);
+
+    const signOut = await collaboratorPage.request.post(`${API_URL}/auth/sign-out`, {
+      headers: { "Content-Type": "application/json", Origin: APP_URL },
+      data: {},
+    });
+    expect(signOut.status()).toBe(200);
+  });
+
+  test("account changes are permitted for standard Users", async ({ page }) => {
+    const response = await page.request.post(`${API_URL}/auth/update-user`, {
+      headers: { "Content-Type": "application/json", Origin: APP_URL },
+      data: { name: "Test Owner" },
+    });
+    expect(response.status()).toBe(200);
+  });
+
+  test("API keys are rejected for preview Users only", async ({ playwright }) => {
+    const request = await playwright.request.newContext();
+
+    const ownerKey = await createTestAPIKey(owner);
+    const ownerResponse = await request.get(`${API_URL}/v1/`, { headers: { api_key: ownerKey } });
+    expect(ownerResponse.status()).toBe(200);
+
+    const previewKey = await createTestAPIKey(preview);
+    const previewResponse = await request.get(`${API_URL}/v1/`, { headers: { api_key: previewKey } });
+    expect(previewResponse.status()).toBe(401);
+
+    await request.dispose();
+  });
+});

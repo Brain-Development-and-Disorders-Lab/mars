@@ -15,11 +15,22 @@ import { Projects } from "../../../../server/src/models/Projects";
 import { Attributes } from "../../../../server/src/models/Attributes";
 import { Workspaces } from "../../../../server/src/models/Workspaces";
 import { User } from "../../../../server/src/models/User";
+import { Admin, DEFAULT_GLOBAL_PERMISSIONS } from "../../../../server/src/models/Admin";
 
 // Custom types
-import { Collaborator, IAttribute, IEntity, IProject, IWorkspace, ResponseData } from "../../../../types";
+import {
+  APIKey,
+  Collaborator,
+  IAttribute,
+  IEntity,
+  IProject,
+  IWorkspace,
+  ResponseData,
+  TestUserOptions,
+} from "../../../../types";
 
 // Utility functions
+import crypto from "crypto";
 import dayjs from "dayjs";
 
 /**
@@ -186,13 +197,10 @@ export const createTestWorkspace = async (
 /**
  * Create a new user account, defaulting to the standard test user credentials
  * @param context Browser context to receive the session cookies, use a separate context per User
- * @param options Override the default email/name, needed when a test requires more than one User
+ * @param options Override the default email/name/role, needed when a test requires more than one User
  * @return {string} `userId` of the created test user
  */
-export const createTestUser = async (
-  context: BrowserContext,
-  options?: { email?: string; name?: string },
-): Promise<string> => {
+export const createTestUser = async (context: BrowserContext, options?: TestUserOptions): Promise<string> => {
   await connect();
 
   // Setup User
@@ -203,6 +211,9 @@ export const createTestUser = async (
   const user = testUtils.createUser({
     email: options?.email ?? `${getUniqueName("user").replace(/\s+/g, "-").toLowerCase()}@test.com`,
     name: options?.name ?? "Test User",
+    role: options?.role ?? "user",
+    account_orcid: "",
+    api_keys: "[]",
     completedProfile: true,
   });
   await testUtils.saveUser(user);
@@ -215,6 +226,29 @@ export const createTestUser = async (
   await disconnect();
 
   return user.id;
+};
+
+/**
+ * Enable API access for a User and give them a new "view" API key
+ * @param {string} user Identifier of the User
+ * @return {Promise<string>} Value of the created API key
+ */
+export const createTestAPIKey = async (user: string): Promise<string> => {
+  await connect();
+  await Admin.setUserGlobalPermissions(user, {
+    ...DEFAULT_GLOBAL_PERMISSIONS,
+    features: { ...DEFAULT_GLOBAL_PERMISSIONS.features, api: true },
+  });
+  const key: APIKey = {
+    value: crypto.randomBytes(32).toString("hex"),
+    expires: dayjs(Date.now()).add(1, "month").toISOString(),
+    scope: "view",
+    workspaces: [],
+  };
+  await User.addKey(user, key);
+  await disconnect();
+
+  return key.value;
 };
 
 export const getTestUser = async (): Promise<string> => {

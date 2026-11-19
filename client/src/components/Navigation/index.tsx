@@ -371,23 +371,26 @@ const Navigation = (props: NavigationProps) => {
         <Spacer />
 
         <Flex>
-          <Button
-            id={"navBugButtonDesktop"}
-            w={"100%"}
-            key={"bug"}
-            size={"xs"}
-            rounded={"md"}
-            colorPalette={"red"}
-            onClick={() => {
-              // Capture event
-              posthog.capture("client.bug.dialog_open");
+          <Tooltip disabled={globalPermissions.account.report} content={"Report Issue is unavailable"} showArrow>
+            <Button
+              id={"navBugButtonDesktop"}
+              w={"100%"}
+              key={"bug"}
+              size={"xs"}
+              rounded={"md"}
+              colorPalette={"red"}
+              onClick={() => {
+                // Capture event
+                posthog.capture("client.bug.dialog_open");
 
-              setReportOpen(true);
-            }}
-          >
-            <Icon name={"bug"} size={"xs"} />
-            Report Issue
-          </Button>
+                setReportOpen(true);
+              }}
+              disabled={!globalPermissions.account.report}
+            >
+              <Icon name={"bug"} size={"xs"} />
+              Report Issue
+            </Button>
+          </Tooltip>
         </Flex>
 
         {/* Version number */}
@@ -559,6 +562,7 @@ const Navigation = (props: NavigationProps) => {
                     id={"navBugButtonMobile"}
                     value={"bug"}
                     fontSize={"xs"}
+                    disabled={!globalPermissions.account.report}
                     onClick={() => {
                       // Capture event
                       posthog.capture("client.bug.dialog_open");

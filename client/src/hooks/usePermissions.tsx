@@ -49,6 +49,10 @@ const GET_USER_PERMISSIONS = gql`
         workspaces {
           create
         }
+        account {
+          edit
+          report
+        }
       }
     }
   }

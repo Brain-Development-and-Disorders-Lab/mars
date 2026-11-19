@@ -17,6 +17,7 @@ import { Entities } from "@models/Entities";
 import { User } from "@models/User";
 import { Workspaces } from "@models/Workspaces";
 import { Activity } from "@models/Activity";
+import { Admin } from "@models/Admin";
 
 // Setup the Express router
 const APIRouter = Router();
@@ -72,7 +73,7 @@ export class API {
       };
       response.contentType("application/json").status(401).send(JSON.stringify(responseData)).end();
       return null;
-    } else if (_.isUndefined(apiUser.features.api) || apiUser.features.api === false) {
+    } else if (!Admin.resolveGlobalPermissions(apiUser).features.api) {
       audit("api_key.rejected", apiUser._id, { path: request.params.path, reason: "api_access_disabled" });
       const responseData: APIData<object> = {
         path: request.params.path,

@@ -39,7 +39,7 @@ import { connect } from "@connectors/database";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 
 // Custom types
-import { Context } from "@types";
+import { Context, UserRole } from "@types";
 
 // GraphQL uploads
 import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
@@ -52,6 +52,9 @@ import APIRouter from "@models/API";
 import pinoHttp from "pino-http";
 import { logger } from "@lib/logger";
 import { audit } from "@lib/audit";
+
+// Access control
+import { previewAccessPlugin } from "@lib/access";
 
 // Posthog
 export { PostHogClient } from "@lib/posthog";
@@ -240,7 +243,7 @@ const start = async () => {
     resolvers,
     introspection: process.env.NODE_ENV !== "production",
     csrfPrevention: true,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), loggingPlugin],
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), loggingPlugin, previewAccessPlugin],
   });
   logger.info("Starting GraphQL server...");
   await server.start();
@@ -378,7 +381,7 @@ const start = async () => {
         return {
           user: res.locals.session?.user?.id || "",
           workspace: (req.headers.workspace as string) || "",
-          userRole: ((res.locals.session?.user as Record<string, unknown>)?.role as string) || "user",
+          userRole: ((res.locals.session?.user as Record<string, unknown>)?.role as UserRole) || "user",
         };
       },
     }),

@@ -18,11 +18,16 @@ test.describe("Security, check endpoint access", () => {
 
   const protectedRoutes = [
     "/entities",
+    "/entities/e1",
     "/projects",
+    "/projects/p1",
     "/attributes",
+    "/attributes/a1",
+    "/workspaces/w1",
     "/search",
     "/profile",
     "/activity",
+    "/admin",
     "/create",
     "/create/entity",
     "/create/attribute",
