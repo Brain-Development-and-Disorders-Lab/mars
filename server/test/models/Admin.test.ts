@@ -113,6 +113,17 @@ describe("Admin model permissions", () => {
       const result = await Admin.setUserGlobalPermissions("nonexistent", DEFAULT_GLOBAL_PERMISSIONS);
       expect(result.success).toBeFalsy();
     });
+
+    it("grants account permissions to a standard User regardless of stored permissions", async () => {
+      await User.create(buildUser(OWNER_ID));
+      const stored = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);
+      stored.account.edit = false;
+      stored.account.report = false;
+      await Admin.setUserGlobalPermissions(OWNER_ID, stored);
+
+      const permissions = await Admin.getUserGlobalPermissions(OWNER_ID);
+      expect(permissions.account).toEqual(DEFAULT_GLOBAL_PERMISSIONS.account);
+    });
   });
 
   describe("Workspace-scoped permissions", () => {
@@ -208,20 +219,20 @@ describe("Admin model permissions", () => {
       expect(collated.workspace.entities.create).toBeTruthy();
       expect(collated.workspace.administration.edit).toBeTruthy();
     });
+
+    it("returns stored Global permissions for a User without an active Workspace", async () => {
+      await User.create(buildUser(COLLABORATOR_ID));
+      const global = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);
+      global.workspaces.create = false;
+      await Admin.setUserGlobalPermissions(COLLABORATOR_ID, global);
+
+      const collated = await Admin.getUserCollatedPermissions(COLLABORATOR_ID, "");
+      expect(collated.global.workspaces.create).toBeFalsy();
+      expect(collated.workspace).toEqual(DEFAULT_WORKSPACE_PERMISSIONS);
+    });
   });
 
   describe("Preview permissions", () => {
-    it("grants account permissions to a standard User regardless of stored permissions", async () => {
-      await User.create(buildUser(OWNER_ID));
-      const stored = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);
-      stored.account.edit = false;
-      stored.account.report = false;
-      await Admin.setUserGlobalPermissions(OWNER_ID, stored);
-
-      const permissions = await Admin.getUserGlobalPermissions(OWNER_ID);
-      expect(permissions.account).toEqual(DEFAULT_GLOBAL_PERMISSIONS.account);
-    });
-
     it("denies every Global permission to a preview User regardless of stored permissions", async () => {
       await User.create({ ...buildUser(COLLABORATOR_ID), role: "preview" });
       const global = _.cloneDeep(DEFAULT_GLOBAL_PERMISSIONS);

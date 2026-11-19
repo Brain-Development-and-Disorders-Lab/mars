@@ -41,7 +41,6 @@ test.describe("Preview accounts", () => {
   });
 
   test("issues cannot be reported", async ({ collaboratorPage }) => {
-    await collaboratorPage.goto("/");
     await expect(collaboratorPage.locator("#navBugButtonDesktop")).toBeDisabled();
   });
 

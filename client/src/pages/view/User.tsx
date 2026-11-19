@@ -47,8 +47,8 @@ import { APP_URL, STYLES } from "@variables";
 
 const User = () => {
   // Permissions
-  const { globalPermissions } = usePermissions();
-  const canEditAccount = globalPermissions.account.edit;
+  const { globalPermissions, loading: permissionsLoading } = usePermissions();
+  const canEditAccount = !permissionsLoading && globalPermissions.account.edit;
 
   // Authentication and user
   const { data: session, error: sessionErrorState } = auth.useSession();
@@ -128,13 +128,9 @@ const User = () => {
 
   useEffect(() => {
     if (data?.user) {
-      // Trim the ORCiD URL
-      if (data.user.account_orcid !== "") {
-        const startOrcid = data.user.account_orcid.lastIndexOf("/");
-        setUserOrcid(data.user.account_orcid.substring(startOrcid + 1));
-      } else {
-        setUserOrcid(data.user.account_orcid);
-      }
+      // Trim the ORCiD URL, the field is null for Users created before it existed
+      const orcid = data.user.account_orcid ?? "";
+      setUserOrcid(orcid.substring(orcid.lastIndexOf("/") + 1));
 
       setUserModel(data.user);
       setUserFirstName(data.user.firstName);

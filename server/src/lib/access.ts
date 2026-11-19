@@ -39,13 +39,19 @@ export const assertAdmin = (context: Context): void => {
   }
 };
 
+/**
+ * Verify the requesting User is the target User or an admin, throwing a `GraphQLError` otherwise
+ * @param {Context} context Request context containing the User identifier and role
+ * @param {string} target Identifier of the User being accessed
+ */
+export const assertSelfOrAdmin = (context: Context, target: string): void => {
+  if (context.user !== target && context.userRole !== "admin") {
+    throw unauthorized("You do not have permission to access this resource");
+  }
+};
+
 // Root Query fields that write data or incur costs, blocked for preview Users
-export const PREVIEW_BLOCKED_QUERY_FIELDS = [
-  "generateKey",
-  "translateSearch",
-  "suggestColumnMapping",
-  "suggestAttribute",
-];
+const PREVIEW_BLOCKED_QUERY_FIELDS = ["generateKey", "translateSearch", "suggestColumnMapping", "suggestAttribute"];
 
 /**
  * Verify a GraphQL operation is read-only when requested by a preview User, throwing a `GraphQLError` otherwise
@@ -83,17 +89,6 @@ export const previewAccessPlugin: ApolloServerPlugin<Context> = {
       },
     };
   },
-};
-
-/**
- * Verify the requesting User is the target User or an admin, throwing a `GraphQLError` otherwise
- * @param {Context} context Request context containing the User identifier and role
- * @param {string} target Identifier of the User being accessed
- */
-export const assertSelfOrAdmin = (context: Context, target: string): void => {
-  if (context.user !== target && context.userRole !== "admin") {
-    throw unauthorized("You do not have permission to access this resource");
-  }
 };
 
 /**

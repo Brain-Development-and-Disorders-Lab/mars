@@ -56,7 +56,7 @@ const WorkspaceSwitcher = (props: { id?: string }) => {
     }
   }, [open]);
 
-  // Admin visibility
+  // Role visibility
   const { data: session } = auth.useSession();
   const isAdmin = session?.user?.role === "admin";
   const isPreview = session?.user?.role === "preview";

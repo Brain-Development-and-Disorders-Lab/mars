@@ -372,25 +372,27 @@ export class Admin {
       .collection<WorkspaceModel>(WORKSPACES_COLLECTION)
       .findOne({ _id: workspace });
 
-    // Preview Users see every Workspace as read-only, including any they own
-    if (userResult?.role === "preview") {
-      return {
-        workspace: DEFAULT_WORKSPACE_PERMISSIONS,
-        global: PREVIEW_GLOBAL_PERMISSIONS,
-      };
-    }
-
-    // Check that both the User and Workspace were located, if not return default permissions
-    if (!userResult || !workspaceResult) {
+    // Check that the User was located, if not return default permissions
+    if (!userResult) {
       return {
         workspace: DEFAULT_WORKSPACE_PERMISSIONS,
         global: DEFAULT_GLOBAL_PERMISSIONS,
       };
     }
 
+    const global = Admin.resolveGlobalPermissions(userResult);
+
+    // Preview Users see every Workspace as read-only, including any they own
+    if (!workspaceResult || userResult.role === "preview") {
+      return {
+        workspace: DEFAULT_WORKSPACE_PERMISSIONS,
+        global,
+      };
+    }
+
     return {
       workspace: Admin.resolveWorkspacePermissions(_id, workspaceResult),
-      global: Admin.resolveGlobalPermissions(userResult),
+      global,
     };
   };
 

@@ -209,6 +209,7 @@ export const createTestUser = async (context: BrowserContext, options?: TestUser
     email: options?.email ?? `${getUniqueName("user").replace(/\s+/g, "-").toLowerCase()}@test.com`,
     name: options?.name ?? "Test User",
     role: options?.role ?? "user",
+    account_orcid: "",
     completedProfile: true,
   });
   await testUtils.saveUser(user);
