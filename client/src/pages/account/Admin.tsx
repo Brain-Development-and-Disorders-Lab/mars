@@ -11,7 +11,7 @@ import { toaster } from "@components/Toast";
 import Tooltip from "@components/Tooltip";
 
 // Custom types
-import { AdminMetrics, AdminUser, AdminWorkspace, IconNames, IResponseMessage } from "@types";
+import { AdminMetrics, AdminUser, AdminWorkspace, IconNames, IResponseMessage, UserRole } from "@types";
 
 // GraphQL imports
 import { gql } from "@apollo/client";
@@ -112,6 +112,13 @@ const StatCard = ({
 
 const workspaceColumnHelper = createColumnHelper<AdminWorkspace>();
 
+// Tag color for each User role
+const ROLE_COLORS: Record<UserRole, string> = {
+  admin: "yellow",
+  user: "blue",
+  preview: "orange",
+};
+
 const Admin = () => {
   const { data, loading, error, refetch } = useQuery<{
     adminMetrics: AdminMetrics;
@@ -171,7 +178,7 @@ const Admin = () => {
     }),
     userColumnHelper.accessor("role", {
       cell: (info) => (
-        <Tag.Root colorPalette={info.getValue() === "admin" ? "yellow" : "blue"} size={"sm"}>
+        <Tag.Root colorPalette={ROLE_COLORS[info.getValue()] ?? "blue"} size={"sm"}>
           <Tag.Label>{_.capitalize(info.getValue()) || "User"}</Tag.Label>
         </Tag.Root>
       ),

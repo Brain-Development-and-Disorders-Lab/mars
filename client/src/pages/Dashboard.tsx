@@ -39,6 +39,7 @@ import { useQuery, useMutation } from "@apollo/client/react";
 // Contexts and hooks
 import { useWorkspace } from "@hooks/useWorkspace";
 import { useBreakpoint } from "@hooks/useBreakpoint";
+import { usePermissions } from "@hooks/usePermissions";
 
 // GraphQL mutation to mark walkthrough as seen
 const UPDATE_USER = gql`
@@ -123,6 +124,7 @@ const Dashboard = () => {
 
   // Authentication
   const { data: session, isPending: isSessionPending } = auth.useSession();
+  const { globalPermissions } = usePermissions();
   const [user, setUser] = useState("");
   useEffect(() => {
     if (!isSessionPending && session) {
@@ -452,7 +454,7 @@ const Dashboard = () => {
    */
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { action, type } = data;
-    if ((action === ACTIONS.SKIP || type === EVENTS.TOUR_END) && session?.user) {
+    if ((action === ACTIONS.SKIP || type === EVENTS.TOUR_END) && session?.user && globalPermissions.account.edit) {
       updateUser({ variables: { user: { _id: session.user.id, hasSeenWalkthrough: true } } });
       auth.updateUser({ hasSeenWalkthrough: true });
     }
