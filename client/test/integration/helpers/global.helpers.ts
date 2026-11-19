@@ -15,9 +15,11 @@ import { Projects } from "../../../../server/src/models/Projects";
 import { Attributes } from "../../../../server/src/models/Attributes";
 import { Workspaces } from "../../../../server/src/models/Workspaces";
 import { User } from "../../../../server/src/models/User";
+import { Admin, DEFAULT_GLOBAL_PERMISSIONS } from "../../../../server/src/models/Admin";
 
 // Custom types
 import {
+  APIKey,
   Collaborator,
   IAttribute,
   IEntity,
@@ -28,6 +30,7 @@ import {
 } from "../../../../types";
 
 // Utility functions
+import crypto from "crypto";
 import dayjs from "dayjs";
 
 /**
@@ -210,6 +213,7 @@ export const createTestUser = async (context: BrowserContext, options?: TestUser
     name: options?.name ?? "Test User",
     role: options?.role ?? "user",
     account_orcid: "",
+    api_keys: "[]",
     completedProfile: true,
   });
   await testUtils.saveUser(user);
@@ -222,6 +226,29 @@ export const createTestUser = async (context: BrowserContext, options?: TestUser
   await disconnect();
 
   return user.id;
+};
+
+/**
+ * Enable API access for a User and give them a new "view" API key
+ * @param {string} user Identifier of the User
+ * @return {Promise<string>} Value of the created API key
+ */
+export const createTestAPIKey = async (user: string): Promise<string> => {
+  await connect();
+  await Admin.setUserGlobalPermissions(user, {
+    ...DEFAULT_GLOBAL_PERMISSIONS,
+    features: { ...DEFAULT_GLOBAL_PERMISSIONS.features, api: true },
+  });
+  const key: APIKey = {
+    value: crypto.randomBytes(32).toString("hex"),
+    expires: dayjs(Date.now()).add(1, "month").toISOString(),
+    scope: "view",
+    workspaces: [],
+  };
+  await User.addKey(user, key);
+  await disconnect();
+
+  return key.value;
 };
 
 export const getTestUser = async (): Promise<string> => {
